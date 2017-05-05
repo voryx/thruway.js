@@ -1,0 +1,68 @@
+{
+  "name": "thruway.js",
+  "version": "1.1.16",
+  "description": "WAMP RxJS Client",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voryx/Thruway.js.git"
+  },
+  "keywords": [
+    "wamp",
+    "typescript",
+    "autobahn",
+    "javascript",
+    "rxjs",
+    "websocket",
+    "reactivex"
+  ],
+  "author": "David Dan <davidwdan@gmail.com> (http://voryx.net)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/voryx/Thruway.js/issues"
+  },
+  "homepage": "https://github.com/voryx/Thruway.js#readme",
+  "peerDependencies": {
+    "rxjs": "^5.0.0",
+    "ws": "^2.2.1"
+  },
+  "browser": {
+    "ws": false
+  },
+  "typings": "./src/Client.ts",
+  "scripts": {
+    "compile": "tsc",
+    "webpack": "webpack --optimize-minimize",
+    "clean_spec": "shx rm -rf spec-js",
+    "build_spec": "tsc --project ./spec --pretty",
+    "test_mocha": "mocha spec-js/spec/*",
+    "test": "npm-run-all clean_spec build_spec test_mocha clean_spec"
+  },
+  "devDependencies": {
+    "@types/es6-shim": "^0.31.32",
+    "@types/escape-string-regexp": "^0.0.30",
+    "@types/lodash": "^4.14.62",
+    "@types/mocha": "^2.2.32",
+    "@types/node": "6.0.38",
+    "@types/sinon": "^1.16.31",
+    "@types/sinon-chai": "^2.7.27",
+    "@types/ws": "0.0.30",
+    "browserfy": "^1.0.0",
+    "chai": "^3.5.0",
+    "es6-shim": "^0.35.1",
+    "escape-string-regexp": "^1.0.5",
+    "lodash": "^4.14.62",
+    "mocha": "^3.0.2",
+    "npm-run-all": "^3.1.0",
+    "promise": "^7.1.1",
+    "protractor": "^3.1.1",
+    "rxjs": "^5.0.0",
+    "shx": "^0.1.4",
+    "sinon": "^2.0.0-pre",
+    "sinon-chai": "^2.8.0",
+    "ts-loader": "^0.8.2",
+    "tslint": "^5.2.0",
+    "typescript": "^2.1.0",
+    "webpack": "^2.0"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "declaration": false,
+    "allowJs": true,
+    "target": "es5",
+    "module": "commonjs",
+    "outDir": "../spec-js",
+    "skipLibCheck": true
+  },
+  "formatCodeOptions": {
+    "indentSize": 2,
+    "tabSize": 2
+  }
+}
