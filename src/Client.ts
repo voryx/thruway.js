@@ -37,6 +37,7 @@ import 'rxjs/add/operator/publish';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/finally';
 import 'rxjs/add/operator/exhaust';
+import 'rxjs/add/operator/defaultIfEmpty';
 
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/from';
