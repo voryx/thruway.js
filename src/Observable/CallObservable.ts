@@ -45,7 +45,7 @@ export class CallObservable<ResultMsg> extends Observable<any> {
                         new ResultMessage(m.requestId, {progress: false})
                     ], this.scheduler)
                 }
-                return Observable.of(m, this.scheduler);
+                return Observable.of(m);
             })
             .publish().refCount();
 
