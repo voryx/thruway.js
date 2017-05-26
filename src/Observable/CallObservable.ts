@@ -59,7 +59,6 @@ export class CallObservable<ResultMsg> extends Observable<any> {
             .filter((m: Message) => m instanceof ErrorMessage && m.errorRequestId === requestId)
             .do(() => this.completed = true)
             .flatMap((m: ErrorMessage) => Observable.throw(new WampErrorException(m.errorURI, m.args), this.scheduler))
-            .takeUntil(resultMsg)
             .take(1);
 
         try {
