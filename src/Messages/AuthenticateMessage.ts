@@ -7,7 +7,7 @@ export class AuthenticateMessage extends Message {
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this.signature, this.extra];
+        return [this.msgCode, this.signature, this.extra || {}];
     }
 
     get signature(): string {
