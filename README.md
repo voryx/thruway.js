@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/voryx/thruway.js.svg?branch=master)](https://travis-ci.org/voryx/thruway.js)
+
 # Thruway.js
 
 This project is a WAMP v2 client written in TypeScript that uses RxJS v5 Observables instead of promises and event emitters.
