@@ -8,7 +8,15 @@ export class CallMessage extends Message implements IRequestMessage {
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this.requestId, this.options, this.procedure, this.args , this.argskw];
+        const r = [this.msgCode, this.requestId, this.options, this.procedure];
+        if (Object.keys(this._argskw).length !== 0) {
+            r.push(this._args, this._argskw);
+            return r;
+        }
+        if (this._args.length !== 0) {
+            r.push(this._args);
+        }
+        return r;
     }
 
     get requestId(): number {

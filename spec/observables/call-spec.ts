@@ -48,12 +48,30 @@ describe('CallObservable', () => {
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
     });
 
+    it('should dispose of messages after non-progressive result', () => {
+        const resultMessage = new ResultMessage(null, {}, [], {});
+
+        const messages = hot( '--w--r------|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const subscriptions = '^----!';
+        const expected =      '-----(d|)';
+
+        const webSocket = new Subject();
+        webSocket.subscribe((msg: any) => {
+            resultMessage['_requestId'] = msg.requestId;
+        });
+
+        const call = new CallObservable('testing.uri', messages, webSocket);
+
+        expectObservable(call).toBe(expected, {d: resultMessage});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
     it('should emit empty args when result message args is empty', () => {
         const resultMessage = new ResultMessage(null, {}, [], {});
 
-        const messages = hot( '--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
-        const subscriptions = '^---!';
-        const expected =      '----(d|)';
+        const messages = hot( '--w--r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const subscriptions = '^----!';
+        const expected =      '-----(d|)';
 
         const webSocket = new Subject();
         webSocket.subscribe((msg: any) => {

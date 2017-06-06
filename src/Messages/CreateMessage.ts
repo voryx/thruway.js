@@ -30,17 +30,17 @@ export abstract class CreateMessage {
             case Message.MSG_UNSUBSCRIBED:
                 return new UnsubscribedMessage(data[1]);
             case Message.MSG_EVENT:
-                return new EventMessage(data[1], data[2], data[3], data[4] || null, data[5] || null);
+                return new EventMessage(data[1], data[2], data[3], data[4] || [], data[5] || {});
             case Message.MSG_REGISTERED:
                 return new RegisteredMessage(data[1], data[2]);
             case Message.MSG_INVOCATION:
-                return new InvocationMessage(data[1], data[2], data[3], data[4] || null, data[5] || null);
+                return new InvocationMessage(data[1], data[2], data[3], data[4] || [], data[5] || {});
             case Message.MSG_RESULT:
-                return new ResultMessage(data[1], data[2], data[3] || null, data[4] || null);
+                return new ResultMessage(data[1], data[2], data[3] || [], data[4] || {});
             case Message.MSG_CHALLENGE:
                 return new ChallengeMessage(data[1], data[2]);
             case Message.MSG_ERROR:
-                return new ErrorMessage(data[1], data[2], data[3], data[4], data[5] || null, data[6] || null);
+                return new ErrorMessage(data[1], data[2], data[3], data[4], data[5] || [], data[6] || {});
             case Message.MSG_INTERRUPT:
                 return new InterruptMessage(data[1], data[2]);
             // default:

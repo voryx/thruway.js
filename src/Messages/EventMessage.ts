@@ -2,12 +2,20 @@ import {Message} from './Message';
 
 export class EventMessage extends Message {
 
-    constructor(private _subscriptionId: number, private _publicationId: number, private _details: Object, private _args?: Array<any>, private _argskw?: Object) {
+    constructor(private _subscriptionId: number, private _publicationId: number, private _details: Object, private _args: Array<any> = [], private _argskw: Object = {}) {
         super(Message.MSG_EVENT);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._subscriptionId, this._publicationId, this._details, this._args, this._argskw];
+        const r = [this.msgCode, this._subscriptionId, this._publicationId, this._details];
+        if (Object.keys(this._argskw).length !== 0) {
+            r.push(this._args, this._argskw);
+            return r;
+        }
+        if (this._args.length !== 0) {
+            r.push(this._args);
+        }
+        return r;
     }
 
     get subscriptionId(): number {

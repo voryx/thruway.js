@@ -15,13 +15,21 @@ export class ErrorMessage extends Message {
                 private _errorRequestId: number,
                 private _details: Object,
                 private _errorURI: string,
-                private _args?: Array<any>,
-                private _argskw?: Object) {
+                private _args: Array<any> = [],
+                private _argskw: Object = {}) {
         super(Message.MSG_ERROR);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._errorMsgCode, this._errorRequestId, this._details, this._errorURI, this._args, this._argskw];
+        const r = [this.msgCode, this._errorMsgCode, this._errorRequestId, this._details, this._errorURI];
+        if (Object.keys(this._argskw).length !== 0) {
+            r.push(this._args, this._argskw);
+            return r;
+        }
+        if (this._args.length !== 0) {
+            r.push(this._args);
+        }
+        return r;
     }
 
     get errorMsgCode(): number {

@@ -3,12 +3,20 @@ import {IRequestMessage} from './IRequestMessage';
 
 export class ResultMessage extends Message implements IRequestMessage {
 
-    constructor(private _requestId: number, private _details: Object, private _args?: Array<any>, private _argskw?: {}) {
+    constructor(private _requestId: number, private _details: Object, private _args: Array<any> = [], private _argskw: Object = {}) {
         super(Message.MSG_RESULT);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._requestId, this._details, this._args, this._argskw];
+        const r = [this.msgCode, this._requestId, this._details];
+        if (Object.keys(this._argskw).length !== 0) {
+            r.push(this._args, this._argskw);
+            return r;
+        }
+        if (this._args.length !== 0) {
+            r.push(this._args);
+        }
+        return r;
     }
 
     get requestId(): number {
