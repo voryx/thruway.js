@@ -156,7 +156,7 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [70, 12345, {}, [0], null]], // YieldMessage
+            [60, [70, 12345, {}, [0]]], // YieldMessage
             [80, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });
@@ -184,7 +184,7 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [70, 12345, {}, [0], null]], // YieldMessage
+            [60, [70, 12345, {}, [0]]], // YieldMessage
         ], wampMessages);
     });
 
@@ -212,7 +212,7 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [70, 12345, {}, [null], null]], // YieldMessage
+            [60, [70, 12345, {}, [null]]], // YieldMessage
             [80, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });
@@ -240,12 +240,12 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [70, 12345, {}, [0], null]], // YieldMessage
-            [80, [70, 12345, {}, [0], null]], // YieldMessage
-            [100, [70, 12345, {}, [0], null]], // YieldMessage
-            [120, [70, 12345, {}, [0], null]], // YieldMessage
-            [140, [70, 12345, {}, [0], null]], // YieldMessage
-            [160, [70, 12345, {}, [0], null]], // YieldMessage
+            [60, [70, 12345, {}, [0]]], // YieldMessage
+            [80, [70, 12345, {}, [0]]], // YieldMessage
+            [100, [70, 12345, {}, [0]]], // YieldMessage
+            [120, [70, 12345, {}, [0]]], // YieldMessage
+            [140, [70, 12345, {}, [0]]], // YieldMessage
+            [160, [70, 12345, {}, [0]]], // YieldMessage
             [180, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });
@@ -273,7 +273,7 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [70, 12345, {}, [1], null]], // YieldMessage
+            [60, [70, 12345, {}, [1]]], // YieldMessage
             [80, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });
@@ -301,7 +301,7 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [70, 12345, {}, [3], null]], // YieldMessage
+            [60, [70, 12345, {}, [3]]], // YieldMessage
             [80, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });
@@ -329,7 +329,7 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [70, 12345, {}, [3], null]], // YieldMessage
+            [60, [70, 12345, {}, [3]]], // YieldMessage
             [80, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });
@@ -357,7 +357,7 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [8, 68, 44444, {}, 'thruway.error.invocation_exception', [], {}]], // ErrorMessage
+            [60, [8, 68, 44444, {}, 'thruway.error.invocation_exception']], // ErrorMessage
             [80, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });
@@ -388,10 +388,10 @@ describe('RegisterObservable', () => {
 
         assertWampMessages([
             [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
-            [60, [8, 68, 44441, {}, 'thruway.error.invocation_exception', [], {}]], // ErrorMessage
-            [80, [8, 68, 44442, {}, 'thruway.error.invocation_exception', [], {}]], // ErrorMessage
-            [100, [8, 68, 44443, {}, 'thruway.error.invocation_exception', [], {}]], // ErrorMessage
-            [120, [8, 68, 44444, {}, 'thruway.error.invocation_exception', [], {}]], // ErrorMessage
+            [60, [8, 68, 44441, {}, 'thruway.error.invocation_exception']], // ErrorMessage
+            [80, [8, 68, 44442, {}, 'thruway.error.invocation_exception']], // ErrorMessage
+            [100, [8, 68, 44443, {}, 'thruway.error.invocation_exception']], // ErrorMessage
+            [120, [8, 68, 44444, {}, 'thruway.error.invocation_exception']], // ErrorMessage
             [140, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
     });

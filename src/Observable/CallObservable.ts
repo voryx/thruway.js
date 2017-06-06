@@ -32,6 +32,7 @@ export class CallObservable<ResultMsg> extends Observable<any> {
         const callMsg = new CallMessage(requestId, this.options, this.uri, this.args, this.argskw);
 
         const msg = this.messages
+            .do(null, () => this.completed = true)
             .filter((m: Message) => m instanceof ResultMessage && m.requestId === requestId)
             .flatMap((m: ResultMessage, index: number) => {
                 // If there is no progress, we need to fake it so that the observable completes
@@ -58,6 +59,7 @@ export class CallObservable<ResultMsg> extends Observable<any> {
         const error = this.messages
             .filter((m: Message) => m instanceof ErrorMessage && m.errorRequestId === requestId)
             .do(() => this.completed = true)
+            .takeUntil(msg.filter(m => !m.details.progress))
             .flatMap((m: ErrorMessage) => Observable.throw(new WampErrorException(m.errorURI, m.args), this.scheduler))
             .take(1);
 
