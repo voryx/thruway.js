@@ -57,7 +57,8 @@ export class Client {
             'caller': {
                 'features': {
                     'caller_identification': true,
-                    'progressive_call_results': true
+                    'progressive_call_results': true,
+                    'call_canceling': true
                 }
             },
             'callee': {
@@ -66,7 +67,8 @@ export class Client {
                     'pattern_based_registration': true,
                     'shared_registration': true,
                     'progressive_call_results': true,
-                    'registration_revocation': true
+                    'registration_revocation': true,
+                    'call_canceling': true
                 }
             },
             'publisher': {
