@@ -24,7 +24,7 @@ export class RegisterObservable<T> extends Observable<T> {
     constructor(private uri: string,
                 private callback: Function,
                 messages: Observable<Message>,
-                private webSocket: Subject<Message>,
+                private webSocket: Subject<any>,
                 private options: any = {},
                 private extended?: boolean,
                 invocationErrors?: Subject<WampInvocationException>,
