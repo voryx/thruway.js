@@ -46,7 +46,8 @@ export class RegisterObservable<T> extends Observable<T> {
 
         const unregisteredMsg = this.messages
             .filter((msg: Message) => msg instanceof UnregisteredMessage && msg.requestId === requestId)
-            .take(1);
+            .take(1)
+            .share();
 
         const registeredMsg = this.messages
             .filter((msg: Message) => msg instanceof RegisteredMessage && msg.requestId === requestId)
@@ -119,9 +120,10 @@ export class RegisterObservable<T> extends Observable<T> {
 
                     const interruptMsg = this.messages
                         .filter((m: Message) => m instanceof InterruptMessage && m.requestId === msg.requestId)
-                        .take(1);
+                        .take(1)
+                        .flatMapTo(Observable.throw(new WampInvocationException(msg, 'wamp.error.canceled')));
 
-                    return returnObs.takeUntil(interruptMsg)
+                    return returnObs.merge(interruptMsg)
                         .takeUntil(unregisteredMsg)
                         .catch((ex: Error) => {
                             const invocationError = ex instanceof WampErrorException

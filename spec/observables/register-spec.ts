@@ -10,7 +10,9 @@ import {RegisterObservable} from '../../src/Observable/RegisterObservable';
 import {RegisteredMessage} from '../../src/Messages/RegisteredMessage';
 import {RegisterMessage} from '../../src/Messages/RegisterMessage';
 import {InvocationMessage} from '../../src/Messages/InvocationMessage';
+import {InterruptMessage} from '../../src/Messages/InterruptMessage';
 import {Observable} from 'rxjs/Observable';
+import {expect} from 'chai';
 
 function callable(first = 0, second = 0) {
     return +first + +second;
@@ -483,5 +485,42 @@ describe('RegisterObservable', () => {
             [60, [8, 68, 44444, {}, 'my.custom.error', [1], {'someKw': 'someArg'}]], // ErrorMessage
             [80, [66, 12345, 54321]] // UnregisterMessage
         ], wampMessages);
+    });
+
+    it('should send error message when invocation is interrupted', () => {
+        const registeredMsg = new RegisteredMessage(null, 54321);
+        const invocationMsg = new InvocationMessage(44444, 54321, {});
+        const interruptMsg = new InterruptMessage(44444, {});
+
+        const messages = hot( '--w-r-i-x-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg, x: interruptMsg});
+        const subscriptions = '^---------!';
+        const expected =      '----d-----|';
+
+        const webSocket = new Subject();
+        webSocket.subscribe(msg => {
+            if (msg instanceof RegisterMessage) {
+                registeredMsg['_requestId'] = msg.requestId;
+            }
+            recordWampMessage(msg);
+        });
+
+        let disposedInner = false;
+
+        const neverCallable = () => {
+            return Observable.never().finally(() => { disposedInner = true; });
+        };
+
+        const register = new RegisterObservable('testing.uri', neverCallable, messages, webSocket, {}, null, null, global.rxTestScheduler);
+
+        expectObservable(register).toBe(expected, {d: registeredMsg});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+
+        assertWampMessages([
+            [0, [64, 12345, {}, 'testing.uri']], // RegisterMessage
+            [80, [8, 68, 44444, {}, 'wamp.error.canceled']], // ErrorMessage
+            [100, [66, 12345, 54321]] // UnregisterMessage
+        ], wampMessages);
+
+        expect(disposedInner).to.be.true;
     });
 });
