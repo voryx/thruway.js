@@ -118,7 +118,7 @@ composer require rx/thruway-client
 use Rx\Observable;
 use Rx\Thruway\Client;
 
-require __DIR__ . './vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 $wamp = new Client('wss://demo.crossbar.io/ws', 'realm1');
 
