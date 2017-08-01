@@ -179,7 +179,7 @@ export class Client {
             .subscribe(this.webSocket);
     }
 
-    public call(uri: string, args?: Array<any>, argskw?: Array<any>, options?: {}): Observable<any> {
+    public call(uri: string, args?: Array<any>, argskw?: Object, options?: {}): Observable<any> {
         return this.session
             .take(1)
             .switchMapTo(new CallObservable(uri, this.messages, this.webSocket, args, argskw, options));
@@ -189,7 +189,7 @@ export class Client {
         return this.session.switchMapTo(new RegisterObservable(uri, callback, this.messages, this.webSocket, options));
     }
 
-    public progressiveCall(uri: string, args?: Array<any>, argskw?: Array<any>, options: { receive_progress? } = {}): Observable<any> {
+    public progressiveCall(uri: string, args?: Array<any>, argskw?: Object, options: { receive_progress? } = {}): Observable<any> {
 
         options.receive_progress = true;
         const completed = new Subject();
