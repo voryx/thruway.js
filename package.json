@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/voryx/Thruway.js#readme",
   "peerDependencies": {
-    "rxjs": "^5.0.0",
+    "rxjs": "^5.4.0",
     "ws": "^2.2.1"
   },
   "browser": {

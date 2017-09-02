@@ -38,6 +38,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/finally';
 import 'rxjs/add/operator/exhaust';
 import 'rxjs/add/operator/defaultIfEmpty';
+import 'rxjs/add/operator/shareReplay';
 
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/from';
@@ -156,7 +157,7 @@ export class Client {
         this.session = this.messages
             .merge(challengeMsg)
             .filter((msg: Message) => msg instanceof WelcomeMessage)
-            .publishReplay(1).refCount();  // not 100% if this behaves the way we want it to
+            .shareReplay(1);
 
         this.subscription.add(this.webSocket);
     }
