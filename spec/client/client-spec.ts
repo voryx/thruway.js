@@ -24,8 +24,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected);
@@ -45,8 +46,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected);
@@ -65,8 +67,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -86,8 +89,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -107,8 +111,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -129,8 +134,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -151,8 +157,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -172,8 +179,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -195,8 +203,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected);
@@ -221,8 +230,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri2');
 
         expectObservable(call).toBe(expected);
@@ -249,8 +259,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, null, new WampErrorException('some.server.error'));
@@ -275,8 +286,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri1');
 
         expectObservable(call, unsubscribe).toBe(expected);
@@ -302,8 +314,9 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
+        ws.onOpen = new Subject();
 
-        const client = new Client('ws://test', 'realm1', {}, ws);
+        const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
         expectObservable(call, unsubscribe).toBe(expected, {d: resultMessage});

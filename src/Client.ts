@@ -1,5 +1,6 @@
+import {TransportInterface} from './Transport/TransportInterface';
 import {WampChallengeException} from './Common/WampChallengeException';
-import {WebSocketSubject} from './Subject/WebSocketSubject';
+import {WebSocketTransport} from './Transport/WebSocketTransport';
 import {RegisterObservable} from './Observable/RegisterObservable';
 import {AuthenticateMessage} from './Messages/AuthenticateMessage';
 import {WampErrorException} from './Common/WampErrorException';
@@ -39,12 +40,12 @@ import 'rxjs/add/operator/finally';
 import 'rxjs/add/operator/exhaust';
 import 'rxjs/add/operator/defaultIfEmpty';
 import 'rxjs/add/operator/shareReplay';
-
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/from';
 import 'rxjs/add/observable/timer';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/merge';
+
 
 export class Client {
     private messages: Observable<Message>;
@@ -89,20 +90,20 @@ export class Client {
         };
     }
 
-    constructor(url: string, realm: string);
-    constructor(url: string, realm: string, options?: WampOptions, webSocket?: Subject<Message>);
-    constructor(private url: string,
+    constructor(private urlOrTransport: string | TransportInterface,
                 private realm: string,
                 private options: WampOptions = {},
-                private webSocket?: Subject<Message>) {
+                private transport?: TransportInterface) {
 
-        const open = new Subject();
-        const close = new Subject();
+        this.transport = typeof urlOrTransport === 'string'
+            ? new WebSocketTransport(urlOrTransport)
+            : <TransportInterface>this.urlOrTransport;
 
         this.subscription = new Subscription();
-        this.webSocket = webSocket || new WebSocketSubject(url, ['wamp.2.json'], open, close);
 
-        this.messages = this.webSocket
+        const open = this.transport.onOpen;
+
+        this.messages = this.transport
             .retryWhen((attempts: Observable<Error>) => {
                 const maxRetryDelay = 300000;
                 const initialRetryDelay = 1500;
@@ -134,7 +135,7 @@ export class Client {
             .map(_ => {
                 this.options.roles = Client.roles();
                 return new HelloMessage(this.realm, this.options);
-            }).subscribe(m => this.webSocket.next(m));
+            }).subscribe(m => this.transport.next(m));
 
         const challengeMsg = this.messages
             .filter((msg: Message) => msg instanceof ChallengeMessage)
@@ -152,18 +153,18 @@ export class Client {
                 }
                 return Observable.throw(error);
             })
-            .do(m => this.webSocket.next(m));
+            .do(m => this.transport.next(m));
 
         this.session = this.messages
             .merge(challengeMsg)
             .filter((msg: Message) => msg instanceof WelcomeMessage)
             .shareReplay(1);
 
-        this.subscription.add(this.webSocket);
+        this.subscription.add(this.transport);
     }
 
     public topic(uri: string, options?: Object): Observable<any> {
-        return this.session.switchMapTo(new TopicObservable(uri, options, this.messages, this.webSocket));
+        return this.session.switchMapTo(new TopicObservable(uri, options, this.messages, this.transport));
     }
 
     public publish(uri: string, value: Observable<any> | any, options?: Object): Subscription {
@@ -177,24 +178,24 @@ export class Client {
             }))
             .exhaust()
             .map(v => new PublishMessage(Utils.uniqueId(), options, uri, [v]))
-            .subscribe(this.webSocket);
+            .subscribe(this.transport);
     }
 
     public call(uri: string, args?: Array<any>, argskw?: Object, options?: {}): Observable<any> {
         return this.session
             .take(1)
-            .switchMapTo(new CallObservable(uri, this.messages, this.webSocket, args, argskw, options));
+            .switchMapTo(new CallObservable(uri, this.messages, this.transport, args, argskw, options));
     }
 
     public register(uri: string, callback: Function, options?: {}): Observable<any> {
-        return this.session.switchMapTo(new RegisterObservable(uri, callback, this.messages, this.webSocket, options));
+        return this.session.switchMapTo(new RegisterObservable(uri, callback, this.messages, this.transport, options));
     }
 
     public progressiveCall(uri: string, args?: Array<any>, argskw?: Object, options: { receive_progress? } = {}): Observable<any> {
 
         options.receive_progress = true;
         const completed = new Subject();
-        const callObs = new CallObservable(uri, this.messages, this.webSocket, args, argskw, options);
+        const callObs = new CallObservable(uri, this.messages, this.transport, args, argskw, options);
         let retry = false;
         return this.session
             .takeUntil(completed)
@@ -238,5 +239,6 @@ export class Client {
 export interface WampOptions {
     authmethods?: Array<string>;
     roles?: any;
+
     [propName: string]: any;
 }

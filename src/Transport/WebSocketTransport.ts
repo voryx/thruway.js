@@ -1,22 +1,22 @@
 import {Subscription} from 'rxjs/Subscription';
+import {Observable} from 'rxjs/Observable';
 import {Subscriber} from 'rxjs/Subscriber';
 import {Subject} from 'rxjs/Subject';
-import {NextObserver} from 'rxjs/Observer';
 import {CreateMessage} from '../Messages/CreateMessage';
+import {TransportInterface} from './TransportInterface';
 
 // This is used for WebSockets in node - removed by webpack for bundling
 declare var require;
 const WebSocket2 = require('ws');
 
-export class WebSocketSubject<Message> extends Subject<any> {
+export class WebSocketTransport<Message> extends Subject<any> implements TransportInterface {
 
     private output: Subject<any> = new Subject();
     private socket: WebSocket = null;
+    private open = new Subject();
+    private close = new Subject();
 
-    constructor(private url: string = 'ws://127.0.0.1:9090/',
-                private protocols?: string | string[],
-                private openObserver?: NextObserver<any>,
-                private closeObserver?: NextObserver<any>) {
+    constructor(private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json']) {
         super();
     }
 
@@ -33,7 +33,9 @@ export class WebSocketSubject<Message> extends Subject<any> {
         subscription.add(this.output.subscribe(subscriber));
 
         subscription.add(() => {
+
             if (this.socket) {
+                console.log('closing socket');
                 this.socket.close();
                 this.socket = null;
             }
@@ -55,27 +57,19 @@ export class WebSocketSubject<Message> extends Subject<any> {
                 this.socket = null;
                 this.output.error(err);
             };
+
             ws.onclose = (e: CloseEvent) => {
                 this.socket = null;
-
-                if (this.closeObserver) {
-                    this.closeObserver.next(e);
-                }
+                this.close.next(e);
 
                 // Handle all closes as errors
-                // if (e.wasClean) {
-                //     this.output.complete();
-                //     return;
-                // }
-
                 this.output.error(e);
             };
 
-            ws.onopen = () => {
+            ws.onopen = (e: Event) => {
+                console.log('socket opened');
                 this.socket = ws;
-                if (this.openObserver) {
-                    this.openObserver.next(this);
-                }
+                this.open.next(e);
             };
 
             ws.onmessage = (e: MessageEvent) => {
@@ -87,7 +81,6 @@ export class WebSocketSubject<Message> extends Subject<any> {
         }
     }
 
-    // @todo figure out why the Message abstract doesn't work here
     public next(msg: any): void {
         if (!this.socket) {
             return;
@@ -103,5 +96,13 @@ export class WebSocketSubject<Message> extends Subject<any> {
             this.socket.close();
             this.socket = null;
         }
+    }
+
+    get onOpen(): Observable<any> {
+        return this.open.asObservable();
+    }
+
+    get onClose(): Observable<any> {
+        return this.close.asObservable();
     }
 }
