@@ -1,0 +1,26 @@
+{
+  "name": "thruway.js",
+  "description": "WAMP RxJS Client",
+  "main": "index.js",
+  "authors": [
+    "David Dan <davidwdan@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "wamp",
+    "typescript",
+    "autobahn",
+    "javascript",
+    "rxjs",
+    "websocket",
+    "reactivex"
+  ],
+  "homepage": "http://voryx.net",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
