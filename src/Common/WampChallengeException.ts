@@ -9,6 +9,6 @@ export class WampChallengeException extends WampErrorException {
     }
 
     public abortMessage() {
-        return new AbortMessage(this.errorUri);
+        return new AbortMessage({}, this.errorUri);
     }
 }

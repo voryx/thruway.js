@@ -2,7 +2,7 @@ import {Message} from './Message';
 
 export class GoodbyeMessage extends Message {
 
-    constructor(private _uri: string, private _details: Object = {}) {
+    constructor(private _details: Object, private _uri: string) {
         super(Message.MSG_GOODBYE);
     }
 

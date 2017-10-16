@@ -7,6 +7,7 @@ import {WampErrorException} from './Common/WampErrorException';
 import {TopicObservable} from './Observable/TopicObservable';
 import {ChallengeMessage} from './Messages/ChallengeMessage';
 import {CallObservable} from './Observable/CallObservable';
+import {GoodbyeMessage} from './Messages/GoodbyeMessage';
 import {WelcomeMessage} from './Messages/WelcomeMessage';
 import {PublishMessage} from './Messages/PublishMessage';
 import {HelloMessage} from './Messages/HelloMessage';
@@ -15,7 +16,7 @@ import {Message} from './Messages/Message';
 import {Utils} from './Common/Utils';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {Subject} from 'rxjs';
+import {Scheduler, Subject} from 'rxjs';
 
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/take';
@@ -50,7 +51,8 @@ import 'rxjs/add/observable/merge';
 export class Client {
     private messages: Observable<Message>;
     private subscription: Subscription;
-    private session: Observable<Message>;
+    private _session: Observable<WelcomeMessage>;
+    private _onClose: Observable<Message>;
     private challengeCallback: (challenge: Observable<any>) => Observable<string>;
     private currentRetryCount = 0;
 
@@ -122,10 +124,16 @@ export class Client {
             .map((msg: Message) => {
                 if (msg instanceof AbortMessage) {
                     // @todo create an exception for this
-                    throw new Error('Connection aborted because ' + msg.details);
+                    Scheduler.async.schedule(() => {
+                        throw new Error('Connection ended because ' + msg.details);
+                    }, 0);
                 }
                 return msg;
             })
+            .share();
+
+        this._onClose = this.messages
+            .filter(msg => msg instanceof AbortMessage || msg instanceof GoodbyeMessage)
             .share();
 
         open
@@ -135,7 +143,8 @@ export class Client {
             .map(_ => {
                 this.options.roles = Client.roles();
                 return new HelloMessage(this.realm, this.options);
-            }).subscribe(m => this.transport.next(m));
+            })
+            .subscribe(m => this.transport.next(m));
 
         const challengeMsg = this.messages
             .filter((msg: Message) => msg instanceof ChallengeMessage)
@@ -155,7 +164,7 @@ export class Client {
             })
             .do(m => this.transport.next(m));
 
-        this.session = this.messages
+        this._session = this.messages
             .merge(challengeMsg)
             .filter((msg: Message) => msg instanceof WelcomeMessage)
             .shareReplay(1);
@@ -164,15 +173,18 @@ export class Client {
     }
 
     public topic(uri: string, options?: Object): Observable<any> {
-        return this.session.switchMapTo(new TopicObservable(uri, options, this.messages, this.transport));
+        return this._session
+            .takeUntil(this.onClose)
+            .switchMapTo(new TopicObservable(uri, options, this.messages, this.transport));
     }
 
     public publish(uri: string, value: Observable<any> | any, options?: Object): Subscription {
         const obs = typeof value.subscribe === 'function' ? value as Observable<any> : Observable.of(value);
         const completed = new Subject();
 
-        return this.session
+        return this._session
             .takeUntil(completed)
+            .takeUntil(this.onClose)
             .mapTo(obs.do(null, null, () => {
                 completed.next(0);
             }))
@@ -182,13 +194,16 @@ export class Client {
     }
 
     public call(uri: string, args?: Array<any>, argskw?: Object, options?: {}): Observable<any> {
-        return this.session
+        return this._session
+            .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
             .take(1)
             .switchMapTo(new CallObservable(uri, this.messages, this.transport, args, argskw, options));
     }
 
     public register(uri: string, callback: Function, options?: {}): Observable<any> {
-        return this.session.switchMapTo(new RegisterObservable(uri, callback, this.messages, this.transport, options));
+        return this._session
+            .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
+            .switchMapTo(new RegisterObservable(uri, callback, this.messages, this.transport, options));
     }
 
     public progressiveCall(uri: string, args?: Array<any>, argskw?: Object, options: { receive_progress? } = {}): Observable<any> {
@@ -197,7 +212,8 @@ export class Client {
         const completed = new Subject();
         const callObs = new CallObservable(uri, this.messages, this.transport, args, argskw, options);
         let retry = false;
-        return this.session
+        return this._session
+            .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
             .takeUntil(completed)
             .switchMapTo(callObs.do(null, null, () => {
                 completed.next(0);
@@ -233,6 +249,14 @@ export class Client {
 
     public close() {
         this.subscription.unsubscribe();
+    }
+
+    get onOpen(): Observable<Message> {
+        return this._session;
+    }
+
+    get onClose(): Observable<Message> {
+        return this._onClose;
     }
 }
 

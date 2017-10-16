@@ -13,10 +13,10 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
 
     private output: Subject<any> = new Subject();
     private socket: WebSocket = null;
-    private open = new Subject();
-    private close = new Subject();
+    private openSubject = new Subject();
+    private closeSubject = new Subject();
 
-    constructor(private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json']) {
+    constructor(private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json'], private autoOpen: boolean = true) {
         super();
     }
 
@@ -26,7 +26,7 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
 
         const subscription = new Subscription();
 
-        if (!this.socket) {
+        if (this.autoOpen) {
             this.connectSocket();
         }
 
@@ -45,6 +45,10 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
     }
 
     private connectSocket(): void {
+        if (this.socket) {
+            return;
+        }
+
         try {
             let ws;
             if (typeof WebSocket === 'undefined') {
@@ -60,7 +64,7 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
 
             ws.onclose = (e: CloseEvent) => {
                 this.socket = null;
-                this.close.next(e);
+                this.closeSubject.next(e);
 
                 // Handle all closes as errors
                 this.output.error(e);
@@ -69,7 +73,7 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
             ws.onopen = (e: Event) => {
                 console.log('socket opened');
                 this.socket = ws;
-                this.open.next(e);
+                this.openSubject.next(e);
             };
 
             ws.onmessage = (e: MessageEvent) => {
@@ -99,10 +103,15 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
     }
 
     get onOpen(): Observable<any> {
-        return this.open.asObservable();
+        return this.openSubject.asObservable();
     }
 
     get onClose(): Observable<any> {
-        return this.close.asObservable();
+        return this.closeSubject.asObservable();
+    }
+
+    public open() {
+        this.connectSocket();
+        this.autoOpen = true;
     }
 }

@@ -2,7 +2,7 @@ import {Message} from './Message';
 
 export class AbortMessage extends Message {
 
-    constructor(private _reason: string, private _details: Object = {}) {
+    constructor(private _details: Object = {}, private _reason: string) {
         super(Message.MSG_ABORT);
     }
 
