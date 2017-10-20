@@ -46,7 +46,7 @@ import 'rxjs/add/observable/from';
 import 'rxjs/add/observable/timer';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/merge';
-
+import 'rxjs/add/observable/throw';
 
 export class Client {
     private messages: Observable<Message>;
