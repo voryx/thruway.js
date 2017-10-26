@@ -12,6 +12,7 @@ import {WelcomeMessage} from './Messages/WelcomeMessage';
 import {PublishMessage} from './Messages/PublishMessage';
 import {HelloMessage} from './Messages/HelloMessage';
 import {AbortMessage} from './Messages/AbortMessage';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {Message} from './Messages/Message';
 import {Utils} from './Common/Utils';
 import {Observable} from 'rxjs/Observable';
@@ -40,6 +41,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/finally';
 import 'rxjs/add/operator/exhaust';
 import 'rxjs/add/operator/defaultIfEmpty';
+import 'rxjs/add/operator/multicast';
 import 'rxjs/add/operator/shareReplay';
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/from';
@@ -167,7 +169,7 @@ export class Client {
         this._session = this.messages
             .merge(challengeMsg)
             .filter((msg: Message) => msg instanceof WelcomeMessage)
-            .shareReplay(1);
+            .multicast(() => new ReplaySubject(1)).refCount();
 
         this.subscription.add(this.transport);
     }
