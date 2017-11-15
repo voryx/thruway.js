@@ -1,13 +1,14 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 
-export class WelcomeMessage extends Message {
+export class WelcomeMessage implements IMessage {
+
+    static MSG_WELCOME = 2;
 
     constructor(private _sessionId: string, private _details: any) {
-        super(Message.MSG_WELCOME);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._sessionId, this._details];
+        return [WelcomeMessage.MSG_WELCOME, this._sessionId, this._details];
     }
 
     get sessionId(): string {
@@ -16,5 +17,9 @@ export class WelcomeMessage extends Message {
 
     get details(): any {
         return this._details;
+    }
+
+    msgCode(): number {
+        return WelcomeMessage.MSG_WELCOME;
     }
 }

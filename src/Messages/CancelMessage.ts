@@ -1,14 +1,15 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class CancelMessage extends Message implements IRequestMessage {
+export class CancelMessage implements IMessage, IRequestMessage {
+
+    static MSG_CANCEL = 49;
 
     constructor(private _requestId: number, private _options: Object) {
-        super(Message.MSG_CANCEL);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._requestId, this._options];
+        return [CancelMessage.MSG_CANCEL, this._requestId, this._options];
     }
 
     get requestId(): number {
@@ -17,5 +18,9 @@ export class CancelMessage extends Message implements IRequestMessage {
 
     get options(): Object {
         return this._options;
+    }
+
+    msgCode(): number {
+        return CancelMessage.MSG_CANCEL;
     }
 }

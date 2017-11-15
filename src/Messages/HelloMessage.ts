@@ -1,12 +1,17 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 
-export class HelloMessage extends Message {
+export class HelloMessage implements IMessage {
+
+    static MSG_HELLO = 1;
 
     constructor(private realm: string, private details: any) {
-        super(Message.MSG_HELLO);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this.realm, this.details];
+        return [HelloMessage.MSG_HELLO, this.realm, this.details];
+    }
+
+    msgCode(): number {
+        return HelloMessage.MSG_HELLO;
     }
 }

@@ -1,14 +1,18 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class YieldMessage extends Message implements IRequestMessage {
+export class YieldMessage implements IMessage, IRequestMessage {
 
-    constructor(private _requestId: number, private _options: Object, private _args: Array<any> = [], private _argskw: Object = {}) {
-        super(Message.MSG_YIELD);
+    static MSG_YIELD = 70;
+
+    constructor(private _requestId: number,
+                private _options: Object,
+                private _args: Array<any> = [],
+                private _argskw: Object = {}) {
     }
 
     public wampifiedMsg(): any[] {
-        const r = [this.msgCode, this._requestId, this._options];
+        const r = [YieldMessage.MSG_YIELD, this._requestId, this._options];
         if (Object.keys(this._argskw).length !== 0) {
             r.push(this._args, this._argskw);
             return r;
@@ -33,5 +37,9 @@ export class YieldMessage extends Message implements IRequestMessage {
 
     get argskw(): Object {
         return this._argskw;
+    }
+
+    msgCode(): number {
+        return YieldMessage.MSG_YIELD;
     }
 }

@@ -1,14 +1,14 @@
 import {IMessage} from './Message';
 
-export class PublisedMessage implements IMessage {
+export class UnknownMessage implements IMessage {
 
-    static MSG_PUBLISHED = 17;
+    static MSG_UNKNOWN = 0;
 
     wampifiedMsg(): Array<any> {
         return undefined;
     }
 
     msgCode(): number {
-        return PublisedMessage.MSG_PUBLISHED;
+        return UnknownMessage.MSG_UNKNOWN;
     }
 }

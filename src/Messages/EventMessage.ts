@@ -1,13 +1,18 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 
-export class EventMessage extends Message {
+export class EventMessage implements IMessage {
 
-    constructor(private _subscriptionId: number, private _publicationId: number, private _details: Object, private _args: Array<any> = [], private _argskw: Object = {}) {
-        super(Message.MSG_EVENT);
+    static MSG_EVENT = 36;
+
+    constructor(private _subscriptionId: number,
+                private _publicationId: number,
+                private _details: Object,
+                private _args: Array<any> = [],
+                private _argskw: Object = {}) {
     }
 
     public wampifiedMsg() {
-        const r = [this.msgCode, this._subscriptionId, this._publicationId, this._details];
+        const r = [EventMessage.MSG_EVENT, this._subscriptionId, this._publicationId, this._details];
         if (Object.keys(this._argskw).length !== 0) {
             r.push(this._args, this._argskw);
             return r;
@@ -36,5 +41,9 @@ export class EventMessage extends Message {
 
     get argskw(): Object {
         return this._argskw;
+    }
+
+    msgCode(): number {
+        return EventMessage.MSG_EVENT;
     }
 }

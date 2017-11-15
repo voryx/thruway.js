@@ -1,14 +1,15 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class SubscribeMessage extends Message implements IRequestMessage {
+export class SubscribeMessage implements IMessage, IRequestMessage {
+
+    static MSG_SUBSCRIBE = 32;
 
     constructor(private _requestId: number, private _options: Object, private _topicName: string) {
-        super(Message.MSG_SUBSCRIBE);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._requestId, this._options || {}, this._topicName];
+        return [SubscribeMessage.MSG_SUBSCRIBE, this._requestId, this._options || {}, this._topicName];
     }
 
     get requestId(): number {
@@ -21,5 +22,9 @@ export class SubscribeMessage extends Message implements IRequestMessage {
 
     get topicName(): string {
         return this._topicName;
+    }
+
+    msgCode(): number {
+        return SubscribeMessage.MSG_SUBSCRIBE;
     }
 }

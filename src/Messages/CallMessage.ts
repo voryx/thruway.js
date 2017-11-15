@@ -1,14 +1,19 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class CallMessage extends Message implements IRequestMessage {
+export class CallMessage implements IMessage, IRequestMessage {
 
-    constructor(private _requestId: number, private _options: Object, private _procedure: string, private _args: Array<any> = [], private _argskw: Object = {}) {
-        super(Message.MSG_CALL);
+    static MSG_CALL = 48;
+
+    constructor(private _requestId: number,
+                private _options: Object,
+                private _procedure: string,
+                private _args: Array<any> = [],
+                private _argskw: Object = {}) {
     }
 
     public wampifiedMsg() {
-        const r = [this.msgCode, this.requestId, this.options, this.procedure];
+        const r = [CallMessage.MSG_CALL, this.requestId, this.options, this.procedure];
         if (Object.keys(this._argskw).length !== 0) {
             r.push(this._args, this._argskw);
             return r;
@@ -39,7 +44,7 @@ export class CallMessage extends Message implements IRequestMessage {
         return this._argskw;
     }
 
-    get msgCode(): number {
-        return Message.MSG_CALL;
+    msgCode(): number {
+        return CallMessage.MSG_CALL;
     }
 }

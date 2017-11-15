@@ -5,7 +5,7 @@ import {WampErrorException} from '../Common/WampErrorException';
 import {SubscribeMessage} from '../Messages/SubscribeMessage';
 import {ErrorMessage} from '../Messages/ErrorMessage';
 import {EventMessage} from '../Messages/EventMessage';
-import {Message} from '../Messages/Message';
+import {IMessage} from '../Messages/Message';
 import {Subscription} from 'rxjs/Subscription';
 import {Observable} from 'rxjs/Observable';
 import {Subscriber} from 'rxjs/Subscriber';
@@ -16,8 +16,8 @@ export class TopicObservable<EventMsg> extends Observable<any> {
 
     constructor(private uri: string,
                 private options: Object,
-                private messages: Observable<Message>,
-                private websocket: Subject<Message>) {
+                private messages: Observable<IMessage>,
+                private websocket: Subject<IMessage>) {
         super();
     }
 
@@ -28,16 +28,16 @@ export class TopicObservable<EventMsg> extends Observable<any> {
         const subscribeMsg = new SubscribeMessage(requestId, this.options, this.uri);
 
         const subscribedMsg = this.messages
-            .filter((msg: Message) => msg instanceof SubscribedMessage && msg.requestId === requestId)
+            .filter((msg: IMessage) => msg instanceof SubscribedMessage && msg.requestId === requestId)
             .take(1);
 
         const errorMsg = this.messages
-            .filter((msg: Message) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
+            .filter((msg: IMessage) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
             .flatMap((msg: ErrorMessage) => Observable.throw(new WampErrorException(msg.errorURI, msg.args)))
             .take(1);
 
         const unsubscribedMsg = this.messages
-            .filter((msg: Message) => msg instanceof UnsubscribedMessage && msg.requestId === requestId)
+            .filter((msg: IMessage) => msg instanceof UnsubscribedMessage && msg.requestId === requestId)
             .take(1);
 
         this.websocket.next(subscribeMsg);
@@ -48,7 +48,7 @@ export class TopicObservable<EventMsg> extends Observable<any> {
                 const sid = m.subscriptionId;
 
                 return this.messages
-                    .filter((msg: Message) => msg instanceof EventMessage && msg.subscriptionId === sid);
+                    .filter((msg: IMessage) => msg instanceof EventMessage && msg.subscriptionId === sid);
             })
             .merge(errorMsg)
             .takeUntil(unsubscribedMsg)

@@ -1,14 +1,15 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class UnsubscribeMessage extends Message implements IRequestMessage {
+export class UnsubscribeMessage implements IMessage, IRequestMessage {
+
+    static MSG_UNSUBSCRIBE = 34;
 
     constructor(private _requestId: number, private _subscriptionId: number) {
-        super(Message.MSG_UNSUBSCRIBE);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._requestId, this._subscriptionId];
+        return [UnsubscribeMessage.MSG_UNSUBSCRIBE, this._requestId, this._subscriptionId];
     }
 
     get requestId(): number {
@@ -17,5 +18,9 @@ export class UnsubscribeMessage extends Message implements IRequestMessage {
 
     get subscriptionId(): number {
         return this._subscriptionId;
+    }
+
+    msgCode(): number {
+        return UnsubscribeMessage.MSG_UNSUBSCRIBE;
     }
 }

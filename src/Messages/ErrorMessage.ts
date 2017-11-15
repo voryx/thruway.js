@@ -1,14 +1,16 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class ErrorMessage extends Message {
+export class ErrorMessage implements IMessage {
+
+    static MSG_ERROR = 8;
 
     public static createErrorMessageFromMessage(msg: IRequestMessage, errorUri?: string): ErrorMessage {
         if (errorUri === null) {
             errorUri = 'wamp.error.unknown';
         }
 
-        return new ErrorMessage(msg.msgCode, msg.requestId, {}, errorUri);
+        return new ErrorMessage(msg.msgCode(), msg.requestId, {}, errorUri);
     }
 
     constructor(private _errorMsgCode: number,
@@ -17,11 +19,10 @@ export class ErrorMessage extends Message {
                 private _errorURI: string,
                 private _args: Array<any> = [],
                 private _argskw: Object = {}) {
-        super(Message.MSG_ERROR);
     }
 
     public wampifiedMsg() {
-        const r = [this.msgCode, this._errorMsgCode, this._errorRequestId, this._details, this._errorURI];
+        const r = [ErrorMessage.MSG_ERROR, this._errorMsgCode, this._errorRequestId, this._details, this._errorURI];
         if (Object.keys(this._argskw).length !== 0) {
             r.push(this._args, this._argskw);
             return r;
@@ -66,5 +67,9 @@ export class ErrorMessage extends Message {
 
     set argskw(value: Object) {
         this._argskw = value;
+    }
+
+    msgCode(): number {
+        return ErrorMessage.MSG_ERROR;
     }
 }

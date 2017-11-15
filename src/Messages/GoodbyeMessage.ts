@@ -1,13 +1,14 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 
-export class GoodbyeMessage extends Message {
+export class GoodbyeMessage implements IMessage {
+
+    static MSG_GOODBYE = 6;
 
     constructor(private _details: Object, private _uri: string) {
-        super(Message.MSG_GOODBYE);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this.details, this.uri];
+        return [GoodbyeMessage.MSG_GOODBYE, this.details, this.uri];
     }
 
     get uri(): string {
@@ -16,5 +17,9 @@ export class GoodbyeMessage extends Message {
 
     get details(): Object {
         return this._details;
+    }
+
+    msgCode(): number {
+        return GoodbyeMessage.MSG_GOODBYE;
     }
 }

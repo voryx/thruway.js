@@ -13,7 +13,7 @@ import {PublishMessage} from './Messages/PublishMessage';
 import {HelloMessage} from './Messages/HelloMessage';
 import {AbortMessage} from './Messages/AbortMessage';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {Message} from './Messages/Message';
+import {IMessage} from './Messages/Message';
 import {Utils} from './Common/Utils';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -51,10 +51,10 @@ import 'rxjs/add/observable/merge';
 import 'rxjs/add/observable/throw';
 
 export class Client {
-    private messages: Observable<Message>;
+    private messages: Observable<IMessage>;
     private subscription: Subscription;
     private _session: Observable<WelcomeMessage>;
-    private _onClose: Observable<Message>;
+    private _onClose: Observable<IMessage>;
     private challengeCallback: (challenge: Observable<any>) => Observable<string>;
     private currentRetryCount = 0;
 
@@ -123,7 +123,7 @@ export class Client {
                     })
                     .take(maxRetries);
             })
-            .map((msg: Message) => {
+            .map((msg: IMessage) => {
                 if (msg instanceof AbortMessage) {
                     // @todo create an exception for this
                     Scheduler.async.schedule(() => {
@@ -149,7 +149,7 @@ export class Client {
             .subscribe(m => this.transport.next(m));
 
         const challengeMsg = this.messages
-            .filter((msg: Message) => msg instanceof ChallengeMessage)
+            .filter((msg: IMessage) => msg instanceof ChallengeMessage)
             .switchMap((msg: ChallengeMessage) => {
                 try {
                     return this.challengeCallback(Observable.of(msg)).take(1);
@@ -168,7 +168,7 @@ export class Client {
 
         this._session = this.messages
             .merge(challengeMsg)
-            .filter((msg: Message) => msg instanceof WelcomeMessage)
+            .filter((msg: IMessage) => msg instanceof WelcomeMessage)
             .multicast(() => new ReplaySubject(1)).refCount();
 
         this.subscription.add(this.transport);
@@ -253,11 +253,11 @@ export class Client {
         this.subscription.unsubscribe();
     }
 
-    get onOpen(): Observable<Message> {
+    get onOpen(): Observable<IMessage> {
         return this._session;
     }
 
-    get onClose(): Observable<Message> {
+    get onClose(): Observable<IMessage> {
         return this._onClose;
     }
 }

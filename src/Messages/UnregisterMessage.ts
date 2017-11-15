@@ -1,14 +1,15 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class UnregisterMessage extends Message implements IRequestMessage {
+export class UnregisterMessage implements IMessage, IRequestMessage {
+
+    static MSG_UNREGISTER = 66;
 
     constructor(private _requestId: number, private _registrationId: number) {
-        super(Message.MSG_UNREGISTER);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._requestId, this._registrationId];
+        return [UnregisterMessage.MSG_UNREGISTER, this._requestId, this._registrationId];
     }
 
     get requestId(): number {
@@ -17,5 +18,9 @@ export class UnregisterMessage extends Message implements IRequestMessage {
 
     get registrationId(): number {
         return this._registrationId;
+    }
+
+    msgCode(): number {
+        return UnregisterMessage.MSG_UNREGISTER;
     }
 }

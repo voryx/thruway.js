@@ -8,7 +8,7 @@ import {InterruptMessage} from '../Messages/InterruptMessage';
 import {RegisterMessage} from '../Messages/RegisterMessage';
 import {ErrorMessage} from '../Messages/ErrorMessage';
 import {YieldMessage} from '../Messages/YieldMessage';
-import {Message} from '../Messages/Message';
+import {IMessage} from '../Messages/Message';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {Subscriber} from 'rxjs/Subscriber';
@@ -18,12 +18,12 @@ import {Scheduler} from 'rxjs/Scheduler';
 
 export class RegisterObservable<T> extends Observable<T> {
 
-    private messages: Observable<Message>;
+    private messages: Observable<IMessage>;
     private invocationErrors: Subject<WampInvocationException>;
 
     constructor(private uri: string,
                 private callback: Function,
-                messages: Observable<Message>,
+                messages: Observable<IMessage>,
                 private webSocket: Subject<any>,
                 private options: any = {},
                 private extended?: boolean,
@@ -45,12 +45,12 @@ export class RegisterObservable<T> extends Observable<T> {
         let completed = false;
 
         const unregisteredMsg = this.messages
-            .filter((msg: Message) => msg instanceof UnregisteredMessage && msg.requestId === requestId)
+            .filter((msg: IMessage) => msg instanceof UnregisteredMessage && msg.requestId === requestId)
             .take(1)
             .share();
 
         const registeredMsg = this.messages
-            .filter((msg: Message) => msg instanceof RegisteredMessage && msg.requestId === requestId)
+            .filter((msg: IMessage) => msg instanceof RegisteredMessage && msg.requestId === requestId)
             .do((m: RegisteredMessage) => {
                 registrationId = m.registrationId;
             })
@@ -58,12 +58,12 @@ export class RegisterObservable<T> extends Observable<T> {
             .share();
 
         const invocationMessage = registeredMsg.flatMap((m: RegisteredMessage) => {
-            return this.messages.filter((msg: Message) => msg instanceof InvocationMessage && msg.registrationId === m.registrationId);
+            return this.messages.filter((msg: IMessage) => msg instanceof InvocationMessage && msg.registrationId === m.registrationId);
         });
 
         // Transform WAMP error messages into an error observable
         const error = this.messages
-            .filter((msg: Message) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
+            .filter((msg: IMessage) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
             .flatMap((msg: ErrorMessage) => Observable.throw(new WampErrorException(msg.errorURI, msg.args), this.scheduler))
             .takeUntil(registeredMsg)
             .take(1);
@@ -119,7 +119,7 @@ export class RegisterObservable<T> extends Observable<T> {
                     }
 
                     const interruptMsg = this.messages
-                        .filter((m: Message) => m instanceof InterruptMessage && m.requestId === msg.requestId)
+                        .filter((m: IMessage) => m instanceof InterruptMessage && m.requestId === msg.requestId)
                         .take(1)
                         .flatMapTo(Observable.throw(new WampInvocationException(msg, 'wamp.error.canceled')));
 

@@ -6,7 +6,7 @@ import {ResultMessage} from '../Messages/ResultMessage';
 import {CancelMessage} from '../Messages/CancelMessage';
 import {ErrorMessage} from '../Messages/ErrorMessage';
 import {CallMessage} from '../Messages/CallMessage';
-import {Message} from '../Messages/Message';
+import {IMessage} from '../Messages/Message';
 import {Utils} from '../Common/Utils';
 import {Subject} from 'rxjs/Subject';
 import {Scheduler} from 'rxjs/Scheduler';
@@ -14,10 +14,10 @@ import {Scheduler} from 'rxjs/Scheduler';
 export class CallObservable<ResultMsg> extends Observable<any> {
 
     private completed = false;
-    private messages: Observable<Message>;
+    private messages: Observable<IMessage>;
 
     constructor(private uri: string,
-                messages: Observable<Message>,
+                messages: Observable<IMessage>,
                 private webSocket: Subject<any>,
                 private args?: Array<any>,
                 private argskw?: Object,
@@ -33,7 +33,7 @@ export class CallObservable<ResultMsg> extends Observable<any> {
 
         const msg = this.messages
             .do(null, () => this.completed = true)
-            .filter((m: Message) => m instanceof ResultMessage && m.requestId === requestId)
+            .filter((m: IMessage) => m instanceof ResultMessage && m.requestId === requestId)
             .flatMap((m: ResultMessage, index: number) => {
                 // If there is no progress, we need to fake it so that the observable completes
                 if (index === 0 && !!m.details.progress === false) {
@@ -57,7 +57,7 @@ export class CallObservable<ResultMsg> extends Observable<any> {
             .share();
 
         const error = this.messages
-            .filter((m: Message) => m instanceof ErrorMessage && m.errorRequestId === requestId)
+            .filter((m: IMessage) => m instanceof ErrorMessage && m.errorRequestId === requestId)
             .do(() => this.completed = true)
             .takeUntil(msg.filter(m => !m.details.progress))
             .flatMap((m: ErrorMessage) => Observable.throw(new WampErrorException(m.errorURI, m.args), this.scheduler))

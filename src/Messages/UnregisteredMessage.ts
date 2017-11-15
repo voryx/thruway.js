@@ -1,17 +1,22 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class UnregisteredMessage extends Message implements IRequestMessage {
+export class UnregisteredMessage implements IMessage, IRequestMessage {
+
+    static MSG_UNREGISTERED = 67;
 
     constructor(private _requestId: number) {
-        super(Message.MSG_UNREGISTERED);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this._requestId];
+        return [UnregisteredMessage.MSG_UNREGISTERED, this._requestId];
     }
 
     get requestId(): number {
         return this._requestId;
+    }
+
+    msgCode(): number {
+        return UnregisteredMessage.MSG_UNREGISTERED;
     }
 }

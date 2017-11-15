@@ -1,13 +1,14 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 
-export class ChallengeMessage extends Message {
+export class ChallengeMessage implements IMessage {
+
+    static MSG_CHALLENGE = 4;
 
     constructor(private _authMethod: string, private _extra: Object) {
-        super(Message.MSG_CHALLENGE);
     }
 
     public wampifiedMsg() {
-        return [this.msgCode, this.authMethod, this.extra];
+        return [ChallengeMessage.MSG_CHALLENGE, this.authMethod, this.extra];
     }
 
     get authMethod(): string {
@@ -16,5 +17,9 @@ export class ChallengeMessage extends Message {
 
     get extra(): Object {
         return this._extra;
+    }
+
+    msgCode() {
+        return ChallengeMessage.MSG_CHALLENGE;
     }
 }

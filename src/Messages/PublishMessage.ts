@@ -1,14 +1,19 @@
-import {Message} from './Message';
+import {IMessage} from './Message';
 import {IRequestMessage} from './IRequestMessage';
 
-export class PublishMessage extends Message implements IRequestMessage {
+export class PublishMessage implements IMessage, IRequestMessage {
 
-    constructor(private _requestId: number, private _options: Object, private _topic: string, private _args: Array<any> = [], private _argskw: Object = {}) {
-        super(Message.MSG_PUBLISH);
+    static MSG_PUBLISH = 16;
+
+    constructor(private _requestId: number,
+                private _options: Object,
+                private _topic: string,
+                private _args: Array<any> = [],
+                private _argskw: Object = {}) {
     }
 
     public wampifiedMsg() {
-        const r = [this.msgCode, this.requestId, this.options || {}, this.topic];
+        const r = [PublishMessage.MSG_PUBLISH, this.requestId, this.options || {}, this.topic];
         if (Object.keys(this._argskw).length !== 0) {
             r.push(this._args, this._argskw);
             return r;
@@ -37,5 +42,9 @@ export class PublishMessage extends Message implements IRequestMessage {
 
     get argskw(): Object {
         return this._argskw;
+    }
+
+    msgCode(): number {
+        return PublishMessage.MSG_PUBLISH;
     }
 }
