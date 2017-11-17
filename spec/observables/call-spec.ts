@@ -51,7 +51,7 @@ describe('CallObservable', () => {
     it('should dispose of messages after non-progressive result', () => {
         const resultMessage = new ResultMessage(null, {}, [], {});
 
-        const messages = hot( '--w--r------|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w--r------|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^----!';
         const expected =      '-----(d|)';
 
@@ -69,7 +69,7 @@ describe('CallObservable', () => {
     it('should emit empty args when result message args is empty', () => {
         const resultMessage = new ResultMessage(null, {}, [], {});
 
-        const messages = hot( '--w--r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w--r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^----!';
         const expected =      '-----(d|)';
 
@@ -87,7 +87,7 @@ describe('CallObservable', () => {
     it('should emit args when result message args has value', () => {
         const resultMessage = new ResultMessage(null, {}, ['testing'], {});
 
-        const messages = hot( '--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected =      '----(d|)';
 
@@ -106,7 +106,7 @@ describe('CallObservable', () => {
     it('should emit args and argkw when result message args and argskw have values', () => {
         const resultMessage = new ResultMessage(null, {}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected =      '----(d|)';
 
@@ -125,7 +125,7 @@ describe('CallObservable', () => {
     it('should emit args, argkw and details when result message has args, argskw and details', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected =      '----(d|)';
 
@@ -143,7 +143,7 @@ describe('CallObservable', () => {
     it('should emit once when reconnected', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '--w-r-w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w-r-w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected =      '----(d|)';
 
@@ -161,7 +161,7 @@ describe('CallObservable', () => {
     it('should emit error when error is emitted before welcome', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '-#w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage}, new Error());
+        const messages = hot( '-#w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage}, new Error());
         const subscriptions = '^!';
         const expected =      '-#';
 
@@ -187,7 +187,7 @@ describe('CallObservable', () => {
 
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '-w#-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage}, new Error());
+        const messages = hot( '-w#-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage}, new Error());
         const subscriptions = '^-!';
         const expected =      '--#';
 
@@ -214,7 +214,7 @@ describe('CallObservable', () => {
 
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const expected =      '#';
 
         const webSocket = new Subject();
@@ -233,7 +233,7 @@ describe('CallObservable', () => {
 
         const errorMessage = new ErrorMessage(123, null, {}, 'some.server.error');
 
-        const messages = hot( '--w-e|', {w: new WelcomeMessage('12345', {}), e: errorMessage});
+        const messages = hot( '--w-e|', {w: new WelcomeMessage(12345, {}), e: errorMessage});
         const subscriptions = '^---!';
         const expected =      '----#';
 
@@ -258,7 +258,7 @@ describe('CallObservable', () => {
     it('should not emit if disposed before result', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '--w---r|', {w: new WelcomeMessage('12345', {}), e: resultMessage});
+        const messages = hot( '--w---r|', {w: new WelcomeMessage(12345, {}), e: resultMessage});
         const subscriptions = '^---!';
         const unsubscribe =   '----!';
         const expected =      '';
@@ -283,7 +283,7 @@ describe('CallObservable', () => {
     it('should emit if disposed after result', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot( '--w-r---|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot( '--w-r---|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const unsubscribe =   '------!';
         const expected =      '----(d|)';

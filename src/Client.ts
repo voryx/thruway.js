@@ -1,15 +1,19 @@
 import {TransportInterface} from './Transport/TransportInterface';
 import {WampChallengeException} from './Common/WampChallengeException';
 import {WebSocketTransport} from './Transport/WebSocketTransport';
-import {RegisterObservable} from './Observable/RegisterObservable';
+import {RegisterObservable, RegisterOptions} from './Observable/RegisterObservable';
 import {AuthenticateMessage} from './Messages/AuthenticateMessage';
 import {WampErrorException} from './Common/WampErrorException';
-import {TopicObservable} from './Observable/TopicObservable';
+import {PublishOptions, TopicObservable, TopicOptions} from './Observable/TopicObservable';
 import {ChallengeMessage} from './Messages/ChallengeMessage';
-import {CallObservable} from './Observable/CallObservable';
+import {CallObservable, CallOptions} from './Observable/CallObservable';
 import {GoodbyeMessage} from './Messages/GoodbyeMessage';
 import {WelcomeMessage} from './Messages/WelcomeMessage';
 import {PublishMessage} from './Messages/PublishMessage';
+import {ResultMessage} from './Messages/ResultMessage';
+import {RegisteredMessage} from './Messages/RegisteredMessage';
+import {UnregisteredMessage} from './Messages/UnregisteredMessage';
+import {EventMessage} from './Messages/EventMessage';
 import {HelloMessage} from './Messages/HelloMessage';
 import {AbortMessage} from './Messages/AbortMessage';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
@@ -174,14 +178,14 @@ export class Client {
         this.subscription.add(this.transport);
     }
 
-    public topic(uri: string, options?: Object): Observable<any> {
+    public topic(uri: string, options?: TopicOptions): Observable<EventMessage> {
         return this._session
             .takeUntil(this.onClose)
             .switchMapTo(new TopicObservable(uri, options, this.messages, this.transport));
     }
 
-    public publish(uri: string, value: Observable<any> | any, options?: Object): Subscription {
-        const obs = typeof value.subscribe === 'function' ? value as Observable<any> : Observable.of(value);
+    public publish<T>(uri: string, value: Observable<T> | any, options?: PublishOptions): Subscription {
+        const obs = typeof value.subscribe === 'function' ? value as Observable<T> : Observable.of(value);
         const completed = new Subject();
 
         return this._session
@@ -195,20 +199,20 @@ export class Client {
             .subscribe(this.transport);
     }
 
-    public call(uri: string, args?: Array<any>, argskw?: Object, options?: {}): Observable<any> {
+    public call(uri: string, args?: Array<any>, argskw?: Object, options?: CallOptions): Observable<ResultMessage> {
         return this._session
             .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
             .take(1)
             .switchMapTo(new CallObservable(uri, this.messages, this.transport, args, argskw, options));
     }
 
-    public register(uri: string, callback: Function, options?: {}): Observable<any> {
+    public register(uri: string, callback: Function, options?: RegisterOptions): Observable<RegisteredMessage | UnregisteredMessage> {
         return this._session
             .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
             .switchMapTo(new RegisterObservable(uri, callback, this.messages, this.transport, options));
     }
 
-    public progressiveCall(uri: string, args?: Array<any>, argskw?: Object, options: { receive_progress? } = {}): Observable<any> {
+    public progressiveCall(uri: string, args?: Array<any>, argskw?: Object, options: CallOptions = {}): Observable<ResultMessage> {
 
         options.receive_progress = true;
         const completed = new Subject();
@@ -238,14 +242,14 @@ export class Client {
             });
     }
 
-    public progressiveRegister(uri: string, callback: Function, options: { progress?, replace_orphaned_sessions? } = {}): Observable<any> {
+    public progressiveRegister(uri: string, callback: Function, options: RegisterOptions = {}): Observable<any> {
 
         options.progress = true;
         options.replace_orphaned_sessions = 'yes';
         return this.register(uri, callback, options);
     }
 
-    public onChallenge(challengeCallback: (challenge: Observable<any>) => Observable<string>) {
+    public onChallenge(challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string>) {
         this.challengeCallback = challengeCallback;
     }
 
@@ -264,7 +268,8 @@ export class Client {
 
 export interface WampOptions {
     authmethods?: Array<string>;
-    roles?: any;
+    roles?: Object;
+    role?: string;
 
     [propName: string]: any;
 }

@@ -16,6 +16,17 @@ import {Utils} from '../Common/Utils';
 import {Subject} from 'rxjs/Subject';
 import {Scheduler} from 'rxjs/Scheduler';
 
+export interface RegisterOptions {
+    progress?: boolean;
+    invoke?: string | 'first' | 'last' | 'roundrobin' | 'random' | '_thruway' | 'single' | 'all';
+    match?: string | 'prefix' | 'wildcard' | 'exact';
+    disclose_caller?: boolean;
+    force_reregister?: boolean;
+    replace_orphaned_sessions?: boolean | 'yes' | 'no'; // Thruway equivalent of 'force_reregister'
+
+    [propName: string]: any;
+}
+
 export class RegisterObservable<T> extends Observable<T> {
 
     private messages: Observable<IMessage>;
@@ -25,7 +36,7 @@ export class RegisterObservable<T> extends Observable<T> {
                 private callback: Function,
                 messages: Observable<IMessage>,
                 private webSocket: Subject<any>,
-                private options: any = {},
+                private options: RegisterOptions = {},
                 private extended?: boolean,
                 invocationErrors?: Subject<WampInvocationException>,
                 private scheduler: Scheduler = null) {
@@ -41,7 +52,7 @@ export class RegisterObservable<T> extends Observable<T> {
         const requestId = Utils.uniqueId();
         const disposable = new Subscription();
         const registerMsg = new RegisterMessage(requestId, this.options, this.uri);
-        let registrationId = null;
+        let registrationId: number = null;
         let completed = false;
 
         const unregisteredMsg = this.messages
@@ -111,10 +122,10 @@ export class RegisterObservable<T> extends Observable<T> {
                     if (!!this.options.progress === false) {
                         returnObs = resultObs
                             .take(1)
-                            .map((value) => [value, msg, this.options]);
+                            .map((value: any) => [value, msg, this.options]);
                     } else {
                         returnObs = resultObs
-                            .map((value) => [value, msg, this.options])
+                            .map((value: any) => [value, msg, this.options])
                             .concat(Observable.of([null, msg, {progress: false}], this.scheduler));
                     }
 

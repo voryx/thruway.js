@@ -85,7 +85,7 @@ describe('RegisterObservable', () => {
 
         const registeredMsg = new RegisteredMessage(null, 54321);
 
-        const messages = hot( '--w-r-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg});
+        const messages = hot( '--w-r-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg});
         const subscriptions = '^-----!';
         const expected =      '----d-|';
 
@@ -113,7 +113,7 @@ describe('RegisterObservable', () => {
 
         const registeredMsg = new RegisteredMessage(null, 54321);
 
-        const messages = hot( '--w-r--', {w: new WelcomeMessage('12345', {}), r: registeredMsg});
+        const messages = hot( '--w-r--', {w: new WelcomeMessage(12345, {}), r: registeredMsg});
         const subscriptions = '^------';
         const expected =      '----d--';
 
@@ -139,7 +139,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -167,7 +167,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-i--', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i--', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^--------';
         const expected =      '----d----';
 
@@ -195,7 +195,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -223,7 +223,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-i-i-i-i-i-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-i-i-i-i-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-----------------!';
         const expected =      '----d-------------|';
 
@@ -256,7 +256,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {}, [1]);
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -284,7 +284,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {}, [1, 2]);
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -312,7 +312,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {}, [1, 2]);
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -340,7 +340,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -371,7 +371,7 @@ describe('RegisterObservable', () => {
         const c = new InvocationMessage(44443, 54321, {});
         const d = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-a-b-c-d-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, a: a, b: b, c: c, d: d});
+        const messages = hot( '--w-r-a-b-c-d-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, a: a, b: b, c: c, d: d});
         const subscriptions = '^-------------!';
         const expected =      '----d---------|';
 
@@ -401,7 +401,7 @@ describe('RegisterObservable', () => {
     it('should emit an error when error message is received during registration', () => {
         const errorMsg = new ErrorMessage(null, 54321, {}, 'registration.error.uri');
 
-        const messages = hot( '--w-e-|', {w: new WelcomeMessage('12345', {}), e: errorMsg});
+        const messages = hot( '--w-e-|', {w: new WelcomeMessage(12345, {}), e: errorMsg});
         const subscriptions = '^---!';
         const expected =      '----#';
 
@@ -427,7 +427,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -459,7 +459,7 @@ describe('RegisterObservable', () => {
         const registeredMsg = new RegisteredMessage(null, 54321);
         const invocationMsg = new InvocationMessage(44444, 54321, {});
 
-        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg});
+        const messages = hot( '--w-r-i-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg});
         const subscriptions = '^-------!';
         const expected =      '----d---|';
 
@@ -492,7 +492,7 @@ describe('RegisterObservable', () => {
         const invocationMsg = new InvocationMessage(44444, 54321, {});
         const interruptMsg = new InterruptMessage(44444, {});
 
-        const messages = hot( '--w-r-i-x-|', {w: new WelcomeMessage('12345', {}), r: registeredMsg, i: invocationMsg, x: interruptMsg});
+        const messages = hot( '--w-r-i-x-|', {w: new WelcomeMessage(12345, {}), r: registeredMsg, i: invocationMsg, x: interruptMsg});
         const subscriptions = '^---------!';
         const expected =      '----d-----|';
 

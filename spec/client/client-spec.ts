@@ -58,7 +58,7 @@ describe('Client', () => {
     it('call should dispose of messages after non-progressive result', () => {
         const resultMessage = new ResultMessage(null, {}, [], {});
 
-        const messages = hot('--w--r------|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot('--w--r------|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^----!';
         const expected = '-----(d|)';
 
@@ -79,7 +79,7 @@ describe('Client', () => {
     it('call should emit empty args when result message args is empty', () => {
         const resultMessage = new ResultMessage(null, {}, [], {});
 
-        const messages = hot('--w--r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot('--w--r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^----!';
         const expected = '-----(d|)';
 
@@ -101,7 +101,7 @@ describe('Client', () => {
     it('call should emit args when result message args has value', () => {
         const resultMessage = new ResultMessage(null, {}, ['testing'], {});
 
-        const messages = hot('--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot('--w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected = '----(d|)';
 
@@ -124,7 +124,7 @@ describe('Client', () => {
     it('call should emit args and argkw when result message args and argskw have values', () => {
         const resultMessage = new ResultMessage(null, {}, ['testing'], {foo: 'bar'});
 
-        const messages = hot('--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot('--w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected = '----(d|)';
 
@@ -147,7 +147,7 @@ describe('Client', () => {
     it('call should emit args, argkw and details when result message has args, argskw and details', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot('--w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot('--w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected = '----(d|)';
 
@@ -169,7 +169,7 @@ describe('Client', () => {
     it('call should emit once when reconnected', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot('--w-r-w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot('--w-r-w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const expected = '----(d|)';
 
@@ -191,7 +191,7 @@ describe('Client', () => {
     it('call should not? emit error when error is emitted before welcome', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot('-#w-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage}, new Error());
+        const messages = hot('-#w-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage}, new Error());
         const subscriptions = '^!';
         const expected = '^';
 
@@ -218,7 +218,7 @@ describe('Client', () => {
 
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot('-w#-r|', {w: new WelcomeMessage('12345', {}), r: resultMessage}, new Error());
+        const messages = hot('-w#-r|', {w: new WelcomeMessage(12345, {}), r: resultMessage}, new Error());
         const subscriptions = '^-!';
         const expected = '--';
 
@@ -247,7 +247,7 @@ describe('Client', () => {
 
         const errorMessage = new ErrorMessage(123, null, {}, 'some.server.error');
 
-        const messages = hot('--w-e|', {w: new WelcomeMessage('12345', {}), e: errorMessage});
+        const messages = hot('--w-e|', {w: new WelcomeMessage(12345, {}), e: errorMessage});
         const subscriptions = '^---!';
         const expected = '----#';
 
@@ -275,7 +275,7 @@ describe('Client', () => {
     it('call should not emit if disposed before result', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot('--w---r|', {w: new WelcomeMessage('12345', {}), e: resultMessage});
+        const messages = hot('--w---r|', {w: new WelcomeMessage(12345, {}), e: resultMessage});
         const subscriptions = '^---!';
         const unsubscribe = '----!';
         const expected = '';
@@ -303,7 +303,7 @@ describe('Client', () => {
     it('call should emit if disposed after result', () => {
         const resultMessage = new ResultMessage(null, {detail: 'thing'}, ['testing'], {foo: 'bar'});
 
-        const messages = hot('--w-r---|', {w: new WelcomeMessage('12345', {}), r: resultMessage});
+        const messages = hot('--w-r---|', {w: new WelcomeMessage(12345, {}), r: resultMessage});
         const subscriptions = '^---!';
         const unsubscribe = '------!';
         const expected = '----(d|)';

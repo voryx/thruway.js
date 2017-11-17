@@ -11,6 +11,14 @@ import {Utils} from '../Common/Utils';
 import {Subject} from 'rxjs/Subject';
 import {Scheduler} from 'rxjs/Scheduler';
 
+export interface CallOptions {
+    receive_progress?: boolean;
+    timeout?: number;
+    disclose_me?: boolean;
+
+    [propName: string]: any;
+}
+
 export class CallObservable<ResultMsg> extends Observable<any> {
 
     private completed = false;
@@ -21,7 +29,7 @@ export class CallObservable<ResultMsg> extends Observable<any> {
                 private webSocket: Subject<any>,
                 private args?: Array<any>,
                 private argskw?: Object,
-                private options: Object = {},
+                private options: CallOptions = {},
                 private scheduler?: Scheduler) {
         super();
         this.messages = messages.share();

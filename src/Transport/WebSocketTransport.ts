@@ -6,7 +6,7 @@ import {CreateMessage} from '../Messages/CreateMessage';
 import {TransportInterface} from './TransportInterface';
 
 // This is used for WebSockets in node - removed by webpack for bundling
-declare var require;
+declare var require: any;
 const WebSocket2 = require('ws');
 
 export class WebSocketTransport<Message> extends Subject<any> implements TransportInterface {
@@ -50,14 +50,14 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
         }
 
         try {
-            let ws;
+            let ws: any;
             if (typeof WebSocket === 'undefined') {
                 ws = new WebSocket2(this.url, this.protocols);
             } else {
                 ws = new WebSocket(this.url, this.protocols);
             }
 
-            ws.onerror = (err) => {
+            ws.onerror = (err: Error) => {
                 this.socket = null;
                 this.output.error(err);
             };

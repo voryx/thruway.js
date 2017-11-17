@@ -18,7 +18,7 @@ export class WebWorkerTransport<Message> extends Subject<any> implements Transpo
 
     public _subscribe(subscriber: Subscriber<any>): Subscription {
 
-        let ww;
+        let ww: Worker;
         if (!this.worker) {
             ww = new Worker(this.workerName);
         }

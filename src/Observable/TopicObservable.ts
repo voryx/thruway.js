@@ -12,10 +12,30 @@ import {Subscriber} from 'rxjs/Subscriber';
 import {Utils} from '../Common/Utils';
 import {Subject} from 'rxjs/Subject';
 
+export interface TopicOptions {
+    [propName: string]: any;
+}
+
+export interface PublishOptions {
+    exclude_me?: boolean;
+    disclose_me?: boolean;
+    // acknowledge?: boolean; // Not supported
+    eligible?: Array<number>;
+    eligible_authid?: Array<string>;
+    eligible_authroles?: Array<string>;
+    exclude?: Array<number>;
+    exclude_authid?: Array<string>;
+    exclude_authroles?: Array<string>;
+    _thruway_eligible_authids?: Array<string>;
+    _thruway_eligible_authroles?: Array<string>;
+
+    [propName: string]: any;
+}
+
 export class TopicObservable<EventMsg> extends Observable<any> {
 
     constructor(private uri: string,
-                private options: Object,
+                private options: TopicOptions,
                 private messages: Observable<IMessage>,
                 private websocket: Subject<IMessage>) {
         super();
@@ -24,7 +44,7 @@ export class TopicObservable<EventMsg> extends Observable<any> {
     public _subscribe(subscriber: Subscriber<any>): Subscription | Function | void {
 
         const requestId = Utils.uniqueId();
-        const subscriptionId = null;
+        const subscriptionId: number = null;
         const subscribeMsg = new SubscribeMessage(requestId, this.options, this.uri);
 
         const subscribedMsg = this.messages
