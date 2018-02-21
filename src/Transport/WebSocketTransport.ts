@@ -4,6 +4,7 @@ import {Subscriber} from 'rxjs/Subscriber';
 import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
 import {TransportInterface} from './TransportInterface';
+import WS = require('ws');
 
 // This is used for WebSockets in node - removed by webpack for bundling
 declare var require: any;
@@ -15,6 +16,8 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
     private socket: WebSocket = null;
     private openSubject = new Subject();
     private closeSubject = new Subject();
+    private resetKeepaliveSubject = new Subject();
+    private keepAliveTimer = 30000;
 
     constructor(private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json'], private autoOpen: boolean = true) {
         super();
@@ -53,16 +56,19 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
             let ws: any;
             if (typeof WebSocket === 'undefined') {
                 ws = new WebSocket2(this.url, this.protocols);
+                this.keepAlive(ws);
             } else {
                 ws = new WebSocket(this.url, this.protocols);
             }
 
             ws.onerror = (err: Error) => {
+                this.resetKeepaliveSubject.next(0);
                 this.socket = null;
                 this.output.error(err);
             };
 
             ws.onclose = (e: CloseEvent) => {
+                this.resetKeepaliveSubject.next(0);
                 this.socket = null;
                 this.closeSubject.next(e);
 
@@ -83,6 +89,23 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
         } catch (ex) {
             this.output.error(ex);
         }
+    }
+
+    private keepAlive(ws: WS) {
+
+        this.resetKeepaliveSubject.next(0);
+
+        Observable.fromEvent(ws, 'pong')
+            .startWith(0)
+            .switchMapTo(Observable.timer(this.keepAliveTimer)
+                .do(() => ws.ping())
+                .delay(2000)
+            )
+            .takeUntil(this.resetKeepaliveSubject)
+            .subscribe(() => {
+                console.log('Terminating because we have received a pong back from the server');
+                ws.terminate()
+            });
     }
 
     public next(msg: any): void {
