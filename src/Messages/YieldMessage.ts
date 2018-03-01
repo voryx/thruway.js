@@ -7,17 +7,17 @@ export class YieldMessage implements IMessage, IRequestMessage {
 
     constructor(private _requestId: number,
                 private _options: Object,
-                private _args: Array<any> = [],
-                private _argskw: Object = {}) {
+                private _args?: Array<any>,
+                private _argskw?: Object) {
     }
 
     public wampifiedMsg(): any[] {
         const r = [YieldMessage.MSG_YIELD, this._requestId, this._options];
-        if (Object.keys(this._argskw).length !== 0) {
+        if (this._argskw && Object.keys(this._argskw).length !== 0) {
             r.push(this._args, this._argskw);
             return r;
         }
-        if (this._args.length !== 0) {
+        if (this._args && this._args.length !== 0) {
             r.push(this._args);
         }
         return r;

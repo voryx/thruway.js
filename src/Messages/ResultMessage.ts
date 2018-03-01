@@ -7,17 +7,17 @@ export class ResultMessage implements IMessage, IRequestMessage {
 
     constructor(private _requestId: number,
                 private _details: Object,
-                private _args: Array<any> = [],
-                private _argskw: Object = {}) {
+                private _args?: Array<any>,
+                private _argskw?: Object) {
     }
 
     public wampifiedMsg() {
         const r = [ResultMessage.MSG_RESULT, this._requestId, this._details];
-        if (Object.keys(this._argskw).length !== 0) {
+        if (this._argskw && Object.keys(this._argskw).length !== 0) {
             r.push(this._args, this._argskw);
             return r;
         }
-        if (this._args.length !== 0) {
+        if (this._args && this._args.length !== 0) {
             r.push(this._args);
         }
         return r;

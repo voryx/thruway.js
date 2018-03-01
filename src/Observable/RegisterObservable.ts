@@ -122,11 +122,11 @@ export class RegisterObservable<T> extends Observable<T> {
                     if (!!this.options.progress === false) {
                         returnObs = resultObs
                             .take(1)
-                            .map((value: any) => [value, msg, this.options]);
+                            .map((value: any) => new YieldMessage(msg.requestId, {}, [value]));
                     } else {
                         returnObs = resultObs
-                            .map((value: any) => [value, msg, this.options])
-                            .concat(Observable.of([null, msg, {progress: false}], this.scheduler));
+                            .map((value: any) => new YieldMessage(msg.requestId, {progress: true}, [value]))
+                            .concat(Observable.of(new YieldMessage(msg.requestId, {})));
                     }
 
                     const interruptMsg = this.messages
@@ -146,11 +146,6 @@ export class RegisterObservable<T> extends Observable<T> {
                         });
                 }
             )
-            .map((args: any) => {
-                const [value, invocationMsg, options] = args;
-
-                return new YieldMessage(invocationMsg.requestId, options, [value]);
-            })
             .subscribe(this.webSocket);
 
         const invocationErrorsSubscription = this.invocationErrors

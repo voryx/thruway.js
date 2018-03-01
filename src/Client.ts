@@ -120,7 +120,7 @@ export class Client {
 
                 return attempts
                     .flatMap((ex) => {
-                        console.error(ex);
+                        console.error(ex.message);
                         console.log('Reconnecting');
                         const delay = Math.min(maxRetryDelay, Math.pow(retryDelayGrowth, ++this.currentRetryCount) + initialRetryDelay);
                         return Observable.timer(Math.floor(delay));

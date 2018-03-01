@@ -36,7 +36,7 @@ export abstract class CreateMessage {
             case InvocationMessage.MSG_INVOCATION:
                 return new InvocationMessage(data[1], data[2], data[3], data[4] || [], data[5] || {});
             case ResultMessage.MSG_RESULT:
-                return new ResultMessage(data[1], data[2], data[3] || [], data[4] || {});
+                return new ResultMessage(data[1], data[2], data[3], data[4]);
             case ChallengeMessage.MSG_CHALLENGE:
                 return new ChallengeMessage(data[1], data[2]);
             case ErrorMessage.MSG_ERROR:

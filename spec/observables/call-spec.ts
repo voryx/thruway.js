@@ -303,4 +303,131 @@ describe('CallObservable', () => {
             [0, [48, 12345, {}, 'testing.uri2']], // CallMessage
         ], wampMessages);
     });
+
+    it('should emit multiple values when progressive and last result has progress set to false', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const r4 = new ResultMessage(null, {progress: false}, [], {});
+
+        const messages = hot('--w-abcd|', {w: w, a: r1, b: r2, c: r3, d: r4});
+        const subscriptions = '^------!';
+        const expected = '----abc(d|)';
+
+        const webSocket = new Subject();
+        webSocket.subscribe((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+        });
+
+        const call = new CallObservable('testing.uri', messages, webSocket, [], {}, {receive_progress: true});
+
+        expectObservable(call).toBe(expected, {a: r1, b: r2, c: r3, d: r4});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+    it('should emit multiple values including last value, when progressive and last result has no progress option but has a value', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const r4 = new ResultMessage(null, {}, ['testing4'], {});
+
+        const messages = hot('--w-abcd|', {w: w, a: r1, b: r2, c: r3, d: r4});
+        const subscriptions = '^------!';
+        const expected = '----abc(d|)';
+
+        const webSocket = new Subject();
+        webSocket.subscribe((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+        });
+
+        const call = new CallObservable('testing.uri', messages, webSocket, [], {}, {receive_progress: true});
+
+        expectObservable(call).toBe(expected, {a: r1, b: r2, c: r3, d: r4});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+    it('should emit multiple values including last value, when progressive and last result has no progress option but has empty array value', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const r4 = new ResultMessage(null, {}, [], {});
+
+        const messages = hot('--w-abcd|', {w: w, a: r1, b: r2, c: r3, d: r4});
+        const subscriptions = '^------!';
+        const expected = '----abc(d|)';
+
+        const webSocket = new Subject();
+        webSocket.subscribe((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+        });
+
+        const call = new CallObservable('testing.uri', messages, webSocket, [], {}, {receive_progress: true});
+
+        expectObservable(call).toBe(expected, {a: r1, b: r2, c: r3, d: r4});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+    it('should emit multiple values when progressive and last result has no value', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const r4 = new ResultMessage(null, {});
+
+        const messages = hot('--w-abcd|', {w: w, a: r1, b: r2, c: r3, d: r4});
+        const subscriptions = '^------!';
+        const expected = '----abc|';
+
+        const webSocket = new Subject();
+        webSocket.subscribe((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+        });
+
+        const call = new CallObservable('testing.uri', messages, webSocket, [], {}, {receive_progress: true});
+
+        expectObservable(call).toBe(expected, {a: r1, b: r2, c: r3});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+
+    it('should ignore keepalives when progressive', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true});
+        const r2 = new ResultMessage(null, {progress: true});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const r4 = new ResultMessage(null, {});
+
+        const messages = hot('--w-abcd|', {w: w, a: r1, b: r2, c: r3, d: r4});
+        const subscriptions = '^------!';
+        const expected = '------c|';
+
+        const webSocket = new Subject();
+        webSocket.subscribe((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+        });
+
+        const call = new CallObservable('testing.uri', messages, webSocket, [], {}, {receive_progress: true});
+
+        expectObservable(call).toBe(expected, {c: r3});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
 });

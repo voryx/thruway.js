@@ -42,6 +42,7 @@ export class CallObservable<ResultMsg> extends Observable<any> {
         const msg = this.messages
             .do(null, () => this.completed = true)
             .filter((m: IMessage) => m instanceof ResultMessage && m.requestId === requestId)
+            .filter((m: ResultMessage) => (!!m.args || !!m.argskw) || !m.details.progress)
             .flatMap((m: ResultMessage, index: number) => {
                 // If there is no progress, we need to fake it so that the observable completes
                 if (index === 0 && !!m.details.progress === false) {
@@ -54,6 +55,18 @@ export class CallObservable<ResultMsg> extends Observable<any> {
                         new ResultMessage(m.requestId, {progress: false})
                     ], this.scheduler)
                 }
+
+                if (!!m.details.progress === false && (m.args || m.argskw)) {
+                    const details = m.details;
+
+                    details.progress = true;
+
+                    return Observable.from([
+                        new ResultMessage(m.requestId, details, m.args, m.argskw),
+                        new ResultMessage(m.requestId, {progress: false})
+                    ], this.scheduler)
+                }
+
                 return Observable.of(m);
             })
             .publish().refCount();
