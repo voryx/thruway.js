@@ -99,7 +99,7 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
             .startWith(0)
             .switchMapTo(Observable.timer(this.keepAliveTimer)
                 .do(() => ws.ping())
-                .delay(2000)
+                .delay(20000)
             )
             .takeUntil(this.resetKeepaliveSubject)
             .subscribe(() => {
