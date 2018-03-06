@@ -102,8 +102,12 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
                 .delay(20000)
             )
             .takeUntil(this.resetKeepaliveSubject)
+            .catch(e => {
+                console.log(e.message);
+                return Observable.of();
+            })
             .subscribe(() => {
-                console.log('Terminating because we have received a pong back from the server');
+                console.log('Terminating because we have not received a pong back from the server');
                 ws.terminate()
             });
     }
