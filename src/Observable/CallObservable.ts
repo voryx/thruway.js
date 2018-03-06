@@ -44,19 +44,9 @@ export class CallObservable<ResultMsg> extends Observable<any> {
             .filter((m: IMessage) => m instanceof ResultMessage && m.requestId === requestId)
             .filter((m: ResultMessage) => (!!m.args || !!m.argskw) || !m.details.progress)
             .flatMap((m: ResultMessage, index: number) => {
-                // If there is no progress, we need to fake it so that the observable completes
-                if (index === 0 && !!m.details.progress === false) {
-                    const details = m.details;
-
-                    details.progress = true;
-
-                    return Observable.from([
-                        new ResultMessage(m.requestId, details, m.args, m.argskw),
-                        new ResultMessage(m.requestId, {progress: false})
-                    ], this.scheduler)
-                }
-
-                if (!!m.details.progress === false && (m.args || m.argskw)) {
+                // If there is no progress and it's the first message or there are no args, add a fake progress to
+                // the end so that the observable completes
+                if (!!m.details.progress === false && (index === 0 || (m.args || m.argskw))) {
                     const details = m.details;
 
                     details.progress = true;
