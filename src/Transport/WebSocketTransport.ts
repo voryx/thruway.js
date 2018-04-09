@@ -73,7 +73,8 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
                 this.closeSubject.next(e);
 
                 // Handle all closes as errors
-                this.output.error(e);
+                const ex = new Error(e.reason || 'The WebSocket connection was closed');
+                this.output.error(ex);
             };
 
             ws.onopen = (e: Event) => {
