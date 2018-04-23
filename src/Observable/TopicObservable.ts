@@ -44,7 +44,7 @@ export class TopicObservable<EventMsg> extends Observable<any> {
     public _subscribe(subscriber: Subscriber<any>): Subscription | Function | void {
 
         const requestId = Utils.uniqueId();
-        const subscriptionId: number = null;
+        let subscriptionId: number = null;
         const subscribeMsg = new SubscribeMessage(requestId, this.options, this.uri);
 
         const subscribedMsg = this.messages
@@ -63,8 +63,8 @@ export class TopicObservable<EventMsg> extends Observable<any> {
         this.websocket.next(subscribeMsg);
 
         const sub = subscribedMsg
+            .do((m: SubscribedMessage) => subscriptionId = m.subscriptionId)
             .flatMap((m: SubscribedMessage) => {
-
                 const sid = m.subscriptionId;
 
                 return this.messages

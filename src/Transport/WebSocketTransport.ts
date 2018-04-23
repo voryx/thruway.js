@@ -38,9 +38,11 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
         subscription.add(() => {
 
             if (this.socket) {
-                console.log('closing socket');
-                this.socket.close();
-                this.socket = null;
+                setTimeout(() => {
+                    console.log('closing socket');
+                    this.socket.close();
+                    this.socket = null;
+                }, 100);
             }
         });
 
