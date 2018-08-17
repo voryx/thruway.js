@@ -23,6 +23,7 @@ export interface RegisterOptions {
     disclose_caller?: boolean;
     force_reregister?: boolean;
     replace_orphaned_sessions?: boolean | 'yes' | 'no'; // Thruway equivalent of 'force_reregister'
+    expanded?: boolean
 
     [propName: string]: any;
 }
@@ -37,7 +38,6 @@ export class RegisterObservable<T> extends Observable<T> {
                 messages: Observable<IMessage>,
                 private webSocket: Subject<any>,
                 private options: RegisterOptions = {},
-                private extended?: boolean,
                 invocationErrors?: Subject<WampInvocationException>,
                 private scheduler: Scheduler = null) {
         super();
@@ -104,7 +104,7 @@ export class RegisterObservable<T> extends Observable<T> {
             .flatMap((msg: InvocationMessage) => {
                     let result = null;
                     try {
-                        if (self.extended) {
+                        if (self.options.extended) {
                             result = self.callback(msg.args, msg.argskw, msg.details, msg);
                         } else {
                             result = self.callback.apply(null, msg.args);
