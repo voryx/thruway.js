@@ -13,6 +13,8 @@ import {Utils} from '../Common/Utils';
 import {Subject} from 'rxjs/Subject';
 
 export interface TopicOptions {
+    disclose_publisher?: boolean;
+
     [propName: string]: any;
 }
 
