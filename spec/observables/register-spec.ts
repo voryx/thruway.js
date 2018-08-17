@@ -352,7 +352,7 @@ describe('RegisterObservable', () => {
             recordWampMessage(msg);
         });
 
-        const register = new RegisterObservable('testing.uri', callableThrows, messages, webSocket, {}, null, null, global.rxTestScheduler);
+        const register = new RegisterObservable('testing.uri', callableThrows, messages, webSocket, {}, null, global.rxTestScheduler);
 
         expectObservable(register).toBe(expected, {d: registeredMsg});
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
@@ -383,7 +383,7 @@ describe('RegisterObservable', () => {
             recordWampMessage(msg);
         });
 
-        const register = new RegisterObservable('testing.uri', callableThrows, messages, webSocket, {}, null, null, global.rxTestScheduler);
+        const register = new RegisterObservable('testing.uri', callableThrows, messages, webSocket, {}, null, global.rxTestScheduler);
 
         expectObservable(register).toBe(expected, {d: registeredMsg});
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
@@ -413,7 +413,7 @@ describe('RegisterObservable', () => {
             recordWampMessage(msg);
         });
 
-        const register = new RegisterObservable('testing.uri', callableThrows, messages, webSocket, {}, null, null, global.rxTestScheduler);
+        const register = new RegisterObservable('testing.uri', callableThrows, messages, webSocket, {}, null, global.rxTestScheduler);
 
         expectObservable(register).toBe(expected, null, new WampErrorException('registration.error.uri'));
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
@@ -443,7 +443,7 @@ describe('RegisterObservable', () => {
            return Observable.throw(new WampErrorException('my.custom.error', [1], {someKw: 'someArg'}));
         };
 
-        const register = new RegisterObservable('testing.uri', errorCallable, messages, webSocket, {}, null, null, global.rxTestScheduler);
+        const register = new RegisterObservable('testing.uri', errorCallable, messages, webSocket, {}, null, global.rxTestScheduler);
 
         expectObservable(register).toBe(expected, {d: registeredMsg});
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
@@ -475,7 +475,7 @@ describe('RegisterObservable', () => {
             throw new WampErrorException('my.custom.error', [1], {someKw: 'someArg'});
         };
 
-        const register = new RegisterObservable('testing.uri', errorCallable, messages, webSocket, {}, null, null, global.rxTestScheduler);
+        const register = new RegisterObservable('testing.uri', errorCallable, messages, webSocket, {}, null, global.rxTestScheduler);
 
         expectObservable(register).toBe(expected, {d: registeredMsg});
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
@@ -510,7 +510,7 @@ describe('RegisterObservable', () => {
             return Observable.never().finally(() => { disposedInner = true; });
         };
 
-        const register = new RegisterObservable('testing.uri', neverCallable, messages, webSocket, {}, null, null, global.rxTestScheduler);
+        const register = new RegisterObservable('testing.uri', neverCallable, messages, webSocket, {}, null, global.rxTestScheduler);
 
         expectObservable(register).toBe(expected, {d: registeredMsg});
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
