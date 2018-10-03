@@ -9,12 +9,9 @@ import {RegisterMessage} from '../Messages/RegisterMessage';
 import {ErrorMessage} from '../Messages/ErrorMessage';
 import {YieldMessage} from '../Messages/YieldMessage';
 import {IMessage} from '../Messages/Message';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
-import {Subscriber} from 'rxjs/Subscriber';
 import {Utils} from '../Common/Utils';
-import {Subject} from 'rxjs/Subject';
-import {Scheduler} from 'rxjs/Scheduler';
+import {Scheduler,Subject,Subscriber,Subscription,Observable, merge, of, throwError, empty} from "rxjs";
+import {filter, share, take, tap, mergeMap, takeUntil, mergeMapTo, map} from "rxjs/operators";
 
 export interface RegisterOptions {
     progress?: boolean;
@@ -42,7 +39,7 @@ export class RegisterObservable<T> extends Observable<T> {
                 private scheduler: Scheduler = null) {
         super();
 
-        this.messages = messages.share();
+        this.messages = messages.pipe(share());
         this.invocationErrors = invocationErrors || new Subject();
     }
 
@@ -55,29 +52,29 @@ export class RegisterObservable<T> extends Observable<T> {
         let registrationId: number = null;
         let completed = false;
 
-        const unregisteredMsg = this.messages
-            .filter((msg: IMessage) => msg instanceof UnregisteredMessage && msg.requestId === requestId)
-            .take(1)
-            .share();
+        const unregisteredMsg = this.messages.pipe(
+            filter((msg: IMessage) => msg instanceof UnregisteredMessage && msg.requestId === requestId)
+            ,take(1)
+            ,share());
 
-        const registeredMsg = this.messages
-            .filter((msg: IMessage) => msg instanceof RegisteredMessage && msg.requestId === requestId)
-            .do((m: RegisteredMessage) => {
+        const registeredMsg = this.messages.pipe(
+            filter((msg: IMessage) => msg instanceof RegisteredMessage && msg.requestId === requestId)
+            ,tap((m: RegisteredMessage) => {
                 registrationId = m.registrationId;
             })
-            .take(1)
-            .share();
+            ,take(1)
+            ,share());
 
-        const invocationMessage = registeredMsg.flatMap((m: RegisteredMessage) => {
-            return this.messages.filter((msg: IMessage) => msg instanceof InvocationMessage && msg.registrationId === m.registrationId);
-        });
+        const invocationMessage = registeredMsg.pipe(mergeMap((m: RegisteredMessage) => {
+            return this.messages.pipe(filter((msg: IMessage) => msg instanceof InvocationMessage && msg.registrationId === m.registrationId));
+        }));
 
         // Transform WAMP error messages into an error observable
-        const error = this.messages
-            .filter((msg: IMessage) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
-            .flatMap((msg: ErrorMessage) => Observable.throw(new WampErrorException(msg.errorURI, msg.args), this.scheduler))
-            .takeUntil(registeredMsg)
-            .take(1);
+        const error = this.messages.pipe(
+            filter((msg: IMessage) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
+            ,mergeMap((msg: ErrorMessage) => throwError(new WampErrorException(msg.errorURI, msg.args), this.scheduler))
+            ,takeUntil(registeredMsg)
+            ,take(1));
 
         const unregister = function () {
             if (!registrationId || completed) {
@@ -89,8 +86,7 @@ export class RegisterObservable<T> extends Observable<T> {
 
         this.webSocket.next(registerMsg);
 
-        const registerSubscription = Observable
-            .merge(registeredMsg, unregisteredMsg, error)
+        const registerSubscription = merge(registeredMsg, unregisteredMsg, error)
             .subscribe(
                 (v) => subscriber.next(v),
                 (e) => subscriber.error(e),
@@ -101,7 +97,7 @@ export class RegisterObservable<T> extends Observable<T> {
                 });
 
         const invocationSubscription = invocationMessage
-            .flatMap((msg: InvocationMessage) => {
+            .pipe(mergeMap((msg: InvocationMessage) => {
                     let result = null;
                     try {
                         if (self.options.extended) {
@@ -110,13 +106,13 @@ export class RegisterObservable<T> extends Observable<T> {
                             result = self.callback.apply(null, msg.args);
                         }
                     } catch (e) {
-                        result = Observable.throw(e);
+                        result = throwError(e);
                     }
 
                     // There are some node issues when using instanceof Observable
                     const resultObs = typeof result.subscribe === 'function'
                         ? result.defaultIfEmpty(null)
-                        : Observable.of(result, this.scheduler);
+                        : of(result, this.scheduler);
 
                     let returnObs;
                     if (!!this.options.progress === false) {
@@ -126,13 +122,12 @@ export class RegisterObservable<T> extends Observable<T> {
                     } else {
                         returnObs = resultObs
                             .map((value: any) => new YieldMessage(msg.requestId, {progress: true}, [value]))
-                            .concat(Observable.of(new YieldMessage(msg.requestId, {})));
+                            .concat(of(new YieldMessage(msg.requestId, {})));
                     }
 
-                    const interruptMsg = this.messages
-                        .filter((m: IMessage) => m instanceof InterruptMessage && m.requestId === msg.requestId)
-                        .take(1)
-                        .flatMapTo(Observable.throw(new WampInvocationException(msg, 'wamp.error.canceled')));
+                    const interruptMsg = this.messages.pipe(filter((m: IMessage) => m instanceof InterruptMessage && m.requestId === msg.requestId)
+                        ,take(1)
+                        ,mergeMapTo(throwError(new WampInvocationException(msg, 'wamp.error.canceled'))));
 
                     return returnObs.merge(interruptMsg)
                         .takeUntil(unregisteredMsg)
@@ -142,14 +137,13 @@ export class RegisterObservable<T> extends Observable<T> {
                                 : new WampInvocationException(msg);
 
                             this.invocationErrors.next(invocationError);
-                            return Observable.empty(this.scheduler);
+                            return empty(this.scheduler);
                         });
                 }
-            )
+            ))
             .subscribe(this.webSocket);
 
-        const invocationErrorsSubscription = this.invocationErrors
-            .map((e: WampInvocationException) => e.errorMessage())
+        const invocationErrorsSubscription = this.invocationErrors.pipe(map((e: WampInvocationException) => e.errorMessage()))
             .subscribe(this.webSocket);
 
         disposable.add(invocationErrorsSubscription);

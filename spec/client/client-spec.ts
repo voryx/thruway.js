@@ -1,4 +1,3 @@
-import {Subject} from 'rxjs/Subject';
 import {hot, expectObservable, expectSubscriptions, cold} from '../helpers/marble-testing';
 import {assertWampMessages, recordWampMessage, wampMessages} from '../helpers/wamp-testing';
 import {CallMessage} from '../../src/Messages/CallMessage';
@@ -7,7 +6,7 @@ import {WelcomeMessage} from '../../src/Messages/WelcomeMessage';
 import {ErrorMessage} from '../../src/Messages/ErrorMessage';
 import {WampErrorException} from '../../src/Common/WampErrorException';
 import {xit as it} from '../helpers/test-helpers';
-import {Subscriber} from 'rxjs/Subscriber';
+import {Subscriber,Subject} from 'rxjs';
 import {Client} from '../../src/Client';
 
 /** @test {client} */

@@ -1,9 +1,7 @@
-import {Subscription} from 'rxjs/Subscription';
-import {Observable} from 'rxjs/Observable';
-import {Subscriber} from 'rxjs/Subscriber';
-import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
 import {TransportInterface} from './TransportInterface';
+import {fromEvent, Observable, of, Subject, Subscriber, Subscription, timer} from "rxjs";
+import {catchError, delay, startWith, switchMapTo, takeUntil, tap} from "rxjs/operators";
 import WS = require('ws');
 
 // This is used for WebSockets in node - removed by webpack for bundling
@@ -19,8 +17,16 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
     private resetKeepaliveSubject = new Subject();
     private keepAliveTimer = 30000;
 
-    constructor(private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json'], private autoOpen: boolean = true) {
+    constructor(private url: string = 'ws://127.0.0.1:8080/ws', private protocols: string | string[] = ['wamp.2.json'], private autoOpen: boolean = true) {
         super();
+    }
+
+    get onOpen(): Observable<any> {
+        return this.openSubject.asObservable();
+    }
+
+    get onClose(): Observable<any> {
+        return this.closeSubject.asObservable();
     }
 
     public _subscribe(subscriber: Subscriber<any>): Subscription {
@@ -46,6 +52,28 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
         });
 
         return subscription;
+    }
+
+    public next(msg: any): void {
+        if (!this.socket) {
+            return;
+        }
+
+        this.socket.send(JSON.stringify(msg.wampifiedMsg()));
+    }
+
+    public unsubscribe(): void {
+        super.unsubscribe();
+
+        if (this.socket) {
+            this.socket.close();
+            this.socket = null;
+        }
+    }
+
+    public open() {
+        this.connectSocket();
+        this.autoOpen = true;
     }
 
     private connectSocket(): void {
@@ -97,50 +125,21 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
 
         this.resetKeepaliveSubject.next(0);
 
-        Observable.fromEvent(ws, 'pong')
-            .startWith(0)
-            .switchMapTo(Observable.timer(this.keepAliveTimer)
-                .do(() => ws.ping())
-                .delay(20000)
+        fromEvent(ws, 'pong').pipe(
+            startWith(0)
+            , switchMapTo(timer(this.keepAliveTimer).pipe(
+                tap(() => ws.ping())
+                , delay(20000)
+                )
             )
-            .takeUntil(this.resetKeepaliveSubject)
-            .catch(e => {
+            , takeUntil(this.resetKeepaliveSubject),
+            catchError((e: any) => {
                 console.log(e.message);
-                return Observable.of();
-            })
+                return of();
+            }))
             .subscribe(() => {
                 console.log('Terminating because we have not received a pong back from the server');
                 ws.terminate()
             });
-    }
-
-    public next(msg: any): void {
-        if (!this.socket) {
-            return;
-        }
-
-        this.socket.send(JSON.stringify(msg.wampifiedMsg()));
-    }
-
-    public unsubscribe(): void {
-        super.unsubscribe();
-
-        if (this.socket) {
-            this.socket.close();
-            this.socket = null;
-        }
-    }
-
-    get onOpen(): Observable<any> {
-        return this.openSubject.asObservable();
-    }
-
-    get onClose(): Observable<any> {
-        return this.closeSubject.asObservable();
-    }
-
-    public open() {
-        this.connectSocket();
-        this.autoOpen = true;
     }
 }

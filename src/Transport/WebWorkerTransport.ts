@@ -1,9 +1,7 @@
-import {Subscription} from 'rxjs/Subscription';
-import {Observable} from 'rxjs/Observable';
-import {Subscriber} from 'rxjs/Subscriber';
-import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
 import {TransportInterface} from './TransportInterface';
+import {Subject,Subscriber,Observable,Subscription} from "rxjs";
+import {filter} from "rxjs/operators";
 
 export class WebWorkerTransport<Message> extends Subject<any> implements TransportInterface {
 
@@ -12,7 +10,7 @@ export class WebWorkerTransport<Message> extends Subject<any> implements Transpo
     private close = new Subject();
     private worker: Worker;
 
-    constructor(private workerName: string = 'worker.js', private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json']) {
+    constructor(private workerName: string = 'worker.js', private url: string = 'ws://127.0.0.1:8080/ws', private protocols: string | string[] = ['wamp.2.json']) {
         super();
     }
 
@@ -32,16 +30,15 @@ export class WebWorkerTransport<Message> extends Subject<any> implements Transpo
             messages.next(e);
         };
 
-        const open = messages
-            .filter((e: MessageEvent) => e.data.type === 'open')
+        const open = messages.pipe(filter((e: MessageEvent) => e.data.type === 'open'))
             .subscribe(e => {
                 console.log('socket opened');
                 this.worker = ww;
                 this.open.next(e);
             });
 
-        const close = messages
-            .filter((e: MessageEvent) => e.data.type === 'close')
+        const close = messages.pipe(
+            filter((e: MessageEvent) => e.data.type === 'close'))
             .subscribe(e => {
                 this.worker = null;
                 this.close.next(e);
@@ -50,16 +47,16 @@ export class WebWorkerTransport<Message> extends Subject<any> implements Transpo
                 this.output.error(e);
             });
 
-        const message = messages
-            .filter((e: MessageEvent) => e.data.type === 'message')
+        const message = messages.pipe(
+            filter((e: MessageEvent) => e.data.type === 'message'))
             .subscribe((e: MessageEvent) => {
                 console.log(e.data.payload);
                 const d = e.data.payload;
                 this.output.next(CreateMessage.fromArray(d));
             });
 
-        const error = messages
-            .filter((e: MessageEvent) => e.data.type === 'error')
+        const error = messages.pipe(
+            filter((e: MessageEvent) => e.data.type === 'error'))
             .subscribe(e => {
                 this.worker = null;
                 this.output.error(e);

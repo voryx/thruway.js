@@ -23,8 +23,8 @@
   },
   "homepage": "https://github.com/voryx/Thruway.js#readme",
   "peerDependencies": {
-    "rxjs": "^5.4.0",
-    "ws": "^2.2.1"
+    "rxjs": "^6.3.3",
+    "ws": "^6.0.0"
   },
   "browser": {
     "ws": false
@@ -39,32 +39,33 @@
     "test_mocha": "mocha spec-js/spec/*",
     "test": "npm-run-all clean_spec build_spec test_mocha clean_spec"
   },
-  "devDependencies": {
-    "@types/es6-shim": "^0.31.32",
-    "@types/escape-string-regexp": "^0.0.30",
-    "@types/lodash": "^4.14.62",
-    "@types/mocha": "^2.2.32",
-    "@types/node": "6.0.38",
-    "@types/sinon": "^1.16.31",
-    "@types/sinon-chai": "^2.7.27",
-    "@types/ws": "0.0.30",
+  "dependencies": {
+    "@types/es6-shim": "^0.31.37",
+    "@types/escape-string-regexp": "^1.0.0",
+    "@types/lodash": "^4.14.116",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "10.11.3",
+    "@types/sinon": "^5.0.2",
+    "@types/sinon-chai": "^3.2.0",
+    "@types/ws": "6.0.1",
     "browserfy": "^1.0.0",
-    "chai": "^3.5.0",
+    "chai": "^4.2.0",
     "es6-shim": "^0.35.1",
     "escape-string-regexp": "^1.0.5",
-    "lodash": "^4.14.62",
-    "mocha": "^3.0.2",
-    "npm-run-all": "^3.1.0",
-    "promise": "^7.1.1",
-    "protractor": "^3.1.1",
-    "rxjs": "^5.0.0",
-    "shx": "^0.1.4",
-    "sinon": "^2.0.0-pre",
-    "sinon-chai": "^2.8.0",
-    "ts-loader": "^0.8.2",
-    "ts-node": "^3.3.0",
-    "tslint": "^5.2.0",
-    "typescript": "<=2.4.0",
-    "webpack": "^2.0"
+    "lodash": "^4.17.11",
+    "mocha": "^5.2.0",
+    "npm-run-all": "^4.1.3",
+    "promise": "^8.0.2",
+    "protractor": "^5.4.1",
+    "rxjs": "^6.3.3",
+    "shx": "^0.3.2",
+    "sinon": "^6.3.4",
+    "sinon-chai": "^3.2.0",
+    "ts-loader": "^5.2.1",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "2.9.2",
+    "webpack": "^4.20.2",
+    "ws": "^6.0.0"
   }
 }

@@ -1,6 +1,7 @@
-declare const global, require, it;
+import {TestScheduler} from "rxjs/testing";
 
-import {TestScheduler} from 'rxjs/Rx';
+declare const global, it;
+
 import {clearWampMessages} from './wamp-testing';
 import {expect} from 'chai';
 
