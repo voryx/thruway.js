@@ -1,4 +1,4 @@
-import {Subject} from 'rxjs/Subject';
+import {Subject} from 'rxjs';
 import {hot, expectObservable, expectSubscriptions, cold} from '../helpers/marble-testing';
 import {CallObservable} from '../../src/Observable/CallObservable';
 import {assertWampMessages, recordWampMessage, wampMessages} from '../helpers/wamp-testing';

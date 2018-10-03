@@ -1,5 +1,6 @@
+import {finalize} from "rxjs/operators";
+
 declare const global: any;
-import {Subject} from 'rxjs/Subject';
 import {hot, expectObservable, expectSubscriptions, cold} from '../helpers/marble-testing';
 import {assertWampMessages, recordWampMessage, wampMessages} from '../helpers/wamp-testing';
 import {WelcomeMessage} from '../../src/Messages/WelcomeMessage';
@@ -11,7 +12,7 @@ import {RegisteredMessage} from '../../src/Messages/RegisteredMessage';
 import {RegisterMessage} from '../../src/Messages/RegisterMessage';
 import {InvocationMessage} from '../../src/Messages/InvocationMessage';
 import {InterruptMessage} from '../../src/Messages/InterruptMessage';
-import {Observable} from 'rxjs/Observable';
+import {empty, from, never, Observable, of, Subject} from 'rxjs';
 import {expect} from 'chai';
 
 function callable(first = 0, second = 0) {
@@ -19,15 +20,15 @@ function callable(first = 0, second = 0) {
 }
 
 function callableObs(first = 0, second = 0) {
-    return Observable.of(+first + +second);
+    return of(+first + +second);
 }
 
 function callableManyObs(first = 0, second = 0) {
-    return Observable.from([first, second]);
+    return from([first, second]);
 }
 
 function callableEmpty(first = 0, second = 0) {
-    return Observable.empty();
+    return empty();
 }
 
 function callableThrows(first = 0, second = 0) {
@@ -507,7 +508,7 @@ describe('RegisterObservable', () => {
         let disposedInner = false;
 
         const neverCallable = () => {
-            return Observable.never().finally(() => { disposedInner = true; });
+            return never().pipe(finalize(() => { disposedInner = true; }));
         };
 
         const register = new RegisterObservable('testing.uri', neverCallable, messages, webSocket, {}, null, global.rxTestScheduler);

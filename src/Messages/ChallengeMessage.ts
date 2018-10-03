@@ -4,7 +4,7 @@ export class ChallengeMessage implements IMessage {
 
     static MSG_CHALLENGE = 4;
 
-    constructor(private _authMethod: string, private _extra: Object) {
+    constructor(private _authMethod: string, private _extra: Object /* TODO: & { challenge: string }*/) {
     }
 
     public wampifiedMsg() {

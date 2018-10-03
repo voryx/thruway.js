@@ -6,11 +6,9 @@ import {SubscribeMessage} from '../Messages/SubscribeMessage';
 import {ErrorMessage} from '../Messages/ErrorMessage';
 import {EventMessage} from '../Messages/EventMessage';
 import {IMessage} from '../Messages/Message';
-import {Subscription} from 'rxjs/Subscription';
-import {Observable} from 'rxjs/Observable';
-import {Subscriber} from 'rxjs/Subscriber';
 import {Utils} from '../Common/Utils';
-import {Subject} from 'rxjs/Subject';
+import {Observable, Subject, Subscriber, Subscription} from "rxjs";
+import {filter, merge, mergeMap, take, takeUntil, tap} from 'rxjs/operators';
 
 export interface TopicOptions {
     disclose_publisher?: boolean;
@@ -49,31 +47,30 @@ export class TopicObservable<EventMsg> extends Observable<any> {
         let subscriptionId: number = null;
         const subscribeMsg = new SubscribeMessage(requestId, this.options, this.uri);
 
-        const subscribedMsg = this.messages
-            .filter((msg: IMessage) => msg instanceof SubscribedMessage && msg.requestId === requestId)
-            .take(1);
+        const subscribedMsg = this.messages.pipe(
+            filter((msg: IMessage) => msg instanceof SubscribedMessage && msg.requestId === requestId)
+            , take(1));
 
-        const errorMsg = this.messages
-            .filter((msg: IMessage) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
-            .flatMap((msg: ErrorMessage) => Observable.throw(new WampErrorException(msg.errorURI, msg.args)))
-            .take(1);
+        const errorMsg = this.messages.pipe(
+            filter((msg: IMessage) => msg instanceof ErrorMessage && msg.errorRequestId === requestId)
+            , mergeMap((msg: ErrorMessage) => Observable.throw(new WampErrorException(msg.errorURI, msg.args)))
+            , take(1));
 
-        const unsubscribedMsg = this.messages
-            .filter((msg: IMessage) => msg instanceof UnsubscribedMessage && msg.requestId === requestId)
-            .take(1);
+        const unsubscribedMsg = this.messages.pipe(
+            filter((msg: IMessage) => msg instanceof UnsubscribedMessage && msg.requestId === requestId)
+            , take(1));
 
         this.websocket.next(subscribeMsg);
 
-        const sub = subscribedMsg
-            .do((m: SubscribedMessage) => subscriptionId = m.subscriptionId)
-            .flatMap((m: SubscribedMessage) => {
+        const sub = subscribedMsg.pipe(
+            tap((m: SubscribedMessage) => subscriptionId = m.subscriptionId)
+            , mergeMap((m: SubscribedMessage) => {
                 const sid = m.subscriptionId;
 
-                return this.messages
-                    .filter((msg: IMessage) => msg instanceof EventMessage && msg.subscriptionId === sid);
+                return this.messages.pipe(filter((msg: IMessage) => msg instanceof EventMessage && msg.subscriptionId === sid));
             })
-            .merge(errorMsg)
-            .takeUntil(unsubscribedMsg)
+            , merge(errorMsg)
+            , takeUntil(unsubscribedMsg))
             .subscribe(subscriber);
 
         const disposable = new Subscription();
