@@ -264,7 +264,7 @@ describe('Client', () => {
         const client = new Client(ws, 'realm1', {});
         const call = client.call('testing.uri');
 
-        expectObservable(call).toBe(expected, null, new WampErrorException('some.server.error'));
+        expectObservable(call).toBe(expected, null, new WampErrorException('some.server.error', [{uri: 'testing.uri'}]));
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
 
         assertWampMessages([

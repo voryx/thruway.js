@@ -69,6 +69,10 @@ export class CallObservable<ResultMsg> extends Observable<any> {
 
         const error = this.messages
             .filter((m: IMessage) => m instanceof ErrorMessage && m.errorRequestId === requestId)
+            .map((errMsg: ErrorMessage) => {
+                errMsg.args.push({uri: this.uri});
+                return errMsg;
+            })
             .do(() => this.completed = true)
             .takeUntil(msg.filter(m => !m.details.progress))
             .flatMap((m: ErrorMessage) => Observable.throw(new WampErrorException(m.errorURI, m.args), this.scheduler))

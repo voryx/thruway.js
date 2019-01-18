@@ -3,23 +3,26 @@ import {Observable} from 'rxjs/Observable';
 import {Subscriber} from 'rxjs/Subscriber';
 import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
-import {TransportInterface} from './TransportInterface';
 import WS = require('ws');
 
 // This is used for WebSockets in node - removed by webpack for bundling
 declare var require: any;
 const WebSocket2 = require('ws');
 
-export class WebSocketTransport<Message> extends Subject<any> implements TransportInterface {
+export class WebSocketTransport<M> extends Subject<M> {
 
     private output: Subject<any> = new Subject();
     private socket: WebSocket = null;
-    private openSubject = new Subject();
-    private closeSubject = new Subject();
     private resetKeepaliveSubject = new Subject();
     private keepAliveTimer = 30000;
 
-    constructor(private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json'], private autoOpen: boolean = true) {
+    constructor(
+        private url: string = 'ws://127.0.0.1:9090/',
+        private protocols: string | string[] = ['wamp.2.json'],
+        private openSubject = new Subject(),
+        private closeSubject = new Subject(),
+        private autoOpen: boolean = true
+    ) {
         super();
     }
 
@@ -129,14 +132,6 @@ export class WebSocketTransport<Message> extends Subject<any> implements Transpo
             this.socket.close();
             this.socket = null;
         }
-    }
-
-    get onOpen(): Observable<any> {
-        return this.openSubject.asObservable();
-    }
-
-    get onClose(): Observable<any> {
-        return this.closeSubject.asObservable();
     }
 
     public open() {

@@ -1,18 +1,20 @@
 import {Subscription} from 'rxjs/Subscription';
-import {Observable} from 'rxjs/Observable';
 import {Subscriber} from 'rxjs/Subscriber';
 import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
-import {TransportInterface} from './TransportInterface';
 
-export class WebWorkerTransport<Message> extends Subject<any> implements TransportInterface {
+export class WebWorkerTransport<Message> extends Subject<any> {
 
     private output: Subject<any> = new Subject();
-    private open = new Subject();
-    private close = new Subject();
     private worker: Worker;
 
-    constructor(private workerName: string = 'worker.js', private url: string = 'ws://127.0.0.1:9090/', private protocols: string | string[] = ['wamp.2.json']) {
+    constructor(
+        private workerName: string = 'worker.js',
+        private url: string = 'ws://127.0.0.1:9090/',
+        private protocols: string | string[] = ['wamp.2.json'],
+        private open = new Subject(),
+        private close = new Subject()
+    ) {
         super();
     }
 
@@ -99,13 +101,5 @@ export class WebWorkerTransport<Message> extends Subject<any> implements Transpo
         if (this.worker) {
             this.worker.postMessage({type: 'close'});
         }
-    }
-
-    get onOpen(): Observable<any> {
-        return this.open.asObservable();
-    }
-
-    get onClose(): Observable<any> {
-        return this.close.asObservable();
     }
 }

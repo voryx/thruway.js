@@ -247,7 +247,7 @@ describe('CallObservable', () => {
 
         const call = new CallObservable('testing.uri', messages, webSocket);
 
-        expectObservable(call).toBe(expected, null, new WampErrorException('some.server.error'));
+        expectObservable(call).toBe(expected, null, new WampErrorException('some.server.error', [{uri: 'testing.uri'}]));
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
 
         assertWampMessages([
