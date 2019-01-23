@@ -257,7 +257,7 @@ export class Client {
                             return Observable.of(e);
                         }
 
-                        return Observable.empty();
+                        return Observable.throw(e);
                     })
                     .delay(5000);
             });
