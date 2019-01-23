@@ -95,7 +95,7 @@ export class Client {
         };
     }
 
-    constructor(urlOrTransportOrObs: string | Subject<IMessage> | Observable<ThruwayConfig>, realm: string, options: WampOptions = {}) {
+    constructor(urlOrTransportOrObs: string | Subject<IMessage> | Observable<ThruwayConfig>, realm?: string, options: WampOptions = {}) {
 
         this.subscription = new Subscription();
         this._onClose = new Subject();
