@@ -19,7 +19,9 @@ import {IMessage} from './Messages/Message';
 import {Utils} from './Common/Utils';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {ReplaySubject, Scheduler, Subject} from 'rxjs';
+import {Subject} from 'rxjs/Subject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {async} from 'rxjs/scheduler/async';
 
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/take';
@@ -45,6 +47,8 @@ import 'rxjs/add/operator/exhaust';
 import 'rxjs/add/operator/defaultIfEmpty';
 import 'rxjs/add/operator/multicast';
 import 'rxjs/add/operator/shareReplay';
+import 'rxjs/add/operator/combineLatest';
+import 'rxjs/add/operator/partition';
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/from';
 import 'rxjs/add/observable/timer';
@@ -143,7 +147,7 @@ export class Client {
                 .map((msg: IMessage) => {
                     if (msg instanceof AbortMessage) {
                         // @todo create an exception for this
-                        Scheduler.async.schedule(() => {
+                        async.schedule(() => {
                             throw new Error('Connection ended because ' + msg.details);
                         }, 0);
                     }

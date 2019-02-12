@@ -15,6 +15,7 @@ import {Subscriber} from 'rxjs/Subscriber';
 import {Utils} from '../Common/Utils';
 import {Subject} from 'rxjs/Subject';
 import {Scheduler} from 'rxjs/Scheduler';
+import 'rxjs/add/operator/mergeMapTo';
 
 export interface RegisterOptions {
     progress?: boolean;

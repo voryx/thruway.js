@@ -4,6 +4,9 @@ import {Subscriber} from 'rxjs/Subscriber';
 import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
 import WS = require('ws');
+import 'rxjs/add/observable/fromEvent';
+import 'rxjs/add/operator/startWith';
+import 'rxjs/add/operator/catch';
 
 // This is used for WebSockets in node - removed by webpack for bundling
 declare var require: any;
