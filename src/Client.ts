@@ -27,8 +27,6 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/merge';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/share';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mapTo';
@@ -117,7 +115,7 @@ export class Client {
             transportData = Observable.of({transport, realm, options}) as any as Observable<TransportData>;
         } else {
             transportData = (urlOrTransportOrObs as Observable<ThruwayConfig>).map((config: ThruwayConfig) => {
-                const transport = new WebSocketTransport(config.url, ['wamp.2.json'], open, close);
+                const transport = new WebSocketTransport(config.url, ['wamp.2.json'], open, close, config.autoOpen);
                 return {transport, realm: config.realm, options: config.options}
             }) as any as Observable<TransportData>;
         }
@@ -329,6 +327,7 @@ export interface SessionData {
 }
 
 export interface ThruwayConfig {
+    autoOpen?: boolean
     url: string;
     realm: string;
     options: WampOptions;
