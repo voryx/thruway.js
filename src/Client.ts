@@ -57,6 +57,7 @@ import 'rxjs/add/observable/throw';
 export class Client {
     private subscription: Subscription;
     private _session: Observable<SessionData>;
+    private _transport: Subject<IMessage>;
     private _onClose: Subject<IMessage>;
     private challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string>;
     private currentRetryCount = 0;
@@ -108,15 +109,23 @@ export class Client {
         let transportData: Observable<TransportData>;
 
         if (typeof urlOrTransportOrObs === 'string') {
-            const transport = new WebSocketTransport(urlOrTransportOrObs, ['wamp.2.json'], open, close);
-            transportData = Observable.of({transport, realm, options}) as any as Observable<TransportData>;
+            this._transport = new WebSocketTransport(urlOrTransportOrObs, ['wamp.2.json'], open, close);
+            transportData = Observable.of({
+                transport: this._transport,
+                realm,
+                options
+            }) as any as Observable<TransportData>;
         } else if (urlOrTransportOrObs instanceof Subject) {
-            const transport = urlOrTransportOrObs as any as Subject<IMessage>;
-            transportData = Observable.of({transport, realm, options}) as any as Observable<TransportData>;
+            this._transport = urlOrTransportOrObs as any as Subject<IMessage>;
+            transportData = Observable.of({
+                transport: this._transport,
+                realm,
+                options
+            }) as any as Observable<TransportData>;
         } else {
             transportData = (urlOrTransportOrObs as Observable<ThruwayConfig>).map((config: ThruwayConfig) => {
-                const transport = new WebSocketTransport(config.url, ['wamp.2.json'], open, close, config.autoOpen);
-                return {transport, realm: config.realm, options: config.options}
+                this._transport = new WebSocketTransport(config.url, ['wamp.2.json'], open, close, config.autoOpen);
+                return {transport: this._transport, realm: config.realm, options: config.options || {}}
             }) as any as Observable<TransportData>;
         }
 
@@ -203,8 +212,8 @@ export class Client {
 
     public topic(uri: string, options?: TopicOptions): Observable<EventMessage> {
         return this._session
-            .takeUntil(this.onClose)
-            .switchMap(({transport, messages}: SessionData) => new TopicObservable(uri, options, messages, transport));
+            .switchMap(({transport, messages}: SessionData) => new TopicObservable(uri, options, messages, transport))
+            .takeUntil(this.onClose);
     }
 
     public publish<T>(uri: string, value: Observable<T> | any, options?: PublishOptions): Subscription {
@@ -213,13 +222,13 @@ export class Client {
 
         return this._session
             .takeUntil(completed)
-            .takeUntil(this.onClose)
             .map(({transport}: SessionData) => obs
                 .finally(() => completed.next(0))
                 .map(v => new PublishMessage(Utils.uniqueId(), options, uri, [v]))
                 .do(m => transport.next(m))
             )
             .exhaust()
+            .takeUntil(this.onClose)
             .subscribe();
     }
 
@@ -300,7 +309,12 @@ export class Client {
     };
 
     public close() {
-        this.subscription.unsubscribe();
+        this._onClose.next();
+    }
+
+    public open() {
+        // @todo we should be using a connectable observable for this
+        (this._transport as WebSocketTransport<IMessage>).open();
     }
 
     get onOpen(): Observable<SessionData> {
