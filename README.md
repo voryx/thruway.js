@@ -41,6 +41,12 @@ wamp.call('add.rpc', [1, 2])
 wamp.register('add.rpc', (a, b) => a + b).subscribe();
 ```
 
+If you need keyword arguments, you can set the `extended` option.
+
+```JS
+wamp.register('add.rpc', (args, argskw) => argskw.a + argskw.b, {extended: true}).subscribe();
+```
+
 ### Publish to topic
 
 ```JS
