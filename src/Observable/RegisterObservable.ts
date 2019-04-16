@@ -16,6 +16,7 @@ import {Utils} from '../Common/Utils';
 import {Subject} from 'rxjs/Subject';
 import {Scheduler} from 'rxjs/Scheduler';
 import 'rxjs/add/operator/mergeMapTo';
+import 'rxjs/add/operator/concat';
 
 export interface RegisterOptions {
     progress?: boolean;
@@ -115,8 +116,8 @@ export class RegisterObservable<T> extends Observable<T> {
                     }
 
                     // There are some node issues when using instanceof Observable
-                    const resultObs = typeof result.subscribe === 'function'
-                        ? result.defaultIfEmpty(null)
+                    const resultObs = (typeof result.subscribe === 'function' || typeof result.then === 'function')
+                        ? Observable.from(result).defaultIfEmpty(null)
                         : Observable.of(result, this.scheduler);
 
                     let returnObs;
@@ -142,6 +143,7 @@ export class RegisterObservable<T> extends Observable<T> {
                                 ? WampInvocationException.withInvocationMessageAndWampErrorException(msg, ex)
                                 : new WampInvocationException(msg);
 
+                            console.log(ex);
                             this.invocationErrors.next(invocationError);
                             return Observable.empty(this.scheduler);
                         });

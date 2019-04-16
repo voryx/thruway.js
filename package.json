@@ -1,6 +1,6 @@
 {
   "name": "thruway.js",
-  "version": "2.0.0-beta7",
+  "version": "2.0.0-beta8",
   "description": "WAMP RxJS Client",
   "main": "index.js",
   "repository": {
