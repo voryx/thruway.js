@@ -198,8 +198,8 @@ export class Client {
         });
 
         [welcomeMsg, remainingMsgs] = remainingMsgs
-            .merge(challenge)
-            .merge(abortError)
+            .merge(challenge.share())
+            .merge(abortError.share())
             .partition(msg => msg instanceof WelcomeMessage) as [Observable<WelcomeMessage>, Observable<IMessage>];
 
         this._session = welcomeMsg
