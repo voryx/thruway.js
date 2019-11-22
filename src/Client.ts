@@ -140,7 +140,6 @@ export class Client {
 
         const messages = transportData
             .switchMap(({transport, options: o, realm: r}) => transport
-                .finally(() => console.log('transport dead'))
                 .map((msg: IMessage) => {
                     if (msg instanceof AbortMessage) {
                         // @todo create an exception for this

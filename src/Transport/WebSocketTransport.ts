@@ -121,11 +121,11 @@ export class WebSocketTransport<M> extends Subject<M> {
     }
 
     public next(msg: any): void {
-        if (!this.socket) {
-            return;
-        }
+        // @todo should queue up messages here
 
-        this.socket.send(JSON.stringify(msg.wampifiedMsg()));
+        if (this.socket && this.socket.readyState === this.socket.OPEN) {
+            this.socket.send(JSON.stringify(msg.wampifiedMsg()));
+        }
     }
 
     public unsubscribe(): void {
