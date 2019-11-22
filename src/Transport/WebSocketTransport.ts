@@ -3,6 +3,7 @@ import {Observable} from 'rxjs/Observable';
 import {Subscriber} from 'rxjs/Subscriber';
 import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
+import {OpenMessage} from '../Messages/OpenMessage';
 import WS = require('ws');
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/startWith';
@@ -22,7 +23,6 @@ export class WebSocketTransport<M> extends Subject<M> {
     constructor(
         private url: string = 'ws://127.0.0.1:9090/',
         private protocols: string | string[] = ['wamp.2.json'],
-        private openSubject = new Subject(),
         private closeSubject = new Subject(),
         private autoOpen: boolean = true
     ) {
@@ -30,7 +30,6 @@ export class WebSocketTransport<M> extends Subject<M> {
     }
 
     public _subscribe(subscriber: Subscriber<any>): Subscription {
-
         this.output = new Subject();
 
         const subscription = new Subscription();
@@ -68,6 +67,8 @@ export class WebSocketTransport<M> extends Subject<M> {
                 ws = new WebSocket(this.url, this.protocols);
             }
 
+            this.socket = ws;
+
             ws.onerror = (err: Error) => {
                 this.resetKeepaliveSubject.next(0);
                 this.socket = null;
@@ -85,9 +86,8 @@ export class WebSocketTransport<M> extends Subject<M> {
             };
 
             ws.onopen = (e: Event) => {
-                console.log('socket opened');
-                this.socket = ws;
-                this.openSubject.next(e);
+                console.log('WebSocket connection has opened');
+                this.output.next(new OpenMessage({event: e}));
             };
 
             ws.onmessage = (e: MessageEvent) => {
@@ -133,7 +133,6 @@ export class WebSocketTransport<M> extends Subject<M> {
 
         if (this.socket) {
             this.socket.close();
-            this.socket = null;
         }
     }
 

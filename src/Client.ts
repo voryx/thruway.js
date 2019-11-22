@@ -15,6 +15,7 @@ import {UnregisteredMessage} from './Messages/UnregisteredMessage';
 import {EventMessage} from './Messages/EventMessage';
 import {HelloMessage} from './Messages/HelloMessage';
 import {AbortMessage} from './Messages/AbortMessage';
+import {OpenMessage} from './Messages/OpenMessage';
 import {IMessage} from './Messages/Message';
 import {Utils} from './Common/Utils';
 import {Observable} from 'rxjs/Observable';
@@ -107,13 +108,12 @@ export class Client {
         this.subscription = new Subscription();
         this._onClose = new Subject();
 
-        const open = new Subject();
         const close = new Subject();
 
         let transportData: Observable<TransportData>;
 
         if (typeof urlOrTransportOrObs === 'string') {
-            this._transport = new WebSocketTransport(urlOrTransportOrObs, ['wamp.2.json'], open, close);
+            this._transport = new WebSocketTransport(urlOrTransportOrObs, ['wamp.2.json'], close);
             transportData = Observable.of({
                 transport: this._transport,
                 realm,
@@ -128,7 +128,7 @@ export class Client {
             }) as any as Observable<TransportData>;
         } else {
             transportData = (urlOrTransportOrObs as Observable<ThruwayConfig>).map((config: ThruwayConfig) => {
-                this._transport = new WebSocketTransport(config.url, ['wamp.2.json'], open, close, config.autoOpen);
+                this._transport = new WebSocketTransport(config.url, ['wamp.2.json'], close, config.autoOpen);
                 return {transport: this._transport, realm: config.realm, options: config.options || {}}
             }) as any as Observable<TransportData>;
         }
@@ -139,9 +139,8 @@ export class Client {
             .shareReplay(1);
 
         const messages = transportData
-            .switchMap(({transport, options: o}) => transport
-                .race(Observable.timer(options.timeout || 5000).flatMapTo(Observable.throw(Error('Transport Timeout'))))
-                .retryWhen(o.retryWhen || retryWhen(options.retryOptions))
+            .switchMap(({transport, options: o, realm: r}) => transport
+                .finally(() => console.log('transport dead'))
                 .map((msg: IMessage) => {
                     if (msg instanceof AbortMessage) {
                         // @todo create an exception for this
@@ -150,21 +149,18 @@ export class Client {
                         }, 0);
                     }
                     return msg;
-                }))
+                })
+                .do((msg: IMessage) => {
+                    if (msg instanceof OpenMessage) {
+                        this.currentRetryCount = 0;
+                        const helloMsg = new HelloMessage(r, o);
+                        transport.next(helloMsg);
+                    }
+                })
+                .race(Observable.timer(options.timeout || 5000).switchMapTo(Observable.throw(Error('Transport Timeout'))))
+                .retryWhen(o.retryWhen || retryWhen(options.retryOptions))
+            )
             .share();
-
-
-        const openSubscription = open
-            .do(() => {
-                this.currentRetryCount = 0;
-            })
-            .combineLatest(transportData)
-            .map(([w, td]) => {
-                const {transport, realm: r, options: o} = td;
-                o.roles = Client.roles();
-                return {msg: new HelloMessage(r, o), transport};
-            })
-            .subscribe(({msg, transport}) => transport.next(msg));
 
         let remainingMsgs: Observable<IMessage>, challengeMsg, goodByeMsg, abortMsg,
             welcomeMsg: Observable<WelcomeMessage>;
@@ -198,8 +194,6 @@ export class Client {
             .combineLatest(transportData)
             .map(([msg, td]) => ({messages: remainingMsgs, transport: td.transport, welcomeMsg: msg}))
             .multicast(() => new ReplaySubject(1)).refCount();
-
-        this.subscription.add(openSubscription);
     }
 
     public topic(uri: string, options?: TopicOptions): Observable<EventMessage> {
