@@ -135,27 +135,13 @@ export class Client {
             .shareReplay(1);
 
         const messages = transportData
-            .switchMap(({transport}) => transport
-                .retryWhen((attempts: Observable<Error>) => {
-                    const maxRetryDelay = 300000;
-                    const initialRetryDelay = 1500;
-                    const retryDelayGrowth = 1.5;
-                    const maxRetries = 550;
-
-                    return attempts
-                        .flatMap((ex) => {
-                            console.error(ex.message);
-                            console.log('Reconnecting');
-                            const delay = Math.min(maxRetryDelay, Math.pow(retryDelayGrowth, ++this.currentRetryCount) + initialRetryDelay);
-                            return Observable.timer(Math.floor(delay));
-                        })
-                        .take(maxRetries);
-                })
+            .switchMap(({transport, options: o}) => transport
+                .retryWhen(o.retryWhen || retryWhen())
                 .map((msg: IMessage) => {
                     if (msg instanceof AbortMessage) {
                         // @todo create an exception for this
                         async.schedule(() => {
-                            throw new Error('Connection ended because ' + msg.details);
+                            throw new Error('Connection ended because ' + JSON.stringify(msg.details));
                         }, 0);
                     }
                     return msg;
@@ -326,10 +312,39 @@ export class Client {
     }
 }
 
+let currentRetryCount = 0;
+
+export interface RetryOptions {
+    maxRetryDelay?: number,
+    initialRetryDelay?: number,
+    retryDelayGrowth?: number,
+    maxRetries?: number
+}
+
+const retryDefaults = {maxRetryDelay: 60000, initialRetryDelay: 1500, retryDelayGrowth: 1.5, maxRetries: 10000};
+
+export const retryWhen = (retryOptions?: RetryOptions) =>
+    (attempts: Observable<Error>) => {
+
+        const o = {...retryDefaults, ...retryOptions};
+
+        const {maxRetryDelay, initialRetryDelay, retryDelayGrowth, maxRetries} = o;
+
+        return attempts
+            .flatMap((ex) => {
+                console.error(ex.message);
+                console.log('Reconnecting');
+                const delay = Math.min(maxRetryDelay, Math.pow(retryDelayGrowth, ++currentRetryCount) + initialRetryDelay);
+                return Observable.timer(Math.floor(delay));
+            })
+            .take(maxRetries);
+    };
+
 export interface WampOptions {
     authmethods?: Array<string>;
     roles?: Object;
     role?: string;
+    retryWhen?: (attempts: Observable<Error>) => Observable<any>;
 
     [propName: string]: any;
 }
