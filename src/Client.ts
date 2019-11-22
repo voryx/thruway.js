@@ -47,6 +47,7 @@ import 'rxjs/add/operator/multicast';
 import 'rxjs/add/operator/shareReplay';
 import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/partition';
+import 'rxjs/add/operator/race';
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/from';
 import 'rxjs/add/observable/timer';
@@ -59,7 +60,6 @@ export class Client {
     private _session: Observable<SessionData>;
     private _transport: Subject<IMessage>;
     private _onClose: Subject<IMessage>;
-    private challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string>;
     private currentRetryCount = 0;
 
     private static roles() {
@@ -97,6 +97,10 @@ export class Client {
             }
         };
     }
+
+    private challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string> = () => Observable.throw(
+        Error('When trying to make a WAMP connection, we received a Challenge Message, but no `onChallenge` callback was set.')
+    );
 
     constructor(urlOrTransportOrObs: string | Subject<IMessage> | Observable<ThruwayConfig>, realm?: string, options: WampOptions = {}) {
 
@@ -136,7 +140,8 @@ export class Client {
 
         const messages = transportData
             .switchMap(({transport, options: o}) => transport
-                .retryWhen(o.retryWhen || retryWhen())
+                .race(Observable.timer(options.timeout || 5000).flatMapTo(Observable.throw(Error('Transport Timeout'))))
+                .retryWhen(o.retryWhen || retryWhen(options.retryOptions))
                 .map((msg: IMessage) => {
                     if (msg instanceof AbortMessage) {
                         // @todo create an exception for this
@@ -147,6 +152,7 @@ export class Client {
                     return msg;
                 }))
             .share();
+
 
         const openSubscription = open
             .do(() => {
@@ -321,7 +327,12 @@ export interface RetryOptions {
     maxRetries?: number
 }
 
-const retryDefaults = {maxRetryDelay: 60000, initialRetryDelay: 1500, retryDelayGrowth: 1.5, maxRetries: 10000};
+const retryDefaults = {
+    maxRetryDelay: 60000,
+    initialRetryDelay: 1500,
+    retryDelayGrowth: 1.5,
+    maxRetries: 10000
+};
 
 export const retryWhen = (retryOptions?: RetryOptions) =>
     (attempts: Observable<Error>) => {
@@ -345,6 +356,8 @@ export interface WampOptions {
     roles?: Object;
     role?: string;
     retryWhen?: (attempts: Observable<Error>) => Observable<any>;
+    retryOptions?: RetryOptions;
+    timeout?: number;
 
     [propName: string]: any;
 }
