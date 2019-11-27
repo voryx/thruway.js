@@ -61,7 +61,6 @@ export class Client {
     private _session: Observable<SessionData>;
     private _transport: Subject<IMessage>;
     private _onClose: Subject<IMessage>;
-    private currentRetryCount = 0;
 
     private static roles() {
         return {
@@ -151,7 +150,7 @@ export class Client {
                 })
                 .do((msg: IMessage) => {
                     if (msg instanceof OpenMessage) {
-                        this.currentRetryCount = 0;
+                        currentRetryCount = 0;
                         const helloMsg = new HelloMessage(r, o);
                         transport.next(helloMsg);
                     }
