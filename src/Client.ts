@@ -151,6 +151,7 @@ export class Client {
                 .do((msg: IMessage) => {
                     if (msg instanceof OpenMessage) {
                         currentRetryCount = 0;
+                        o.roles = o.roles || Client.roles();
                         const helloMsg = new HelloMessage(r, o);
                         transport.next(helloMsg);
                     }
