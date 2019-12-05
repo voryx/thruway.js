@@ -61,6 +61,7 @@ export class Client {
     private _session: Observable<SessionData>;
     private _transport: Subject<IMessage>;
     private _onClose: Subject<IMessage>;
+    private currentRetryCount = 0;
 
     private static roles() {
         return {
@@ -96,6 +97,15 @@ export class Client {
                 }
             }
         };
+    }
+
+    private static retryDefaults(): RetryOptions {
+        return {
+            maxRetryDelay: 60000,
+            initialRetryDelay: 1500,
+            retryDelayGrowth: 1.5,
+            maxRetries: 10000
+        }
     }
 
     private challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string> = () => Observable.throw(
@@ -150,14 +160,14 @@ export class Client {
                 })
                 .do((msg: IMessage) => {
                     if (msg instanceof OpenMessage) {
-                        currentRetryCount = 0;
+                        this.currentRetryCount = 0;
                         o.roles = o.roles || Client.roles();
                         const helloMsg = new HelloMessage(r, o);
                         transport.next(helloMsg);
                     }
                 })
                 .race(Observable.timer(options.timeout || 5000).switchMapTo(Observable.throw(Error('Transport Timeout'))))
-                .retryWhen(o.retryWhen || retryWhen(options.retryOptions))
+                .retryWhen(o.retryWhen || this.defaultRetryWhen(options.retryOptions))
             )
             .share();
 
@@ -193,6 +203,24 @@ export class Client {
             .combineLatest(transportData)
             .map(([msg, td]) => ({messages: remainingMsgs, transport: td.transport, welcomeMsg: msg}))
             .multicast(() => new ReplaySubject(1)).refCount();
+    }
+
+    private defaultRetryWhen(retryOptions?: RetryOptions) {
+        return (attempts: Observable<Error>) => {
+
+            const o = {...Client.retryDefaults(), ...retryOptions};
+
+            const {maxRetryDelay, initialRetryDelay, retryDelayGrowth, maxRetries} = o;
+
+            return attempts
+                .flatMap((ex) => {
+                    console.error(ex.message);
+                    console.log('Reconnecting', this.currentRetryCount);
+                    const delay = Math.min(maxRetryDelay, Math.pow(retryDelayGrowth, ++this.currentRetryCount) + initialRetryDelay);
+                    return Observable.timer(Math.floor(delay));
+                })
+                .take(maxRetries);
+        };
     }
 
     public topic(uri: string, options?: TopicOptions): Observable<EventMessage> {
@@ -311,38 +339,12 @@ export class Client {
     }
 }
 
-let currentRetryCount = 0;
-
 export interface RetryOptions {
     maxRetryDelay?: number,
     initialRetryDelay?: number,
     retryDelayGrowth?: number,
     maxRetries?: number
 }
-
-const retryDefaults = {
-    maxRetryDelay: 60000,
-    initialRetryDelay: 1500,
-    retryDelayGrowth: 1.5,
-    maxRetries: 10000
-};
-
-export const retryWhen = (retryOptions?: RetryOptions) =>
-    (attempts: Observable<Error>) => {
-
-        const o = {...retryDefaults, ...retryOptions};
-
-        const {maxRetryDelay, initialRetryDelay, retryDelayGrowth, maxRetries} = o;
-
-        return attempts
-            .flatMap((ex) => {
-                console.error(ex.message);
-                console.log('Reconnecting');
-                const delay = Math.min(maxRetryDelay, Math.pow(retryDelayGrowth, ++currentRetryCount) + initialRetryDelay);
-                return Observable.timer(Math.floor(delay));
-            })
-            .take(maxRetries);
-    };
 
 export interface WampOptions {
     authmethods?: Array<string>;
