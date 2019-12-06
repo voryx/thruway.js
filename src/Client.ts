@@ -57,60 +57,74 @@ import 'rxjs/add/observable/merge';
 import 'rxjs/add/observable/throw';
 
 export class Client {
+    private static roles = {
+        'caller': {
+            'features': {
+                'caller_identification': true,
+                'progressive_call_results': true,
+                'call_canceling': true
+            }
+        },
+        'callee': {
+            'features': {
+                'caller_identification': true,
+                'pattern_based_registration': true,
+                'shared_registration': true,
+                'progressive_call_results': true,
+                'registration_revocation': true,
+                'call_canceling': true
+            }
+        },
+        'publisher': {
+            'features': {
+                'publisher_identification': true,
+                'subscriber_blackwhite_listing': true,
+                'publisher_exclusion': true
+            }
+        },
+        'subscriber': {
+            'features': {
+                'publisher_identification': true,
+                'pattern_based_subscription': true,
+                'subscription_revocation': true
+            }
+        }
+    };
+
+    private static retryDefaults: RetryOptions = {
+        maxRetryDelay: 60000,
+        initialRetryDelay: 1500,
+        retryDelayGrowth: 1.5,
+        maxRetries: 10000
+    };
+
     private subscription: Subscription;
     private _session: Observable<SessionData>;
     private _transport: Subject<IMessage>;
     private _onClose: Subject<IMessage>;
     private currentRetryCount = 0;
 
-    private static roles() {
-        return {
-            'caller': {
-                'features': {
-                    'caller_identification': true,
-                    'progressive_call_results': true,
-                    'call_canceling': true
-                }
-            },
-            'callee': {
-                'features': {
-                    'caller_identification': true,
-                    'pattern_based_registration': true,
-                    'shared_registration': true,
-                    'progressive_call_results': true,
-                    'registration_revocation': true,
-                    'call_canceling': true
-                }
-            },
-            'publisher': {
-                'features': {
-                    'publisher_identification': true,
-                    'subscriber_blackwhite_listing': true,
-                    'publisher_exclusion': true
-                }
-            },
-            'subscriber': {
-                'features': {
-                    'publisher_identification': true,
-                    'pattern_based_subscription': true,
-                    'subscription_revocation': true
-                }
-            }
-        };
-    }
-
-    private static retryDefaults(): RetryOptions {
-        return {
-            maxRetryDelay: 60000,
-            initialRetryDelay: 1500,
-            retryDelayGrowth: 1.5,
-            maxRetries: 10000
-        }
-    }
-
     private challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string> = () => Observable.throw(
         Error('When trying to make a WAMP connection, we received a Challenge Message, but no `onChallenge` callback was set.')
     );
+
+    public readonly defaultRetryWhen = (retryOptions?: RetryOptions) => {
+        return (attempts: Observable<Error>) => {
+
+            const o = {...Client.retryDefaults, ...retryOptions};
+
+            const {maxRetryDelay, initialRetryDelay, retryDelayGrowth, maxRetries} = o;
+
+            return attempts
+                .flatMap((ex) => {
+                    console.error(ex.message);
+                    const delay = Math.min(maxRetryDelay, Math.pow(retryDelayGrowth, ++this.currentRetryCount) + initialRetryDelay);
+                    console.log('Reconnecting attempt: ' + this.currentRetryCount + ', Retrying in: ' + (delay / 1000).toPrecision(4) + ' seconds.');
+                    return Observable.timer(Math.floor(delay));
+                })
+                .take(maxRetries);
+        };
+    };
 
     constructor(urlOrTransportOrObs: string | Subject<IMessage> | Observable<ThruwayConfig>, realm?: string, options: WampOptions = {}) {
 
@@ -161,7 +175,7 @@ export class Client {
                 .do((msg: IMessage) => {
                     if (msg instanceof OpenMessage) {
                         this.currentRetryCount = 0;
-                        o.roles = o.roles || Client.roles();
+                        o.roles = Client.roles;
                         const helloMsg = new HelloMessage(r, o);
                         transport.next(helloMsg);
                     }
@@ -203,24 +217,6 @@ export class Client {
             .combineLatest(transportData)
             .map(([msg, td]) => ({messages: remainingMsgs, transport: td.transport, welcomeMsg: msg}))
             .multicast(() => new ReplaySubject(1)).refCount();
-    }
-
-    private defaultRetryWhen(retryOptions?: RetryOptions) {
-        return (attempts: Observable<Error>) => {
-
-            const o = {...Client.retryDefaults(), ...retryOptions};
-
-            const {maxRetryDelay, initialRetryDelay, retryDelayGrowth, maxRetries} = o;
-
-            return attempts
-                .flatMap((ex) => {
-                    console.error(ex.message);
-                    console.log('Reconnecting', this.currentRetryCount);
-                    const delay = Math.min(maxRetryDelay, Math.pow(retryDelayGrowth, ++this.currentRetryCount) + initialRetryDelay);
-                    return Observable.timer(Math.floor(delay));
-                })
-                .take(maxRetries);
-        };
     }
 
     public topic(uri: string, options?: TopicOptions): Observable<EventMessage> {
