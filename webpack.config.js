@@ -6,32 +6,23 @@ module.exports = {
     externals: [{'ws': 'WebSocket'}],
     output: {
         library: 'thruway',
-        filename: './dist/thruway.js'
+        filename: './thruway.js'
     },
     resolve: {
         extensions: ['.webpack.js', '.web.js', '.ts', '.js']
     },
     module: {
-        loaders: [
-            {
-                test: /\.ts$/,
-                loader: "ts-loader"
-            }
+        rules: [
+            { test: /\.tsx?$/, loader: "ts-loader" }
         ]
+    },
+    optimization: {
+        minimize: true
     },
     plugins: [
         new webpack.LoaderOptionsPlugin({
             minimize: true,
             debug: false
-        }),
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: true
-            },
-            output: {
-                comments: false
-            },
-            sourceMap: false
         })
     ]
 };

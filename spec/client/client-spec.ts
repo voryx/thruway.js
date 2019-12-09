@@ -26,7 +26,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected);
@@ -35,11 +35,11 @@ describe('Client', () => {
         assertWampMessages([], wampMessages);
     });
 
-    it('call should complete when messages are empty before Welcome', () => {
+    it('call should never complete when messages are empty before Welcome', () => {
 
         const messages = hot('--|');
         const subscriptions = '^-!';
-        const expected = '--|';
+        const expected = '--';
 
         const observer = new Subscriber((msg: any) => {
             recordWampMessage(msg);
@@ -48,7 +48,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected);
@@ -69,7 +69,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -91,7 +91,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -113,7 +113,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -136,7 +136,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -159,7 +159,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -181,7 +181,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, {d: resultMessage});
@@ -205,7 +205,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected);
@@ -232,7 +232,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri2');
 
         expectObservable(call).toBe(expected);
@@ -261,7 +261,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call).toBe(expected, null, new WampErrorException('some.server.error', [{uri: 'testing.uri'}]));
@@ -288,7 +288,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri1');
 
         expectObservable(call, unsubscribe).toBe(expected);
@@ -316,7 +316,7 @@ describe('Client', () => {
         const ws = Subject.create(observer, messages);
         ws.onOpen = new Subject();
 
-        const client = new Client(ws, 'realm1', {});
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
 
         expectObservable(call, unsubscribe).toBe(expected, {d: resultMessage});
