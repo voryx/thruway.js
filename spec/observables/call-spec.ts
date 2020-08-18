@@ -430,4 +430,31 @@ describe('CallObservable', () => {
         expectSubscriptions(messages.subscriptions).toBe(subscriptions);
     });
 
+    it('should be able to emit error after emitting a value when progressive', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const e = new ErrorMessage(123, null, {}, 'some.server.error');
+        const r4 = new ResultMessage(null, {});
+
+        const messages = hot('--w-abced|', {w: w, a: r1, b: r2, c: r3, d: r4, e});
+        const subscriptions =        '^------!';
+        const expected =             '----abc#';
+
+        const webSocket = new Subject();
+        webSocket.subscribe((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+            e['_errorRequestId'] = msg.requestId;
+        });
+
+        const call = new CallObservable('testing.uri', messages, webSocket, [], {}, {receive_progress: true});
+
+        expectObservable(call).toBe(expected, {a: r1, b: r2, c: r3}, new WampErrorException('some.server.error', [{uri: 'testing.uri'}]));
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
 });

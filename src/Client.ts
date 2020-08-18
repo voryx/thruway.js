@@ -22,7 +22,6 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {Subject} from 'rxjs/Subject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {async} from 'rxjs/scheduler/async';
 
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/take';
@@ -98,10 +97,11 @@ export class Client {
         maxRetries: 10000
     };
 
-    private subscription: Subscription;
+    private subscription: Subscription = new Subscription();
+    private _onClose: Subject<IMessage> = new Subject();
+    private _onError: Subject<Error> = new Subject();
     private _session: Observable<SessionData>;
     private _transport: Subject<IMessage>;
-    private _onClose: Subject<IMessage>;
     private currentRetryCount = 0;
 
     private challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string> = () => Observable.throw(
@@ -128,15 +128,9 @@ export class Client {
 
     constructor(urlOrTransportOrObs: string | Subject<IMessage> | Observable<ThruwayConfig>, realm?: string, options: WampOptions = {}) {
 
-        this.subscription = new Subscription();
-        this._onClose = new Subject();
-
-        const close = new Subject();
-
         let transportData: Observable<TransportData>;
-
         if (typeof urlOrTransportOrObs === 'string') {
-            this._transport = new WebSocketTransport(urlOrTransportOrObs, ['wamp.2.json'], close);
+            this._transport = new WebSocketTransport(urlOrTransportOrObs, ['wamp.2.json']);
             transportData = Observable.of({
                 transport: this._transport,
                 realm,
@@ -151,7 +145,7 @@ export class Client {
             }) as any as Observable<TransportData>;
         } else {
             transportData = (urlOrTransportOrObs as Observable<ThruwayConfig>).map((config: ThruwayConfig) => {
-                this._transport = new WebSocketTransport(config.url, ['wamp.2.json'], close, config.autoOpen);
+                this._transport = new WebSocketTransport(config.url, ['wamp.2.json'], config.autoOpen);
                 return {transport: this._transport, realm: config.realm, options: config.options || {}}
             }) as any as Observable<TransportData>;
         }
@@ -166,9 +160,7 @@ export class Client {
                 .map((msg: IMessage) => {
                     if (msg instanceof AbortMessage) {
                         // @todo create an exception for this
-                        async.schedule(() => {
-                            throw new Error('Connection ended because ' + JSON.stringify(msg.details));
-                        }, 0);
+                        throw new Error('Connection ended because ' + JSON.stringify(msg.details) + msg.reason);
                     }
                     return msg;
                 })
@@ -181,6 +173,7 @@ export class Client {
                     }
                 })
                 .race(Observable.timer(options.timeout || 5000).switchMapTo(Observable.throw(Error('Transport Timeout'))))
+                .do({error: e => this._onError.next(e)})
                 .retryWhen(o.retryWhen || this.defaultRetryWhen(options.retryOptions))
             )
             .share();
@@ -243,14 +236,14 @@ export class Client {
 
     public call(uri: string, args?: Array<any>, argskw?: Object, options?: CallOptions): Observable<ResultMessage> {
         return this._session
-            .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
+            .merge(this.onClose.flatMapTo(Observable.throw(new Error('Connection Closed'))))
             .take(1)
             .switchMap(({transport, messages}: SessionData) => new CallObservable(uri, messages, transport, args, argskw, options));
     }
 
     public register(uri: string, callback: Function, options?: RegisterOptions): Observable<RegisteredMessage | UnregisteredMessage> {
         return this._session
-            .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
+            .merge(this.onClose.flatMapTo(Observable.throw(new Error('Connection Closed'))))
             .switchMap(({transport, messages}: SessionData) => new RegisterObservable(uri, callback, messages, transport, options));
     }
 
@@ -261,7 +254,8 @@ export class Client {
         let retry = false;
 
         return this._session
-            .merge(this.onClose.mapTo(Observable.throw(new Error('Connection Closed'))))
+            .merge(this.onError.flatMap(e => Observable.throw(e)))
+            .merge(this.onClose.flatMapTo(Observable.throw(new Error('Connection Closed'))))
             .takeUntil(completed)
             .switchMap(({transport, messages}: SessionData) => {
                 const callObs = new CallObservable(uri, messages, transport, args, argskw, options);
@@ -332,6 +326,10 @@ export class Client {
 
     get onClose(): Observable<IMessage> {
         return this._onClose;
+    }
+
+    get onError(): Observable<Error> {
+        return this._onError;
     }
 }
 

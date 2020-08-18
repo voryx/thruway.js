@@ -2,6 +2,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {Subscriber} from 'rxjs/Subscriber';
 import {Subject} from 'rxjs/Subject';
 import {CreateMessage} from '../Messages/CreateMessage';
+import {OpenMessage} from '../Messages/OpenMessage';
 
 export class WebWorkerTransport<Message> extends Subject<any> {
 
@@ -11,9 +12,7 @@ export class WebWorkerTransport<Message> extends Subject<any> {
     constructor(
         private workerName: string = 'worker.js',
         private url: string = 'ws://127.0.0.1:9090/',
-        private protocols: string | string[] = ['wamp.2.json'],
-        private open = new Subject(),
-        private close = new Subject()
+        private protocols: string | string[] = ['wamp.2.json']
     ) {
         super();
     }
@@ -36,17 +35,16 @@ export class WebWorkerTransport<Message> extends Subject<any> {
 
         const open = messages
             .filter((e: MessageEvent) => e.data.type === 'open')
-            .subscribe(e => {
+            .subscribe((e: Event) => {
                 console.log('socket opened');
                 this.worker = ww;
-                this.open.next(e);
+                this.output.next(new OpenMessage({event: e}));
             });
 
         const close = messages
             .filter((e: MessageEvent) => e.data.type === 'close')
             .subscribe(e => {
                 this.worker = null;
-                this.close.next(e);
 
                 // Handle all closes as errors
                 this.output.error(e);

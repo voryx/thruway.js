@@ -23,7 +23,6 @@ export class WebSocketTransport<M> extends Subject<M> {
     constructor(
         private url: string = 'ws://127.0.0.1:9090/',
         private protocols: string | string[] = ['wamp.2.json'],
-        private closeSubject = new Subject(),
         private autoOpen: boolean = true
     ) {
         super();
@@ -78,7 +77,6 @@ export class WebSocketTransport<M> extends Subject<M> {
             ws.onclose = (e: CloseEvent) => {
                 this.resetKeepaliveSubject.next(0);
                 this.socket = null;
-                this.closeSubject.next(e);
 
                 // Handle all closes as errors
                 const ex = new Error(e.reason || 'The WebSocket connection was closed');

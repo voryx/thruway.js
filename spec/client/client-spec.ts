@@ -9,6 +9,8 @@ import {WampErrorException} from '../../src/Common/WampErrorException';
 import {xit as it} from '../helpers/test-helpers';
 import {Subscriber} from 'rxjs/Subscriber';
 import {Client} from '../../src/Client';
+import {GoodbyeMessage} from '../../src/Messages/GoodbyeMessage';
+import {AbortMessage} from '../../src/Messages/AbortMessage';
 
 /** @test {client} */
 describe('Client', () => {
@@ -24,7 +26,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -46,7 +47,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -67,7 +67,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -89,7 +88,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -111,7 +109,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -134,7 +131,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -157,7 +153,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -179,7 +174,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -203,7 +197,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -230,7 +223,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri2');
@@ -259,7 +251,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -286,7 +277,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri1');
@@ -314,7 +304,6 @@ describe('Client', () => {
         });
 
         const ws = Subject.create(observer, messages);
-        ws.onOpen = new Subject();
 
         const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
         const call = client.call('testing.uri');
@@ -325,6 +314,139 @@ describe('Client', () => {
         assertWampMessages([
             [20, [48, 12345, {}, 'testing.uri']], // CallMessage
         ], wampMessages);
+    });
+
+    it('progressiveCall should emit multiple', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const r4 = new ResultMessage(null, {});
+
+        const messages = hot('--w-abcd|', {w: w, a: r1, b: r2, c: r3, d: r4});
+        const subscriptions =        '^------!';
+        const unsubscribe =          '--------!';
+        const expected =             '----abc|';
+
+        const observer = new Subscriber((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+        });
+
+        const ws = Subject.create(observer, messages);
+
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
+        const call = client.progressiveCall('testing.uri');
+
+        expectObservable(call, unsubscribe).toBe(expected, {a: r1, b: r2, c: r3});
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+    it('progressiveCall should be able to emit error after values', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const e = new ErrorMessage(123, null, {}, 'some.server.error');
+        const r4 = new ResultMessage(null, {});
+
+        const messages = hot('--w-abced|', {w: w, a: r1, b: r2, c: r3, d: r4, e});
+        const subscriptions =        '^------!';
+        const unsubscribe =          '--------!';
+        const expected =             '----abc#';
+
+        const observer = new Subscriber((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+            r4['_requestId'] = msg.requestId;
+            e['_errorRequestId'] = msg.requestId;
+        });
+
+        const ws = Subject.create(observer, messages);
+
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
+        const call = client.progressiveCall('testing.uri');
+
+        expectObservable(call, unsubscribe).toBe(expected, {a: r1, b: r2, c: r3}, new WampErrorException('some.server.error', [{uri: 'testing.uri'}]));
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+    it('progressiveCall should error when transport errors', () => {
+        const error = new Error('Transport Error');
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const messages = hot('--w-abc-#', {w, a: r1, b: r2, c: r3}, error);
+        const subscriptions =        '^-------!';
+        const unsubscribe =          '---------!';
+        const expected =             '----abc-#';
+        const observer = new Subscriber((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+        });
+
+        const ws = Subject.create(observer, messages);
+
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
+        const call = client.progressiveCall('testing.uri');
+
+        expectObservable(call, unsubscribe).toBe(expected, {w, a: r1, b: r2, c: r3}, error);
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+    it('progressiveCall should error on GoodbyeMessage', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const g = new GoodbyeMessage({}, 'goodbye');
+        const messages = hot('--w-abc-g', {w, a: r1, b: r2, c: r3, g});
+        const subscriptions =        '^-------!';
+        const unsubscribe =          '---------!';
+        const expected =             '----abc-#';
+        const observer = new Subscriber((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+        });
+
+        const ws = Subject.create(observer, messages);
+
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
+        const call = client.progressiveCall('testing.uri');
+
+        expectObservable(call, unsubscribe).toBe(expected, {w, a: r1, b: r2, c: r3}, new Error('Connection Closed'));
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
+    });
+
+    it('progressiveCall should error on AbortMessage', () => {
+        const w = new WelcomeMessage(12345, {});
+        const r1 = new ResultMessage(null, {progress: true}, ['testing1'], {});
+        const r2 = new ResultMessage(null, {progress: true}, ['testing2'], {});
+        const r3 = new ResultMessage(null, {progress: true}, ['testing3'], {});
+        const e = new AbortMessage({}, 'abort');
+        const messages = hot('-ew-abc', {w, a: r1, b: r2, c: r3, e});
+        const subscriptions =        '^!';
+        const unsubscribe =          '---!';
+        const expected =             '-#';
+        const observer = new Subscriber((msg: any) => {
+            r1['_requestId'] = msg.requestId;
+            r2['_requestId'] = msg.requestId;
+            r3['_requestId'] = msg.requestId;
+        });
+
+        const ws = Subject.create(observer, messages);
+
+        const client = new Client(ws, 'realm1', {retryOptions: {maxRetries: 1}});
+        const call = client.progressiveCall('testing.uri');
+
+        expectObservable(call, unsubscribe).toBe(expected, {w, a: r1, b: r2, c: r3}, new Error('Connection Closed'));
+        expectSubscriptions(messages.subscriptions).toBe(subscriptions);
     });
 
 });
