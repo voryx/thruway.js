@@ -24,7 +24,7 @@
   "homepage": "https://github.com/voryx/Thruway.js#readme",
   "peerDependencies": {
     "rxjs": "^5.5.12",
-    "ws": "^6.0.0"
+    "ws": "^7.4.6"
   },
   "browser": {
     "ws": false
@@ -64,6 +64,6 @@
     "typescript": "^3.7.3",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
-    "ws": "^6.0.0"
+    "ws": "^7.4.6"
   }
 }
