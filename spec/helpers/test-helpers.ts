@@ -7,6 +7,8 @@ import {expect} from 'chai';
 export const xit: any = function (description, cb, timeout) {
     if (cb.length === 0) {
         it(description, function () {
+            // A failed test can leave recorded messages behind, so don't let them leak into the next one
+            clearWampMessages();
             global.rxTestScheduler = new TestScheduler(assertDeepEqual);
             cb();
             global.rxTestScheduler.flush();

@@ -48,6 +48,8 @@ import 'rxjs/add/operator/shareReplay';
 import 'rxjs/add/operator/combineLatest';
 import 'rxjs/add/operator/partition';
 import 'rxjs/add/operator/race';
+import 'rxjs/add/operator/ignoreElements';
+import 'rxjs/add/operator/concat';
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/from';
 import 'rxjs/add/observable/timer';
@@ -100,9 +102,11 @@ export class Client {
     private subscription: Subscription = new Subscription();
     private _onClose: Subject<IMessage> = new Subject();
     private _onError: Subject<Error> = new Subject();
+    private _sessionLost: Subject<SessionData> = new Subject();
     private _session: Observable<SessionData>;
     private _transport: Subject<IMessage>;
     private currentRetryCount = 0;
+    private sessionEstablished = false;
 
     private challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string> = () => Observable.throw(
         Error('When trying to make a WAMP connection, we received a Challenge Message, but no `onChallenge` callback was set.')
@@ -165,15 +169,32 @@ export class Client {
                     return msg;
                 })
                 .do((msg: IMessage) => {
+                    if (msg instanceof WelcomeMessage) {
+                        this.sessionEstablished = true;
+                    }
                     if (msg instanceof OpenMessage) {
                         this.currentRetryCount = 0;
+                        // A transport may reopen without erroring first; the old session is gone either way.
+                        // Close the gate before announcing it, so nothing torn down here writes into the new handshake
+                        const wasEstablished = this.sessionEstablished;
+                        this.sessionEstablished = false;
+                        if (wasEstablished) {
+                            this._sessionLost.next(null);
+                        }
                         o.roles = Client.roles;
                         const helloMsg = new HelloMessage(r, o);
                         transport.next(helloMsg);
                     }
                 })
                 .race(Observable.timer(options.timeout || 5000).switchMapTo(Observable.throw(Error('Transport Timeout'))))
-                .do({error: e => this._onError.next(e)})
+                .do({
+                    error: e => {
+                        // Forget the session before anyone hears about the error, so retries wait for the next Welcome
+                        this.sessionEstablished = false;
+                        this._sessionLost.next(null);
+                        this._onError.next(e);
+                    }
+                })
                 .retryWhen(o.retryWhen || this.defaultRetryWhen(options.retryOptions))
             )
             .share();
@@ -208,8 +229,11 @@ export class Client {
 
         this._session = welcomeMsg
             .combineLatest(transportData)
-            .map(([msg, td]) => ({messages: remainingMsgs, transport: td.transport, welcomeMsg: msg}))
-            .multicast(() => new ReplaySubject(1)).refCount();
+            .map(([msg, td]) => ({messages: remainingMsgs, transport: this.sessionTransport(td.transport), welcomeMsg: msg}))
+            // A lost session is replayed as null (skipped below); stop listening for losses once the sessions end
+            .publish(sessions => sessions.merge(this._sessionLost.takeUntil(sessions.ignoreElements().concat(Observable.of(null)))))
+            .multicast(() => new ReplaySubject(1)).refCount()
+            .filter((session: SessionData) => session !== null);
     }
 
     public topic(uri: string, options?: TopicOptions): Observable<EventMessage> {
@@ -282,6 +306,19 @@ export class Client {
         options.progress = true;
         options.replace_orphaned_sessions = 'yes';
         return this.register(uri, callback, options);
+    }
+
+    // Writes from a session are dropped outside an established session, e.g. during the next connection's handshake
+    private sessionTransport(transport: Subject<IMessage>): Subject<IMessage> {
+        return Subject.create({
+            next: (msg: IMessage) => {
+                if (this.sessionEstablished) {
+                    transport.next(msg);
+                }
+            },
+            error: (e: any) => transport.error(e),
+            complete: () => transport.complete()
+        }, transport);
     }
 
     public onChallenge(challengeCallback: (challenge: Observable<ChallengeMessage>) => Observable<string>) {
