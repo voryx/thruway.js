@@ -1,6 +1,14 @@
 # Changelog
 
-## 3.0.0-beta1 (2026-10-27, under the `next` dist-tag)
+## 3.0.0-beta2 (2026-10-27, under the `next` dist-tag)
+
+### Fixed
+
+- A callee could stay unregistered after a reconnect against Thruway PHP. When a REGISTER replaced an orphaned
+  session's registration, Thruway invoked it before confirming it; the client withdrew that unknown id and then kept
+  the confirmed registration the router had already removed. The client now registers again.
+
+## 3.0.0-beta1 (2026-10-27)
 
 A rewrite. See [MIGRATION.md](MIGRATION.md) for what changes in your code, with before and after examples, and the
 [README](README.md) for the API.

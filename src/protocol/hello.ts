@@ -9,7 +9,7 @@
  */
 import type { Dict } from './messages.js';
 
-export const AGENT = 'thruway.js/3.0.0-beta1';
+export const AGENT = 'thruway.js/3.0.0-beta2';
 
 /** One frozen role entry: `{features: {…}}`. */
 function role<F extends Readonly<Record<string, true>>>(features: F): { readonly features: F } {

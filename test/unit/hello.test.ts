@@ -11,7 +11,7 @@ describe('HELLO details', () => {
     const details = helloDetails({ authmethods: [], authid: undefined, authextra: undefined });
     expect(JSON.stringify(details, null, 2)).toMatchInlineSnapshot(`
       "{
-        "agent": "thruway.js/3.0.0-beta1",
+        "agent": "thruway.js/3.0.0-beta2",
         "roles": {
           "caller": {
             "features": {
