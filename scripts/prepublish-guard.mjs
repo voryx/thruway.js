@@ -2,7 +2,7 @@
 // Release guard: `prepublishOnly` runs this, and the `package` CI job runs it before it uploads the tarball. It refuses
 // to continue unless
 //   1. `git status --porcelain` is empty (no modified, staged or untracked file) and — for a publish (`npm_command`
-//      is `publish`) or with --release — HEAD is the commit the tag v<version> points at;
+//      is `publish`) or with --release — HEAD is the commit the tag <version> (e.g. 3.0.0-beta1, no `v`) points at;
 //   2. a fresh build succeeds: dist is deleted here (a literal path) and `npm run build` runs, so no stale output of
 //      the working tree can ship; the build must leave the tree clean;
 //   3. `npm pack --dry-run --json` lists exactly test/package/files.snapshot.txt (the diff is printed);
@@ -62,9 +62,9 @@ const manifest = /** @type {unknown} */ (JSON.parse(readFileSync('package.json',
 const version = String(field(manifest, 'version'));
 if (release) {
   const head = run('git', ['rev-parse', 'HEAD']).stdout.trim();
-  const tag = run('git', ['rev-parse', '--verify', '--quiet', `refs/tags/v${version}^{commit}`]);
-  if (tag.status !== 0) refuse(`a release needs the tag v${version} on HEAD, and there is no such tag`);
-  if (tag.stdout.trim() !== head) refuse(`the tag v${version} points at ${tag.stdout.trim()}, not at HEAD ${head}`);
+  const tag = run('git', ['rev-parse', '--verify', '--quiet', `refs/tags/${version}^{commit}`]);
+  if (tag.status !== 0) refuse(`a release needs the tag ${version} on HEAD, and there is no such tag`);
+  if (tag.stdout.trim() !== head) refuse(`the tag ${version} points at ${tag.stdout.trim()}, not at HEAD ${head}`);
 }
 
 // 2. a fresh build
@@ -115,5 +115,5 @@ for (const file of packed) {
 if (found.length > 0) refuse(`debug markers in packed files:\n${found.join('\n')}`);
 
 console.log(
-  `prepublish-guard: passed (${release ? `release v${version} on HEAD, ` : ''}clean tree, fresh build, ${String(packed.length)} files as in ${SNAPSHOT}, no debug markers)`,
+  `prepublish-guard: passed (${release ? `release ${version} on HEAD, ` : ''}clean tree, fresh build, ${String(packed.length)} files as in ${SNAPSHOT}, no debug markers)`,
 );

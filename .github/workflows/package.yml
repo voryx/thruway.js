@@ -1,8 +1,9 @@
 # Job `package`: build (TS 7 ESM + CJS, rspack bundles); the declaration gate; `npm run package:check` (ES2020 gate,
 # publint --strict, attw, size budget, consumer matrix incl. the RxJS 6 cell, Jest 29 consumer, Node 22.0.0/22.4.0
 # smoke); the package tests (smoke, hazard, bundle-semantics, release guard, audit gate); scripts/prepublish-guard.mjs
-# on the checkout (with --release on a v* tag); the packed tarball as the release artifact. The Hermes smoke needs the
-# macOS hermes-ios VM and runs in the `hermes` job. Same scripts as `npm run ci`.
+# on the checkout (with --release on a tag, which is the bare version, e.g. 3.0.0-beta1); the packed tarball as the
+# release artifact. The Hermes smoke needs the macOS hermes-ios VM and runs in the `hermes` job. Same scripts as
+# `npm run ci`.
 name: package
 
 on:
@@ -57,7 +58,7 @@ jobs:
       - name: Release guard
         run: node scripts/prepublish-guard.mjs
       - name: Release guard (tagged release)
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/')
         run: node scripts/prepublish-guard.mjs --release
       - name: Pack the release artifact
         run: npm pack --ignore-scripts

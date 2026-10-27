@@ -187,13 +187,30 @@ describe.concurrent('prepublish-guard', () => {
     expect(r.output).toContain('README.md: .only(');
   });
 
-  test('a release (--release, or npm_command=publish) refuses a HEAD without the tag v<version>', async () => {
+  test('a release (--release, or npm_command=publish) refuses a HEAD without the tag <version>', async () => {
     const dir = fixtureRepo();
     const version = (JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8')) as { version: string }).version;
     for (const r of [await guard(dir, ['--release']), await guard(dir, [], { npm_command: 'publish' })]) {
       expect(r.status, r.output).toBe(1);
-      expect(r.output).toContain(`REFUSED: a release needs the tag v${version} on HEAD`);
+      expect(r.output).toContain(`REFUSED: a release needs the tag ${version} on HEAD`);
     }
+    git(dir, 'tag', `v${version}`); // the v-prefixed name is not the release tag
+    expect((await guard(dir, ['--release'])).output).toContain(`REFUSED: a release needs the tag ${version} on HEAD`);
+  });
+
+  test('a release passes with the tag <version> on HEAD, and refuses it on another commit', async () => {
+    const dir = fixtureRepo();
+    const version = (JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8')) as { version: string }).version;
+    git(dir, 'tag', '-a', version, '-m', version);
+    const r = await guard(dir, ['--release']);
+    expect(r.status, r.output).toBe(0);
+    expect(r.output).toContain(`prepublish-guard: passed (release ${version} on HEAD, clean tree`);
+    commit(dir, () => {
+      appendFileSync(path.join(dir, 'README.md'), '\nafter the tag\n');
+    });
+    const later = await guard(dir, ['--release']);
+    expect(later.status, later.output).toBe(1);
+    expect(later.output).toContain(`REFUSED: the tag ${version} points at`);
   });
 
   test('an unknown argument is a usage error', async () => {
