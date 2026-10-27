@@ -5,7 +5,5 @@ reports/
 .vitest/
 *.tgz
 package-lock.json
-# The 2.x README stays as it was until the 3.0 docs replace it
-README.md
 # Vendored router and probe notes, kept as found
 test/**/README.md

@@ -17,6 +17,7 @@ export default defineProject({
       'test/model/**/*.test.ts',
       'test/fuzz/**/*.test.ts',
       'test/helpers/**/*.test.ts',
+      'test/docs/**/*.test.ts',
     ],
     setupFiles: ['test/setup-fast-check.ts'],
     typecheck: {

@@ -1,4 +1,6 @@
+CHANGELOG.md
 LICENSE
+MIGRATION.md
 README.md
 dist/browser/package.json
 dist/browser/thruway.js
