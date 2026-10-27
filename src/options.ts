@@ -2,8 +2,8 @@
  * Client option defaults, validation and normalisation: `TypeError` with the option path on invalid values; keys set to
  * `undefined` mean "default"; frozen copies, never mutating the caller's objects.
  *
- * Each app property is read once. Unknown keys are ignored (the HELLO only ever carries `authmethods`, `authid` and
- * `authextra`).
+ * Each app property is read once. `authmethods`, `authid` and `authextra` may instead be functions: `helloAuth()` calls
+ * them for every attempt's HELLO. Unknown keys are ignored (the HELLO only ever carries those three).
  *
  * @module
  */
@@ -72,9 +72,10 @@ const MAX_DURATION = 2 ** 31 - 1;
 export interface NormalizedOptions {
   readonly url: string | (() => Input<string>);
   readonly realm: string;
-  readonly authmethods: readonly string[];
-  readonly authid: string | undefined;
-  readonly authextra: Readonly<Record<string, unknown>> | undefined;
+  /** A validated value, or the app's function (called by `helloAuth()`). */
+  readonly authmethods: readonly string[] | (() => unknown);
+  readonly authid: string | undefined | (() => unknown);
+  readonly authextra: Readonly<Record<string, unknown>> | undefined | (() => unknown);
   readonly onChallenge: ((challenge: ChallengeMessage) => Input<string>) | undefined;
   readonly autoOpen: boolean;
   readonly retry: {
@@ -170,17 +171,59 @@ function timeouts(value: unknown): NormalizedOptions['timeouts'] {
   });
 }
 
-function authmethods(value: unknown): readonly string[] {
+/** A function option as it is (called later), anything else through `check`. */
+function orValue<T>(value: unknown, check: (value: unknown) => T): T | (() => unknown) {
+  return typeof value === 'function' ? (value as () => unknown) : check(value);
+}
+
+/** One attempt's HELLO auth keys, validated and frozen. */
+export interface HelloAuth {
+  readonly authmethods: readonly string[];
+  readonly authid: string | undefined;
+  readonly authextra: Readonly<Record<string, unknown>> | undefined;
+}
+
+/** `what` names the option in the error: the option itself, or `authmethods()` for a function's result. */
+function authmethods(value: unknown, what: string): readonly string[] {
   if (value === undefined) return Object.freeze([]);
-  if (!Array.isArray(value)) throw new TypeError('authmethods must be an array of non-empty strings');
+  if (!Array.isArray(value)) throw new TypeError(`${what} must be an array of non-empty strings${orFunction(what)}`);
   const copy: string[] = [];
   for (const method of value as readonly unknown[]) {
     if (typeof method !== 'string' || method === '') {
-      throw new TypeError('authmethods must be an array of non-empty strings');
+      throw new TypeError(`${what} must be an array of non-empty strings${orFunction(what)}`);
     }
     copy.push(method);
   }
   return Object.freeze(copy);
+}
+
+function authid(value: unknown, what: string): string | undefined {
+  if (value === undefined || typeof value === 'string') return value;
+  throw new TypeError(`${what} must be a string${orFunction(what)}`);
+}
+
+function authextra(value: unknown, what: string): Readonly<Record<string, unknown>> | undefined {
+  if (value === undefined) return undefined;
+  if (!isPlainObject(value)) throw new TypeError(`${what} must be a plain object${orFunction(what)}`);
+  return Object.freeze({ ...value });
+}
+
+/** The tail of an option's error message: a function's result may also be `undefined`; the option may be a function. */
+function orFunction(what: string): string {
+  return what.endsWith('()') ? ' or undefined' : ' (or a function returning one)';
+}
+
+/**
+ * The HELLO auth keys for one attempt: each function option is called now (authmethods, then authid, then authextra)
+ * and its result validated like the value form; `undefined` means not set. Throws what a function threw, or a
+ * `TypeError` for an invalid result.
+ */
+export function helloAuth(o: Pick<NormalizedOptions, 'authmethods' | 'authid' | 'authextra'>): HelloAuth {
+  return Object.freeze({
+    authmethods: typeof o.authmethods === 'function' ? authmethods(o.authmethods(), 'authmethods()') : o.authmethods,
+    authid: typeof o.authid === 'function' ? authid(o.authid(), 'authid()') : o.authid,
+    authextra: typeof o.authextra === 'function' ? authextra(o.authextra(), 'authextra()') : o.authextra,
+  });
 }
 
 function webSocket(value: unknown): WebSocketConstructorLike {
@@ -245,10 +288,6 @@ export function normalizeOptions(url: unknown, realm: unknown, options: unknown)
     throw new TypeError('realm must be a URI: non-empty, no whitespace, no "#", no empty component');
   }
   const o = bag(options, 'options');
-  const authid = o['authid'];
-  if (authid !== undefined && typeof authid !== 'string') throw new TypeError('authid must be a string');
-  const authextra = o['authextra'];
-  if (authextra !== undefined && !isPlainObject(authextra)) throw new TypeError('authextra must be a plain object');
   const requestIds = o['requestIds'] ?? DEFAULTS.requestIds;
   if (requestIds !== 'random' && requestIds !== 'sequential') {
     throw new TypeError("requestIds must be 'random' or 'sequential'");
@@ -258,9 +297,9 @@ export function normalizeOptions(url: unknown, realm: unknown, options: unknown)
   return Object.freeze({
     url: url as NormalizedOptions['url'],
     realm,
-    authmethods: authmethods(o['authmethods']),
-    authid,
-    authextra: authextra === undefined ? undefined : Object.freeze({ ...authextra }),
+    authmethods: orValue(o['authmethods'], (v) => authmethods(v, 'authmethods')),
+    authid: orValue(o['authid'], (v) => authid(v, 'authid')),
+    authextra: orValue(o['authextra'], (v) => authextra(v, 'authextra')),
     onChallenge: fn(o['onChallenge'], 'onChallenge') as NormalizedOptions['onChallenge'],
     autoOpen: bool(o['autoOpen'], 'autoOpen', DEFAULTS.autoOpen),
     retry: retryOptions(o['retryOptions']),

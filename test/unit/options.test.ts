@@ -6,7 +6,7 @@
 import { describe, expect, test, vi } from 'vitest';
 import { Client } from '../../src/client.js';
 import { systemClock } from '../../src/core/clock.js';
-import { DEFAULTS, INTERNAL_DEFAULTS, INTERNAL_OPTIONS, normalizeOptions } from '../../src/options.js';
+import { DEFAULTS, helloAuth, INTERNAL_DEFAULTS, INTERNAL_OPTIONS, normalizeOptions } from '../../src/options.js';
 import { jsonSerializer } from '../../src/transport/json.js';
 import type { WebSocketConstructorLike } from '../../src/types.js';
 
@@ -229,6 +229,65 @@ describe('the other options', () => {
     rejects({ onChallenge: 'x' }, /onChallenge must be a function/);
     rejects({ logger: console }, /logger must be a function/);
     rejects({ autoOpen: 'yes' }, /autoOpen must be a boolean/);
+  });
+
+  test('authmethods, authid and authextra may be functions: kept as they are, not called', () => {
+    const fns = {
+      authmethods: vi.fn(() => ['ticket']),
+      authid: vi.fn(() => 'joe'),
+      authextra: vi.fn(() => ({ k: 1 })),
+    };
+    const o = norm(fns);
+    expect([o.authmethods, o.authid, o.authextra]).toEqual([fns.authmethods, fns.authid, fns.authextra]);
+    for (const fn of Object.values(fns)) expect(fn).not.toHaveBeenCalled();
+    rejects({ authid: 7 }, /authid must be a string \(or a function returning one\)/);
+  });
+
+  test('helloAuth: calls the functions (authmethods, authid, authextra), validates and freezes the results', () => {
+    const calls: string[] = [];
+    const extra = { device: 'd1' };
+    const auth = helloAuth(
+      norm({
+        authmethods: () => (calls.push('authmethods'), ['ticket']),
+        authid: () => (calls.push('authid'), 'joe'),
+        authextra: () => (calls.push('authextra'), extra),
+      }),
+    );
+    expect(calls).toEqual(['authmethods', 'authid', 'authextra']);
+    expect(auth).toEqual({ authmethods: ['ticket'], authid: 'joe', authextra: { device: 'd1' } });
+    expect([auth, auth.authmethods, auth.authextra].every((part) => Object.isFrozen(part))).toBe(true);
+    expect(auth.authextra).not.toBe(extra); // a copy: the app may change its object afterwards
+    expect(
+      helloAuth(norm({ authmethods: () => undefined, authid: () => undefined, authextra: () => undefined })),
+    ).toEqual({
+      authmethods: [],
+      authid: undefined,
+      authextra: undefined,
+    });
+    const values = norm({ authmethods: ['wampcra'], authid: 'ann' });
+    expect(helloAuth(values)).toEqual({ authmethods: ['wampcra'], authid: 'ann', authextra: undefined });
+  });
+
+  test.each([
+    [{ authmethods: () => 'ticket' }, 'authmethods() must be an array of non-empty strings or undefined'],
+    [{ authmethods: () => [''] }, 'authmethods() must be an array of non-empty strings or undefined'],
+    [{ authid: () => 7 }, 'authid() must be a string or undefined'],
+    [{ authextra: () => [] }, 'authextra() must be a plain object or undefined'],
+  ])('helloAuth: an invalid result is a TypeError naming the function (%o)', (options, message) => {
+    expect(() => helloAuth(norm(options))).toThrow(new TypeError(message));
+  });
+
+  test("helloAuth: a function's own throw passes through", () => {
+    const error = new Error('no user yet');
+    expect(() =>
+      helloAuth(
+        norm({
+          authid: () => {
+            throw error;
+          },
+        }),
+      ),
+    ).toThrow(error);
   });
 
   test("requestIds: 'random' or 'sequential'", () => {

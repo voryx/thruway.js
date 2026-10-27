@@ -773,6 +773,38 @@ describe('recipes against the reference router', () => {
     topic.unsubscribe();
   });
 
+  test('recipe 11: auth options as functions switch an anonymous session to a login through reconnect(); the topic carries over', async () => {
+    const token = 'jwt-joe';
+    // doctest: recipe-11-identity
+    let login: { authid: string; ticket: string } | undefined = undefined; // anonymous until the user logs in
+    const client = new Client(url, 'realm1', {
+      authmethods: () => (login === undefined ? undefined : ['ticket']),
+      authid: () => login?.authid,
+      onChallenge: () => login?.ticket ?? '', // only challenged once ticket is offered
+    });
+    // doctest-end
+    env.current.track(client);
+    const events: unknown[] = [];
+    const topic = client.topic('com.example.status').subscribe((e) => events.push(e.args[0]));
+    await env.current.advance(10);
+    expect(client.session?.details).toMatchObject({ authrole: 'anonymous' });
+    // doctest: recipe-11-login
+    login = { authid: 'joe', ticket: token };
+    client.reconnect(); // the next HELLO offers ticket as joe; every stream carries over
+    // doctest-end
+    await env.current.advance(1100);
+    const hellos = env.current.written(T.HELLO).map((f) => f[2] as Record<string, unknown>);
+    expect(hellos).toHaveLength(2);
+    expect(hellos[0]).not.toHaveProperty('authmethods');
+    expect(hellos[1]).toMatchObject({ authmethods: ['ticket'], authid: 'joe' });
+    expect(env.current.written(T.AUTHENTICATE).map((f) => f[1])).toEqual(['jwt-joe']);
+    expect(client.session?.details).toMatchObject({ authid: 'joe', authrole: 'user' });
+    env.current.router.publish('com.example.status', ['as joe']);
+    await env.current.advance(10);
+    expect(events).toEqual(['as joe']);
+    topic.unsubscribe();
+  });
+
   test('recipe 12: retry no_such_procedure (8 × 1 s), nothing else', async () => {
     const { router } = env.current;
     const { wamp } = setup();

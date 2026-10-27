@@ -135,22 +135,27 @@ new Client(url: string | (() => Input<string>), realm: string, options?: ClientO
 
 Every key is optional. A key set to `undefined` means the default.
 
-| Option         | Type                                             | Default                                     | Notes                                                                                                                                                             |
-| -------------- | ------------------------------------------------ | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `authmethods`  | `readonly string[]`                              | none (anonymous)                            | Sent in HELLO. Non-empty strings.                                                                                                                                 |
-| `authid`       | `string`                                         | —                                           | Sent in HELLO.                                                                                                                                                    |
-| `authextra`    | `Readonly<Record<string, unknown>>`              | —                                           | Sent in HELLO. A plain object.                                                                                                                                    |
-| `onChallenge`  | `(challenge: ChallengeMessage) => Input<string>` | —                                           | Answers each CHALLENGE. See [Authentication](#authentication).                                                                                                    |
-| `autoOpen`     | `boolean`                                        | `true`                                      | `false`: stays closed until `open()`.                                                                                                                             |
-| `retryOptions` | `RetryOptions`                                   | see below                                   | Reconnect backoff.                                                                                                                                                |
-| `timeouts`     | `Timeouts`                                       | see below                                   | Client timers.                                                                                                                                                    |
-| `requestIds`   | `'random' \| 'sequential'`                       | `'random'`                                  | `random`: 53-bit ids unique among the session's in-flight requests. `sequential`: a counter from 1 per session (Nexus `strict_request_ids`; not for Thruway PHP). |
-| `WebSocket`    | `WebSocketConstructorLike`                       | `globalThis.WebSocket`                      | Any WHATWG-style WebSocket class: `ws`, React Native's, a custom transport.                                                                                       |
-| `serializer`   | `Serializer`                                     | `jsonSerializer()`                          |                                                                                                                                                                   |
-| `clock`        | `Clock`                                          | the system clock                            | Inject a virtual clock in tests.                                                                                                                                  |
-| `logger`       | `(entry: LogEntry) => void`                      | prints `error` entries with `console.error` | See [`LogEntry`](#logentry).                                                                                                                                      |
+| Option         | Type                                                             | Default                                     | Notes                                                                                                                                                             |
+| -------------- | ---------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `authmethods`  | `readonly string[]`, or a function returning one                 | none (anonymous)                            | Sent in HELLO. Non-empty strings. A function is called for every HELLO ([recipe 11](#11-re-authenticate)).                                                        |
+| `authid`       | `string`, or a function returning one                            | —                                           | Sent in HELLO. A function is called for every HELLO.                                                                                                              |
+| `authextra`    | `Readonly<Record<string, unknown>>`, or a function returning one | —                                           | Sent in HELLO. A plain object. A function is called for every HELLO.                                                                                              |
+| `onChallenge`  | `(challenge: ChallengeMessage) => Input<string>`                 | —                                           | Answers each CHALLENGE. See [Authentication](#authentication).                                                                                                    |
+| `autoOpen`     | `boolean`                                                        | `true`                                      | `false`: stays closed until `open()`.                                                                                                                             |
+| `retryOptions` | `RetryOptions`                                                   | see below                                   | Reconnect backoff.                                                                                                                                                |
+| `timeouts`     | `Timeouts`                                                       | see below                                   | Client timers.                                                                                                                                                    |
+| `requestIds`   | `'random' \| 'sequential'`                                       | `'random'`                                  | `random`: 53-bit ids unique among the session's in-flight requests. `sequential`: a counter from 1 per session (Nexus `strict_request_ids`; not for Thruway PHP). |
+| `WebSocket`    | `WebSocketConstructorLike`                                       | `globalThis.WebSocket`                      | Any WHATWG-style WebSocket class: `ws`, React Native's, a custom transport.                                                                                       |
+| `serializer`   | `Serializer`                                                     | `jsonSerializer()`                          |                                                                                                                                                                   |
+| `clock`        | `Clock`                                                          | the system clock                            | Inject a virtual clock in tests.                                                                                                                                  |
+| `logger`       | `(entry: LogEntry) => void`                                      | prints `error` entries with `console.error` | See [`LogEntry`](#logentry).                                                                                                                                      |
 
 HELLO carries only `agent`, `roles`, `authmethods`, `authid` and `authextra`. Other keys of `options` are ignored.
+
+`authmethods`, `authid` and `authextra` may each be a function instead of a value. It is called, synchronously, every
+time a HELLO is written (never at construction), and returning `undefined` leaves the key out. A throw or an invalid
+result ends that attempt before the HELLO (`AuthenticationError` in `CloseInfo`, the throw as its `cause`) and the
+client retries with backoff.
 
 #### `RetryOptions`
 
@@ -612,7 +617,9 @@ const client = new Client(url, 'realm1', {
 - A WELCOME without a CHALLENGE that is anonymous (no `authid` and no `authmethod`, `authmethod: 'anonymous'`, or an
   echo of your HELLO) when you offered only non-anonymous methods is rejected as an authentication failure (Thruway PHP
   does that when no provider covers the realm). Add `'anonymous'` to `authmethods` to accept it.
-- `reconnect()` runs a new handshake, so `onChallenge` reads fresh credentials ([recipe 11](#11-re-authenticate)).
+- `reconnect()` runs a new handshake, so `onChallenge` reads fresh credentials, and `authmethods`, `authid` and
+  `authextra` given as functions are read again: a new identity takes effect without ending any stream
+  ([recipe 11](#11-re-authenticate)).
 
 ### `thruway.js/auth`
 
@@ -1045,6 +1052,29 @@ client.reconnect();
 
 Topics and registrations are re-established, waiting work stays, in-flight reads fail with `connection_lost`
 (recipe 1 re-issues them). Do not use `close(); open()` for this: `close()` ends every stream.
+
+To switch identity, for example from an anonymous session to a logged-in user, give the auth options as functions.
+They are read for every HELLO:
+
+<!-- doctest: recipe-11-identity -->
+
+```ts
+let login: { authid: string; ticket: string } | undefined = undefined; // anonymous until the user logs in
+const client = new Client(url, 'realm1', {
+  authmethods: () => (login === undefined ? undefined : ['ticket']),
+  authid: () => login?.authid,
+  onChallenge: () => login?.ticket ?? '', // only challenged once ticket is offered
+});
+```
+
+After the login:
+
+<!-- doctest: recipe-11-login -->
+
+```ts
+login = { authid: 'joe', ticket: token };
+client.reconnect(); // the next HELLO offers ticket as joe; every stream carries over
+```
 
 ### 12. Retry selected error URIs
 

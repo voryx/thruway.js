@@ -50,7 +50,7 @@ import { Liveness } from '../ops/liveness.js';
 import { PublishParticipant } from '../ops/publish.js';
 import { GHOST_MEMORY, RegisterParticipant } from '../ops/register.js';
 import { TopicParticipant } from '../ops/topic.js';
-import type { NormalizedOptions } from '../options.js';
+import { helloAuth, type HelloAuth, type NormalizedOptions } from '../options.js';
 import { CloseCode, MessageType, Uri } from '../protocol/codes.js';
 import { decode, frameText } from '../protocol/decode.js';
 import { helloDetails } from '../protocol/hello.js';
@@ -952,12 +952,27 @@ export class Core implements LoopHost {
     this.kConnect = 0;
     conn.gate = 'hello';
     this.phase = { state: 'HELLO_SENT', conn };
-    const details = helloDetails({
-      authmethods: this.o.authmethods,
-      authid: this.o.authid,
-      authextra: this.o.authextra,
-    });
-    if (this.writeHandshake(conn, helloFrame(this.o.realm, details))) this.armHandshake(conn);
+    const auth = this.helloAuth(conn);
+    if (auth === undefined) return;
+    if (this.writeHandshake(conn, helloFrame(this.o.realm, helloDetails(auth)))) this.armHandshake(conn);
+  }
+
+  /** This attempt's auth keys, kept on the connection: the function options are called now. Undefined when one threw
+   *  or returned an invalid value: the attempt ended (AuthenticationError, retried with backoff). */
+  private helloAuth(conn: Connection): HelloAuth | undefined {
+    try {
+      conn.auth = helloAuth(this.o);
+      return conn.auth;
+    } catch (cause) {
+      conn.release(CloseCode.NORMAL);
+      this.end(conn, {
+        initiator: 'connection',
+        closeCode: CloseCode.NORMAL,
+        wasClean: true,
+        error: new AuthenticationError({ message: 'the authmethods, authid or authextra option failed', cause }),
+      });
+      return undefined;
+    }
   }
 
   private armHandshake(conn: Connection): void {
@@ -1099,7 +1114,7 @@ export class Core implements LoopHost {
   /** The anonymous-WELCOME rule: a client whose `authmethods` leave out `anonymous` and that got no CHALLENGE
    *  rejects a WELCOME that is (or looks) anonymous. */
   private anonymous(conn: Connection, details: Dict): boolean {
-    const methods = this.o.authmethods;
+    const methods = conn.auth.authmethods;
     if (methods.length === 0 || methods.includes('anonymous') || conn.challenged) return false;
     return (
       details['authmethod'] === 'anonymous' ||
@@ -1158,7 +1173,7 @@ export class Core implements LoopHost {
 
   private challenge(conn: Connection, msg: InboundChallenge): void {
     const method = msg.authMethod;
-    const methods = this.o.authmethods;
+    const methods = conn.auth.authmethods;
     if (this.o.onChallenge === undefined) {
       this.cannotAuthenticate(conn, 'no onChallenge handler', method, undefined);
       return;

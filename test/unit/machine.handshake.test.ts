@@ -816,6 +816,116 @@ describe('CHALLENGE', () => {
   });
 });
 
+describe('authmethods, authid and authextra as functions: called for every HELLO', () => {
+  test('called when each HELLO is written (authmethods, authid, authextra); undefined leaves the key out; a new identity takes effect with reconnect()', async () => {
+    let user: { authid: string; ticket: string } | undefined = undefined;
+    const calls: string[] = [];
+    const c = start(
+      {
+        authmethods: () => {
+          calls.push('authmethods');
+          return user === undefined ? undefined : ['ticket'];
+        },
+        authid: () => {
+          calls.push('authid');
+          return user?.authid;
+        },
+        authextra: () => {
+          calls.push('authextra');
+          return user === undefined ? undefined : { device: 'd1' };
+        },
+        onChallenge: () => user?.ticket ?? '',
+      },
+      scripted,
+    );
+    expect(calls).toEqual([]); // not at construction
+    await h.current.clock.advance(1);
+    expect(calls).toEqual(['authmethods', 'authid', 'authextra']);
+    expect(Object.keys(written(c)[0]?.[2] as object).sort()).toEqual(['agent', 'roles']);
+    raw([2, 70, { authid: 'anon-1', authrole: 'anonymous', authmethod: 'anonymous', roles: { broker: {} } }]);
+    await h.current.clock.advance(1);
+    expect(c.client.session?.id).toBe(70); // offered nothing: an anonymous session is what was asked for
+    user = { authid: 'joe', ticket: 't0k3n' };
+    c.reconnect();
+    await h.current.clock.advance(3000);
+    expect(calls).toHaveLength(6);
+    const [hello] = written(c, 2);
+    expect(hello?.[2]).toMatchObject({ authmethods: ['ticket'], authid: 'joe', authextra: { device: 'd1' } });
+    raw([4, 'ticket', {}]);
+    await h.current.clock.advance(1);
+    expect(written(c, 2).at(-1)).toEqual([5, 't0k3n', {}]);
+    raw([2, 71, WELCOME_AUTH]);
+    await h.current.clock.advance(1);
+    expect(c.client.session).toMatchObject({ id: 71, details: { authid: 'joe' } });
+    expect(calls).toHaveLength(6); // a CHALLENGE does not call them again
+  });
+
+  test('a function that throws or returns an invalid value ends the attempt before any HELLO: AuthenticationError{cause}, retried', async () => {
+    let k = 0;
+    const c = start(
+      {
+        authid: () => {
+          k++;
+          if (k === 1) throw new Error('no user yet');
+          return k === 2 ? (7 as unknown as string) : 'joe';
+        },
+        retryOptions: { retryDelay: () => 100 },
+      },
+      scripted,
+    );
+    await h.current.clock.advance(1);
+    await h.current.clock.advance(1200);
+    await h.current.clock.advance(1200);
+    const infos = closes(c);
+    expect(infos.slice(0, 2).map((i) => [i.initiator, i.closeCode, i.willRetry])).toEqual([
+      ['connection', 1000, true],
+      ['connection', 1000, true],
+    ]);
+    expect(infos[0]?.error).toMatchObject({
+      code: 'authentication',
+      message: 'the authmethods, authid or authextra option failed',
+    });
+    expect((infos[0]?.error as { cause: Error }).cause.message).toBe('no user yet');
+    expect((infos[1]?.error as { cause: Error }).cause).toBeInstanceOf(TypeError);
+    expect((infos[1]?.error as { cause: Error }).cause.message).toBe('authid() must be a string or undefined');
+    expect(types(c, 1)).toEqual([]);
+    expect(types(c, 2)).toEqual([]);
+    expect(c.connections[0]!.controls.closeCalls).toEqual([{ code: 1000, reason: 'normal closure' }]);
+    expect(written(c, 3)[0]?.[2]).toMatchObject({ authid: 'joe' });
+  });
+
+  test("the CHALLENGE check and the anonymous-WELCOME rule use the methods of that attempt's HELLO", async () => {
+    let methods: string[] | undefined = ['ticket'];
+    const c = start(
+      { authmethods: () => methods, onChallenge: () => 'x', retryOptions: { retryDelay: () => 100 } },
+      scripted,
+    );
+    const next = async (): Promise<void> => {
+      await h.current.clock.advance(1200);
+    };
+    await h.current.clock.advance(1);
+    raw([4, 'wampcra', {}]); // not offered in this HELLO
+    await h.current.clock.advance(1);
+    expect(lastClose(c)).toMatchObject({ reason: 'wamp.error.cannot_authenticate', attempt: 1 });
+    methods = ['wampcra'];
+    await next();
+    raw([4, 'wampcra', {}]); // offered in this one
+    await h.current.clock.advance(1);
+    expect(written(c, 2).at(-1)).toEqual([5, 'x', {}]);
+    raw([3, {}, 'wamp.error.not_authorized']);
+    await next();
+    raw([2, 80, { authid: 'anon-2', authmethod: 'anonymous', roles: {} }]); // asked for wampcra, welcomed anonymously
+    await h.current.clock.advance(1);
+    expect(lastClose(c).error?.message).toBe('router welcomed the session anonymously');
+    methods = undefined; // anonymous now: the same WELCOME is what was asked for
+    await next();
+    raw([2, 81, { authid: 'anon-3', authmethod: 'anonymous', roles: {} }]);
+    await h.current.clock.advance(1);
+    expect(c.client.session?.id).toBe(81);
+    expect(written(c, 4)[0]?.[2]).not.toHaveProperty('authmethods');
+  });
+});
+
 describe('the anonymous-WELCOME rule', () => {
   const offered: ClientOptions = { authmethods: ['ticket'], onChallenge: () => 'x' };
 

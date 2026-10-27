@@ -8,6 +8,7 @@
 import { WampError } from '../errors.js';
 import { CloseCode, Uri } from '../protocol/codes.js';
 import { MAX_FRAME_BYTES, type InboundChallenge, type OutboundFrame } from '../protocol/messages.js';
+import type { HelloAuth } from '../options.js';
 import type { Serializer, Session } from '../types.js';
 import type { Transport } from '../transport/websocket.js';
 import type { ConnId } from './contracts.js';
@@ -31,6 +32,9 @@ const CLOSE_REASONS: Readonly<Record<ClientCloseCode, string>> = {
 export function closeReason(code: ClientCloseCode): string {
   return CLOSE_REASONS[code];
 }
+
+/** The auth keys of a connection whose HELLO is not written yet. */
+const NO_AUTH: HelloAuth = Object.freeze({ authmethods: Object.freeze([]), authid: undefined, authextra: undefined });
 
 /** The transport of a connection whose socket does not exist yet (RESOLVING): nothing can be written to it. */
 const NO_TRANSPORT: Transport = Object.freeze({
@@ -93,6 +97,8 @@ export class Connection {
   cancelResolver: (() => void) | undefined = undefined;
   /** The URL this attempt's socket was opened with (empty until the URL is resolved and the socket created). */
   url = '';
+  /** The auth keys of this attempt's HELLO (none until it is written). */
+  auth: HelloAuth = NO_AUTH;
   /** The id of a WELCOME the client rejected as unrequested-anonymous (`CloseInfo.sessionId`). */
   rejectedSessionId: number | undefined = undefined;
   /** The deadline the connect / handshake timer was armed with (`TimeoutError.timeout`). */

@@ -227,9 +227,10 @@ describe('Client', () => {
 
 // ------------------------------------------------------------------------------------------------------- Options
 interface SpecClientOptions {
-  readonly authmethods?: readonly string[] | undefined;
-  readonly authid?: string | undefined;
-  readonly authextra?: Readonly<Record<string, unknown>> | undefined;
+  readonly authmethods?: readonly string[] | (() => readonly string[] | undefined) | undefined;
+  readonly authid?: string | (() => string | undefined) | undefined;
+  readonly authextra?:
+    Readonly<Record<string, unknown>> | (() => Readonly<Record<string, unknown>> | undefined) | undefined;
   readonly onChallenge?: ((challenge: ChallengeMessage) => Input<string>) | undefined;
   readonly autoOpen?: boolean | undefined;
   readonly retryOptions?: RetryOptions | undefined;
@@ -318,6 +319,14 @@ describe('Options', () => {
     expectTypeOf({ invoke: '_thruway' as const, replace_orphaned_session: 'yes' }).toExtend<RegisterOptions>();
     // @ts-expect-error -- `match` only accepts the spec values or the `_…` escape hatch
     expectTypeOf({ match: 'regex' }).toExtend<TopicOptions>();
+    const maybeUser = undefined as string | undefined;
+    expectTypeOf({
+      authmethods: () => (maybeUser === undefined ? undefined : ['ticket']),
+      authid: () => maybeUser,
+      authextra: () => undefined,
+    }).toExtend<ClientOptions>();
+    // @ts-expect-error -- the auth functions are synchronous: a Promise is not an authid
+    expectTypeOf({ authid: () => Promise.resolve('joe') }).toExtend<ClientOptions>();
     const maybeSession = undefined as number | undefined;
     expectTypeOf({ timer: 'call', timeout: 1, procedure: 'p', sessionId: maybeSession } as const).toExtend<
       ConstructorParameters<typeof TimeoutError>[0]

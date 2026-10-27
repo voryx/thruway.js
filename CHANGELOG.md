@@ -15,7 +15,9 @@ A rewrite. See [MIGRATION.md](MIGRATION.md) for what changes in your code, with 
   across package copies (`isThruwayError`, `isWampError`).
 - `onChallenge` as an option: a function per CHALLENGE that returns a string, a Promise or any Observable, with an
   `AbortSignal` for abandoned handshakes.
-- The URL may be a function, called at the start of every attempt.
+- The URL may be a function, called at the start of every attempt; `authmethods`, `authid` and `authextra` may be
+  functions, called for every HELLO, so `reconnect()` can switch identity (an anonymous session to a login) without
+  ending any stream.
 - `retryOptions.retryDelay` (a custom backoff that can give up with `null`), `timeouts` (connect, handshake, request,
   idle), `requestIds`, `WebSocket`, `serializer`, `clock`, `logger`.
 - Liveness: a WAMP-level probe finds dead sockets that browsers and React Native cannot ping.

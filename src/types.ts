@@ -72,9 +72,12 @@ export interface Observable<T> {
 
 export interface ClientOptions {
   // --- HELLO.Details, spec names (only these keys are ever sent; nothing else leaks) ---
-  readonly authmethods?: readonly string[] | undefined; // [none → anonymous]
-  readonly authid?: string | undefined;
-  readonly authextra?: Readonly<Record<string, unknown>> | undefined;
+  // Each may be a function instead: it is called, synchronously, every time a HELLO is written, so a new identity
+  // takes effect with `reconnect()` (README recipe 11). A function returning `undefined` leaves the key out.
+  readonly authmethods?: readonly string[] | (() => readonly string[] | undefined) | undefined; // [none → anonymous]
+  readonly authid?: string | (() => string | undefined) | undefined;
+  readonly authextra?:
+    Readonly<Record<string, unknown>> | (() => Readonly<Record<string, unknown>> | undefined) | undefined;
   /** Called for every CHALLENGE whose method is in `authmethods`, on every handshake (a newer CHALLENGE replaces a
    *  pending one; its signal is aborted). May take arbitrarily long (login dialogs): the handshake timer does not run
    *  while it is pending — bound non-interactive handlers yourself (README recipe 18).

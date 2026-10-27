@@ -274,7 +274,7 @@ export function itClient(r: Router | undefined, setup: ItClientSetup = {}): ItCl
     ),
     maxRetries: options.retryOptions?.maxRetries,
     retryDelay: options.retryOptions?.retryDelay === undefined ? 'default' : 'custom-null',
-    authmethods: options.authmethods,
+    authmethods: typeof options.authmethods === 'function' ? undefined : options.authmethods, // a function: not judged
   };
   const url = setup.url ?? r?.url;
   if (url === undefined) throw new Error('itClient: no router and no url');
