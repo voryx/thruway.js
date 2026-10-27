@@ -152,13 +152,13 @@ describe.concurrent('prepublish-guard', () => {
   test('refuses a file-list diff: a packed file the snapshot lacks, and a listed file that is not packed', async () => {
     const dir = fixtureRepo();
     commit(dir, () => {
-      writeFileSync(path.join(dir, 'src/notes.txt'), 'shipped by accident\n');
+      writeFileSync(path.join(dir, 'src/extra.ts'), 'export const extra = 1;\n'); // built, so packed by accident
       rmSync(path.join(dir, 'LICENSE'));
     });
     const r = await guard(dir);
     expect(r.status, r.output).toBe(1);
     expect(r.output).toContain('REFUSED: the packed files differ from test/package/files.snapshot.txt');
-    expect(r.output).toContain('+ src/notes.txt');
+    expect(r.output).toContain('+ dist/esm/extra.js');
     expect(r.output).toContain('- LICENSE');
   });
 
@@ -170,7 +170,7 @@ describe.concurrent('prepublish-guard', () => {
     const r = await guard(dir);
     expect(r.status, r.output).toBe(1);
     expect(r.output).toContain('REFUSED: debug markers in packed files');
-    expect(r.output).toContain(`src/yield.ts: ${marker}`);
+    expect(r.output).toContain(`dist/esm/yield.js: ${marker}`); // the build keeps comments
   });
 
   test('Markdown may show console.log in examples, but no other marker', async () => {

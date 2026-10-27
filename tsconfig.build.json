@@ -6,8 +6,6 @@
     "rootDir": "./src",
     "outDir": "./dist/esm",
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "removeComments": false,
     "stripInternal": true
   },

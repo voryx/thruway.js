@@ -59,7 +59,7 @@ const base = (minify: boolean): RspackOptions => ({
   mode: 'production',
   entry: { thruway: './src/bundle.ts' },
   target: ['web', 'es2020'],
-  devtool: 'source-map',
+  devtool: false, // no source maps in the package
   resolve,
   module: { rules: moduleRules },
   optimization: minify ? minimizer() : { minimize: false },
