@@ -1,0 +1,458 @@
+{
+  "url": "ws://127.0.0.1:18295/",
+  "realm": "realm1",
+  "node": "v26.3.0",
+  "at": "2026-10-25T20:22:41.225Z",
+  "probes": {
+    "welcome": {
+      "desc": "WELCOME details/roles for an anonymous HELLO",
+      "welcome": {
+        "roles": {
+          "broker": {},
+          "dealer": {}
+        }
+      }
+    },
+    "hello_no_roles": {
+      "desc": "HELLO with empty details (no roles) - spec requires roles",
+      "reply": "WELCOME [2,5576865875340083,{\"roles\":{\"broker\":{},\"dealer\":{}}}]",
+      "closed": null
+    },
+    "invalid_realm": {
+      "desc": "HELLO for realm \"Bad Realm!\" (invalid chars)",
+      "reply": "ABORT [3,\"wamp.error.no_such_realm\",{\"roles\":{\"broker\":{},\"dealer\":{}}}]",
+      "closed": null
+    },
+    "subprotocol_none": {
+      "desc": "WebSocket offering only \"wamp.2.msgpack\" (no json)",
+      "opened": true,
+      "negotiated": "wamp.2.msgpack",
+      "closed": null
+    },
+    "msg_before_hello": {
+      "desc": "SUBSCRIBE sent before HELLO",
+      "frames": ["ABORT [3,\"wamp.error.no_such_realm\",{\"roles\":{\"broker\":{},\"dealer\":{}}}]"],
+      "closed": null
+    },
+    "second_hello": {
+      "desc": "second HELLO after WELCOME",
+      "frames": ["WELCOME [2,2433301149581641,{\"roles\":{\"broker\":{},\"dealer\":{}}}]"],
+      "closed": null
+    },
+    "invalid_json": {
+      "desc": "send \"not json{\" after WELCOME",
+      "frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "closed": {
+        "code": 1005,
+        "reason": ""
+      }
+    },
+    "unknown_type": {
+      "desc": "send [999, 1, {}] after WELCOME",
+      "frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "closed": {
+        "code": 1005,
+        "reason": ""
+      }
+    },
+    "client_sends_welcome": {
+      "desc": "send a router-only message (WELCOME) after WELCOME",
+      "frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "closed": {
+        "code": 1005,
+        "reason": ""
+      }
+    },
+    "goodbye": {
+      "desc": "GOODBYE wamp.close.system_shutdown -> reply + who closes the socket",
+      "reply": "GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]",
+      "closed_by_router": {
+        "code": 1005,
+        "reason": ""
+      }
+    },
+    "rid_zero": {
+      "desc": "CALL with request id 0 to an unknown procedure",
+      "frames": ["ERROR [8,48,0,{},\"wamp.error.no_such_procedure\",null]"],
+      "closed": null
+    },
+    "rid_2pow53": {
+      "desc": "CALL with request id 9007199254740992 to an unknown procedure",
+      "frames": ["ERROR [8,48,9007199254740992,{},\"wamp.error.no_such_procedure\",null]"],
+      "closed": null
+    },
+    "rid_negative": {
+      "desc": "CALL with request id -5 to an unknown procedure",
+      "frames": ["ERROR [8,48,-5,{},\"wamp.error.no_such_procedure\",null]"],
+      "closed": null
+    },
+    "rid_string": {
+      "desc": "CALL with request id \"abc\" to an unknown procedure",
+      "frames": ["ERROR [8,48,\"abc\",{},\"wamp.error.no_such_procedure\",null]"],
+      "closed": null
+    },
+    "rid_float": {
+      "desc": "CALL with request id 1.5 to an unknown procedure",
+      "frames": ["ERROR [8,48,1.5,{},\"wamp.error.no_such_procedure\",null]"],
+      "closed": null
+    },
+    "rid_nonsequential": {
+      "desc": "REGISTER with id 1000 then SUBSCRIBE with id 5 (non-sequential)",
+      "frames": ["REGISTERED [65,1000,3229366304011809]", "SUBSCRIBED [33,5,1081635294012047]"],
+      "closed": null
+    },
+    "rid_duplicate_inflight": {
+      "desc": "two CALLs in flight with the same request id",
+      "caller_frames": ["RESULT [50,7,{},[\"first\"]]"],
+      "invocations": 2
+    },
+    "rid_same_across_sessions_cancel_second": {
+      "desc": "two callers both use CALL id 1, the second caller cancels (kill)",
+      "caller1_frames": [],
+      "caller2_frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "callee_interrupted_calls": []
+    },
+    "rid_same_across_sessions_cancel_first": {
+      "desc": "two callers both use CALL id 1, the first caller cancels (kill)",
+      "caller1_frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "caller2_frames": [],
+      "callee_interrupted_calls": []
+    },
+    "uri_uppercase": {
+      "desc": "REGISTER \"probe.C.Upper\"",
+      "reply": "REGISTERED [65,1,6400129793047424]"
+    },
+    "uri_hyphen": {
+      "desc": "REGISTER \"probe.c.with-hyphen\"",
+      "reply": "REGISTERED [65,1,7601388633684038]"
+    },
+    "uri_empty_component": {
+      "desc": "REGISTER \"probe..c\"",
+      "reply": "REGISTERED [65,1,6998608631086965]"
+    },
+    "uri_wamp_reserved": {
+      "desc": "REGISTER \"wamp.probe_c\"",
+      "reply": "REGISTERED [65,1,5542401937495003]"
+    },
+    "uri_publish_invalid": {
+      "desc": "PUBLISH{acknowledge} to \"probe.C.Bad-Topic\"",
+      "reply": "none"
+    },
+    "rpc_errors": {
+      "desc": "CALL unknown procedure; UNREGISTER unknown id; callee ERROR with custom uri/args/kwargs",
+      "call_unknown": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\",null]",
+      "unregister_unknown": null,
+      "callee_error": null
+    },
+    "payload_fidelity": {
+      "desc": "echo callee: args/kwargs edge cases survive the router unchanged?",
+      "no args": {
+        "sent": "[]",
+        "invocation_tail": "[null,null]",
+        "result_tail": "[null]"
+      },
+      "args []": {
+        "sent": "[[]]",
+        "invocation_tail": "[[],null]",
+        "result_tail": "[[]]"
+      },
+      "args [[1,2]]": {
+        "sent": "[[[1,2]]]",
+        "invocation_tail": "[[[1,2]],null]",
+        "result_tail": "[[[1,2]]]"
+      },
+      "args [null]": {
+        "sent": "[[null]]",
+        "invocation_tail": "[[null],null]",
+        "result_tail": "[[null]]"
+      },
+      "args [1,2,3]": {
+        "sent": "[[1,2,3]]",
+        "invocation_tail": "[[1,2,3],null]",
+        "result_tail": "[[1,2,3]]"
+      },
+      "args [] kwargs {}": {
+        "sent": "[[],{}]",
+        "invocation_tail": "[[],{}]",
+        "result_tail": "[[]]"
+      },
+      "args [] kwargs {a:1}": {
+        "sent": "[[],{\"a\":1}]",
+        "invocation_tail": "[[],{\"a\":1}]",
+        "result_tail": "[[]]"
+      },
+      "unicode": {
+        "sent": "[[\"héllo 😀 / \\\\ \\\"q\\\"\"]]",
+        "invocation_tail": "[[\"héllo 😀 / \\\\ \\\"q\\\"\"],null]",
+        "result_tail": "[[\"héllo 😀 / \\\\ \\\"q\\\"\"]]"
+      },
+      "int 2^53-1": {
+        "sent": "[[9007199254740991]]",
+        "invocation_tail": "[[9007199254740991],null]",
+        "result_tail": "[[9007199254740991]]"
+      },
+      "nested": {
+        "sent": "[[{\"a\":[1,{\"b\":null}]}],{\"deep\":{\"x\":[]}}]",
+        "invocation_tail": "[[{\"a\":[1,{\"b\":null}]}],{\"deep\":{\"x\":[]}}]",
+        "result_tail": "[[{\"a\":[1,{\"b\":null}]}]]"
+      }
+    },
+    "large_payload": {
+      "desc": "echo a ~1 MiB string argument",
+      "ok": true,
+      "ms": 134,
+      "reply": "RESULT [50,1,{},[\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "closed": null
+    },
+    "caller_identification": {
+      "desc": "REGISTER{disclose_caller:true} -> INVOCATION.details.caller?",
+      "register": "REGISTERED [65,1,2882790504629715]",
+      "invocation_details": {
+        "disclose_me": true
+      },
+      "caller_session": 2881080263509006
+    },
+    "progressive_results": {
+      "desc": "CALL{receive_progress} + 2 progressive YIELDs + final",
+      "invocation_details": {
+        "receive_progress": true
+      },
+      "caller_frames": ["RESULT [50,1,{},[\"p1\"]]"]
+    },
+    "progressive_unrequested": {
+      "desc": "callee sends progressive YIELD although caller did not ask for progress",
+      "caller_frames": ["RESULT [50,1,{},[\"p1\"]]"],
+      "callee_frames_after": []
+    },
+    "cancel_skip": {
+      "desc": "CANCEL{mode:skip} on a pending call (callee answers INTERRUPT with ERROR(INVOCATION) wamp.error.canceled)",
+      "caller_frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "callee_frames": ["INVOCATION [68,1,8288974174347123,{},[],null]"]
+    },
+    "cancel_kill": {
+      "desc": "CANCEL{mode:kill} on a pending call (callee answers INTERRUPT with ERROR(INVOCATION) wamp.error.canceled)",
+      "caller_frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "callee_frames": ["INVOCATION [68,1,8232008437228931,{},[],null]"]
+    },
+    "cancel_killnowait": {
+      "desc": "CANCEL{mode:killnowait} on a pending call (callee answers INTERRUPT with ERROR(INVOCATION) wamp.error.canceled)",
+      "caller_frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "callee_frames": ["INVOCATION [68,1,7496991046681443,{},[],null]"]
+    },
+    "cancel_callee_no_cancel_feature": {
+      "desc": "CANCEL{kill} when the callee did NOT announce call_canceling",
+      "caller_frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "callee_frames": ["INVOCATION [68,1,8050732672938842,{},[],null]"]
+    },
+    "cancel_progressive_kill": {
+      "desc": "CANCEL{kill} on a receive_progress call that already got one progressive result",
+      "caller_frames": ["RESULT [50,1,{},[\"p1\"]]", "GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "callee_frames": ["INVOCATION [68,1,7345212382368344,{\"receive_progress\":true},[],null]"]
+    },
+    "cancel_unknown": {
+      "desc": "CANCEL for a request id that was never used",
+      "frames": ["GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]"],
+      "closed": {
+        "code": 1005,
+        "reason": ""
+      }
+    },
+    "call_timeout": {
+      "desc": "CALL{timeout:300} to a callee that never answers",
+      "caller_reply": "none within 2s",
+      "after_ms": null,
+      "invocation_details": {
+        "timeout": 300
+      },
+      "callee_interrupt": [],
+      "caller_frames": []
+    },
+    "callee_leaves": {
+      "desc": "callee disconnects while an invocation is pending",
+      "caller_reply": "none within 2.5s",
+      "caller_frames": []
+    },
+    "caller_leaves": {
+      "desc": "caller disconnects while its call is pending: does the callee get INTERRUPT?",
+      "callee_frames": ["INVOCATION [68,1,6581496378918105,{},[],null]"]
+    },
+    "registration_duplicate": {
+      "desc": "second session REGISTERs the same URI without options",
+      "first": "REGISTERED [65,1,1732899202069285]",
+      "second": "ERROR [8,64,1,{},\"wamp.error.procedure_already_exists\",null]"
+    },
+    "shared_roundrobin": {
+      "desc": "two sessions REGISTER {invoke:\"roundrobin\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,2956151686714096]",
+      "register_b": "ERROR [8,64,1,{},\"wamp.error.procedure_already_exists\",null]",
+      "results": ["a", "a", "a", "a", "a", "a"],
+      "counts": {
+        "a": 6,
+        "b": 0
+      }
+    },
+    "shared_random": {
+      "desc": "two sessions REGISTER {invoke:\"random\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,1897413064478707]",
+      "register_b": "ERROR [8,64,1,{},\"wamp.error.procedure_already_exists\",null]",
+      "results": ["a", "a", "a", "a", "a", "a"],
+      "counts": {
+        "a": 6,
+        "b": 0
+      }
+    },
+    "shared_first": {
+      "desc": "two sessions REGISTER {invoke:\"first\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,6820820343542271]",
+      "register_b": "ERROR [8,64,1,{},\"wamp.error.procedure_already_exists\",null]",
+      "results": ["a", "a", "a", "a", "a", "a"],
+      "counts": {
+        "a": 6,
+        "b": 0
+      }
+    },
+    "shared_last": {
+      "desc": "two sessions REGISTER {invoke:\"last\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,4805673866439727]",
+      "register_b": "ERROR [8,64,1,{},\"wamp.error.procedure_already_exists\",null]",
+      "results": ["a", "a", "a", "a", "a", "a"],
+      "counts": {
+        "a": 6,
+        "b": 0
+      }
+    },
+    "shared_mismatch": {
+      "desc": "REGISTER {invoke:\"roundrobin\"} then {invoke:\"random\"} on the same URI",
+      "first": "REGISTERED [65,1,1614504257682738]",
+      "second": "ERROR [8,64,1,{},\"wamp.error.procedure_already_exists\",null]"
+    },
+    "register_prefix": {
+      "desc": "REGISTER {match:\"prefix\"} \"probe.c.rp\" then CALL \"probe.c.rp.x.y\"",
+      "register": "REGISTERED [65,1,3495903386082199]",
+      "call": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\",null]"
+    },
+    "register_wildcard": {
+      "desc": "REGISTER {match:\"wildcard\"} \"probe..rw\" then CALL \"probe.c.rw\"",
+      "register": "REGISTERED [65,1,7944212747017895]",
+      "call": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\",null]"
+    },
+    "meta_api": {
+      "desc": "CALL wamp.session.count / wamp.registration.list / wamp.subscription.list",
+      "wamp.session.count": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\",null]",
+      "wamp.session.list": "ERROR [8,48,2,{},\"wamp.error.no_such_procedure\",null]",
+      "wamp.registration.list": "ERROR [8,48,3,{},\"wamp.error.no_such_procedure\",null]",
+      "wamp.subscription.list": "ERROR [8,48,4,{},\"wamp.error.no_such_procedure\",null]"
+    },
+    "pubsub_basics": {
+      "desc": "PUBLISH without ack (no reply expected), exclude_me default and false, publisher disclosure",
+      "subscribed": "SUBSCRIBED [33,1,6368658947668211]",
+      "publisher_frames": [],
+      "other_subscriber_frames": [
+        "EVENT [36,4341473225805376,6368658947668211,{\"topic\":\"probe.c.pub_mvo9z7x5_2y1a0k\"},[\"default\"],null]",
+        "EVENT [36,4341473225805376,6368658947668211,{\"topic\":\"probe.c.pub_mvo9z7x5_2y1a0k\"},[\"exclude_me_false\"],null]",
+        "EVENT [36,4341473225805376,6368658947668211,{\"topic\":\"probe.c.pub_mvo9z7x5_2y1a0k\"},[\"disclose_me\"],null]"
+      ]
+    },
+    "pubsub_blackwhite": {
+      "desc": "PUBLISH {eligible:[B]} and {exclude:[B]} with subscribers A and B",
+      "A_got": ["eligible_B", "exclude_B"],
+      "B_got": ["eligible_B", "exclude_B"]
+    },
+    "meta_events": {
+      "desc": "subscribe to session meta topics (spec + Thruway-legacy names), then another session joins and leaves",
+      "subscribe_replies": {
+        "wamp.session.on_join": "SUBSCRIBED",
+        "wamp.session.on_leave": "SUBSCRIBED",
+        "wamp.metaevent.session.on_join": "SUBSCRIBED",
+        "wamp.metaevent.session.on_leave": "SUBSCRIBED"
+      },
+      "events": [],
+      "joiner_session": 1502222194870503,
+      "sub_ids": {
+        "8982191204391514": 1,
+        "3235823602257490": 2,
+        "2978586696720870": 3,
+        "198622375684341": 4
+      }
+    },
+    "subscribe_duplicate": {
+      "desc": "same session SUBSCRIBEs twice to the same topic, then 1 PUBLISH",
+      "first": "SUBSCRIBED [33,1,7857309101576767]",
+      "second": "SUBSCRIBED [33,2,8229855886598433]",
+      "events": [
+        "EVENT [36,7857309101576767,7857309101576767,{\"topic\":\"probe.c.dupsub_mvo9zbss_6zy2xh\"},[\"x\"],null]",
+        "EVENT [36,7857309101576767,7857309101576767,{\"topic\":\"probe.c.dupsub_mvo9zbss_6zy2xh\"},[\"x\"],null]"
+      ]
+    },
+    "subscribe_two_sessions_ids": {
+      "desc": "two sessions subscribe to the same topic: same subscription id?",
+      "a": "SUBSCRIBED [33,1,508277491136783]",
+      "b": "SUBSCRIBED [33,1,8560149738420449]"
+    },
+    "unsubscribe_unknown": {
+      "desc": "UNSUBSCRIBE an unknown subscription id",
+      "reply": "none"
+    },
+    "sub_prefix": {
+      "desc": "SUBSCRIBE {\"match\":\"prefix\"} \"probe.c.pfx\" then PUBLISH to probe.c.pfx, probe.c.pfx.a.b, probe.c.pfxzzz, probe.c.other",
+      "subscribed": "SUBSCRIBED [33,1,1024250728527218]",
+      "publish_acks": ["PUBLISHED", "none", "none", "none"],
+      "delivered": ["probe.c.pfx"],
+      "event_details": [
+        {
+          "topic": "probe_mvo9zecu_acogzl.c.pfx"
+        }
+      ]
+    },
+    "sub_wildcard": {
+      "desc": "SUBSCRIBE {\"match\":\"wildcard\"} \"probe.c..w\" then PUBLISH to probe.c.x.w, probe.c.w, probe.c.x.y.w",
+      "subscribed": "SUBSCRIBED [33,1,9003379106707010]",
+      "publish_acks": ["none", "none", "none"],
+      "delivered": [],
+      "event_details": []
+    },
+    "sub_hash_pattern": {
+      "desc": "SUBSCRIBE {} \"probe.c.h.#\" then PUBLISH to probe.c.h.a, probe.c.h.a.b, probe.c.h",
+      "subscribed": "SUBSCRIBED [33,1,1523197229004933]",
+      "publish_acks": ["none", "none", "none"],
+      "delivered": [],
+      "event_details": []
+    },
+    "sub_star_pattern": {
+      "desc": "SUBSCRIBE {} \"probe.c.*.s\" then PUBLISH to probe.c.a.s, probe.c.a.b.s",
+      "subscribed": "SUBSCRIBED [33,1,5556173469840083]",
+      "publish_acks": ["none", "none"],
+      "delivered": [],
+      "event_details": []
+    },
+    "retained_spec": {
+      "desc": "PUBLISH {\"retain\":true,\"acknowledge\":true} then late SUBSCRIBE {\"get_retained\":true}; then a live PUBLISH",
+      "publish_ack": null,
+      "subscribed": "SUBSCRIBED [33,1,2330983615481053]",
+      "late_subscriber_frames": [
+        "SUBSCRIBED [33,1,2330983615481053]",
+        "EVENT [36,2330983615481053,2330983615481053,{\"topic\":\"probe.c.ret_mvo9zscv_3mh9ds\"},[\"live-value\"],null]"
+      ]
+    },
+    "retained_fox": {
+      "desc": "PUBLISH {\"retain\":true,\"acknowledge\":true} then late SUBSCRIBE {\"retained\":true}; then a live PUBLISH",
+      "publish_ack": null,
+      "subscribed": "SUBSCRIBED [33,1,5627583609237023]",
+      "late_subscriber_frames": [
+        "SUBSCRIBED [33,1,5627583609237023]",
+        "EVENT [36,5627583609237023,5627583609237023,{\"topic\":\"probe.c.ret_mvo9zuak_ezemms\"},[\"live-value\"],null]"
+      ]
+    },
+    "auth_during_challenge": {
+      "desc": "HELLO authmethods [wampcra] authid joe, ignore CHALLENGE, send PUBLISH{acknowledge}",
+      "first_reply": "WELCOME [2,3042891377371238,{\"roles\":{\"broker\":{},\"dealer\":{}}}]",
+      "after": ["ERROR [8,48,78,{},\"wamp.error.no_such_procedure\",null]"],
+      "closed": null
+    },
+    "auth_two_methods": {
+      "desc": "HELLO authmethods [\"ticket\",\"wampcra\"] authid joe: how many CHALLENGEs?",
+      "frames": ["WELCOME [2,3181882146070092,{\"roles\":{\"broker\":{},\"dealer\":{}}}]"],
+      "closed": null
+    }
+  }
+}

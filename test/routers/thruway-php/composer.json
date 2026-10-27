@@ -1,0 +1,27 @@
+{
+  "name": "thruwayjs/test-router-thruway-php",
+  "description": "Thruway (PHP) WAMP router used for thruway.js integration/fuzz testing",
+  "type": "project",
+  "require": {
+    "php": ">=8.1",
+    "voryx/thruway": "^0.6.1",
+    "thruway/ratchet-transport": "^0.5.0"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {},
+    "platform": {
+      "php": "8.3.0"
+    },
+    "policy": {
+      "advisories": {
+        "ignore": [
+          "guzzlehttp/psr7"
+        ]
+      }
+    },
+    "audit": {
+      "abandoned": "report"
+    }
+  }
+}

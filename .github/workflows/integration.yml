@@ -1,0 +1,75 @@
+# Job `integration`: one job per router under podman — on push and pull requests Thruway PHP only (the first-class
+# router); a manual run takes a JSON list of routers (`routers` input, e.g.
+# ["thruway-php","crossbar","bondy","nexus-3.3.1","nexus-main","nxt","fox-wamp","wamp-server"]; wamp-server runs the
+# hostile suite) — through the same scripts/routers.mjs as local runs: build or pull the pinned router image, then the
+# integration project with REQUIRE_ROUTERS=1 — capability schema check, probe drift check, every scenario file and a
+# short chaos run (2 schedules × 20 s). Router logs, client traces and chaos seeds are uploaded on failure. Images are
+# rebuilt per run (no cache action is pinned yet; the `routers.mjs hash <router>` key is ready for one).
+name: integration
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      routers:
+        description: 'JSON list of routers (default: ["thruway-php"])'
+        required: false
+        default: '["thruway-php"]'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: integration (${{ matrix.router }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        router: ${{ fromJSON(inputs.routers || '["thruway-php"]') }}
+    env:
+      ROUTERS: ${{ matrix.router }}
+      REQUIRE_ROUTERS: '1'
+      ROUTER_PREFIX: thruwayjs-ci
+      # rootless podman on the runner has no cgroup for `podman pause` (liveness and chaos pause the router)
+      ROUTER_PODMAN: sudo podman
+      CHAOS_SCHEDULES: '2'
+      CHAOS_SECONDS: '20'
+      INTEGRATION_TRACES: ${{ github.workspace }}/integration-traces
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - name: podman
+        run: sudo podman version
+      - name: Router image (build or pull, pinned)
+        run: |
+          node scripts/routers.mjs build "$ROUTERS"
+          if [ "$ROUTERS" = thruway-php ]; then node scripts/routers.mjs build thruway-php-anon; fi
+      - name: Integration project (routers started and stopped by its global setup)
+        run: npm run test:integration
+      - name: Router logs
+        if: failure()
+        run: |
+          mkdir -p router-logs
+          for id in $ROUTERS thruway-php-anon; do node scripts/routers.mjs logs "$id" > "router-logs/$id.log" 2>&1 || true; done
+      - name: Upload traces and router logs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: integration-${{ matrix.router }}
+          path: |
+            integration-traces/
+            router-logs/
+          if-no-files-found: ignore

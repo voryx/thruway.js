@@ -1,0 +1,612 @@
+{
+  "$schema": "./capabilities.schema.json",
+  "routers": {
+    "thruway-php": {
+      "title": "Thruway PHP 0.6.1",
+      "endpoint": "auth",
+      "realm": "realm1",
+      "strictRealm": null,
+      "hostile": false,
+      "auth": {
+        "endpoint": "auth",
+        "realm": "realm1",
+        "ticket": {
+          "authid": "ticketuser",
+          "secret": "ticketsecret",
+          "method": "ticket"
+        },
+        "wampcra": {
+          "authid": "joe",
+          "secret": "secret2"
+        },
+        "wampcraSalted": {
+          "authid": "peter",
+          "secret": "secret1"
+        },
+        "cryptosign": null,
+        "dual": {
+          "authid": "dual",
+          "ticket": "dualticket",
+          "wampcra": "dualsecret"
+        },
+        "failureReasons": ["thruway.error.authentication_failure"]
+      },
+      "reregisterOptions": {
+        "replace_orphaned_session": "yes"
+      },
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "always",
+        "cancel_reply": "always",
+        "cancel_without_mode_interrupts": "always",
+        "progressive_results": "always",
+        "wildcard_subscribe_answered": "never",
+        "subscribe_match": "always",
+        "register_match": "never",
+        "goodbye_reply_delivered": "always",
+        "abort_delivered": "always",
+        "router_goodbye_trigger": "rpc",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "always",
+        "blackwhite_listing": "always",
+        "publisher_always_disclosed": "never",
+        "meta_kill": "never",
+        "strict_ids": "never",
+        "max_message_bytes": 16777216,
+        "callee_leave_answer": "always",
+        "caller_leave_interrupts": "always",
+        "callee_error_forwarded": "always",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "always",
+        "wildcard_match": "never",
+        "invalid_realm_reply": "never",
+        "self_publish_order": "never",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "never",
+        "multi_method_challenge": "always",
+        "anonymous_welcome_without_provider": "always",
+        "ghost_registrations": "always",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    },
+    "thruway-php-anon": {
+      "title": "Thruway PHP 0.6.1, late external provider",
+      "endpoint": "late",
+      "realm": "realm_late",
+      "strictRealm": null,
+      "hostile": false,
+      "auth": null,
+      "reregisterOptions": {
+        "replace_orphaned_session": "yes"
+      },
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "always",
+        "cancel_reply": "always",
+        "cancel_without_mode_interrupts": "always",
+        "progressive_results": "always",
+        "wildcard_subscribe_answered": "never",
+        "subscribe_match": "always",
+        "register_match": "never",
+        "goodbye_reply_delivered": "always",
+        "abort_delivered": "always",
+        "router_goodbye_trigger": "rpc",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "always",
+        "blackwhite_listing": "always",
+        "publisher_always_disclosed": "never",
+        "meta_kill": "never",
+        "strict_ids": "never",
+        "max_message_bytes": 16777216,
+        "callee_leave_answer": "always",
+        "caller_leave_interrupts": "always",
+        "callee_error_forwarded": "always",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "always",
+        "wildcard_match": "never",
+        "invalid_realm_reply": "never",
+        "self_publish_order": "never",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "never",
+        "multi_method_challenge": "always",
+        "anonymous_welcome_without_provider": "always",
+        "ghost_registrations": "always",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    },
+    "crossbar": {
+      "title": "Crossbar.io 26.10.1",
+      "endpoint": "ws",
+      "realm": "realm1",
+      "strictRealm": null,
+      "hostile": false,
+      "auth": {
+        "endpoint": "auth",
+        "realm": "realm1",
+        "ticket": {
+          "authid": "ticketuser",
+          "secret": "ticket-secret",
+          "method": "ticket"
+        },
+        "wampcra": {
+          "authid": "crauser",
+          "secret": "cra-secret"
+        },
+        "wampcraSalted": {
+          "authid": "crasalted",
+          "secret": "salted-secret"
+        },
+        "cryptosign": {
+          "authid": "csuser",
+          "seed": "7468727577617921746573742d6b65792d666f722d63726f73736261722d3031",
+          "publicKey": "f41bb129ab45887291e77ea03eb5a0ed5318e87231fc12d46b54e2b2a66347f0"
+        },
+        "dual": {
+          "authid": "dual",
+          "ticket": "dualticket",
+          "wampcra": "dualsecret"
+        },
+        "failureReasons": ["wamp.error.not_authorized", "wamp.error.authentication_failed"]
+      },
+      "reregisterOptions": {
+        "force_reregister": true
+      },
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "always",
+        "cancel_reply": "always",
+        "cancel_without_mode_interrupts": "always",
+        "progressive_results": "always",
+        "wildcard_subscribe_answered": "always",
+        "subscribe_match": "always",
+        "register_match": "always",
+        "goodbye_reply_delivered": "always",
+        "abort_delivered": "always",
+        "router_goodbye_trigger": "meta",
+        "router_closes_after_goodbye": "never",
+        "exclude_me": "always",
+        "blackwhite_listing": "always",
+        "publisher_always_disclosed": "always",
+        "meta_kill": "always",
+        "strict_ids": "never",
+        "max_message_bytes": 16777216,
+        "callee_leave_answer": "always",
+        "caller_leave_interrupts": "always",
+        "callee_error_forwarded": "always",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "always",
+        "wildcard_match": "always",
+        "invalid_realm_reply": "always",
+        "self_publish_order": "always",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "always",
+        "multi_method_challenge": "never",
+        "anonymous_welcome_without_provider": "never",
+        "ghost_registrations": "always",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    },
+    "bondy": {
+      "title": "Bondy 1.0.0-rc.65",
+      "endpoint": "ws",
+      "realm": "realm1",
+      "strictRealm": null,
+      "hostile": false,
+      "auth": {
+        "endpoint": "ws",
+        "realm": "realm1",
+        "ticket": {
+          "authid": "ticketuser",
+          "secret": "ticketsecret",
+          "method": "password"
+        },
+        "wampcra": {
+          "authid": "crauser",
+          "secret": "crasecret"
+        },
+        "wampcraSalted": null,
+        "cryptosign": {
+          "authid": "csuser",
+          "seed": "93a276a0b622ce7c6dd077120550cd3524ec1eed5ebf8692c4a828da9fc15dd2",
+          "publicKey": "682a35e8c87f7004cbb10679617a29154f9906b7e29a64af3f6d3e8e10934701"
+        },
+        "dual": null,
+        "failureReasons": [
+          "bondy.error.authentication_failed",
+          "wamp.error.authentication_failed",
+          "wamp.error.not_authorized"
+        ]
+      },
+      "reregisterOptions": {},
+      "restartable": false,
+      "capabilities": {
+        "cancel_interrupts_callee": "never",
+        "cancel_reply": "always",
+        "cancel_without_mode_interrupts": "never",
+        "progressive_results": "never",
+        "wildcard_subscribe_answered": "always",
+        "subscribe_match": "always",
+        "register_match": "always",
+        "goodbye_reply_delivered": "always",
+        "abort_delivered": "always",
+        "router_goodbye_trigger": "sigterm",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "never",
+        "blackwhite_listing": "never",
+        "publisher_always_disclosed": "always",
+        "meta_kill": "never",
+        "strict_ids": "never",
+        "max_message_bytes": 4194304,
+        "callee_leave_answer": "always",
+        "caller_leave_interrupts": "never",
+        "callee_error_forwarded": "always",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "always",
+        "wildcard_match": "always",
+        "invalid_realm_reply": "always",
+        "self_publish_order": "never",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "always",
+        "multi_method_challenge": "never",
+        "anonymous_welcome_without_provider": "always",
+        "ghost_registrations": "sometimes",
+        "probe_answered": "always",
+        "publisher_order_kept": "sometimes",
+        "invocation_receive_progress": "never",
+        "progressive_final_payload": "always"
+      }
+    },
+    "nexus-3.3.1": {
+      "title": "Nexus v3.3.1",
+      "endpoint": "ws",
+      "realm": "realm1",
+      "strictRealm": null,
+      "hostile": false,
+      "auth": {
+        "endpoint": "ws",
+        "realm": "realm1",
+        "ticket": {
+          "authid": "ticketuser",
+          "secret": "ticketsecret",
+          "method": "ticket"
+        },
+        "wampcra": {
+          "authid": "crauser",
+          "secret": "crasecret"
+        },
+        "wampcraSalted": {
+          "authid": "crasalted",
+          "secret": "crasecret"
+        },
+        "cryptosign": {
+          "authid": "csuser",
+          "seed": "93a276a0b622ce7c6dd077120550cd3524ec1eed5ebf8692c4a828da9fc15dd2",
+          "publicKey": "682a35e8c87f7004cbb10679617a29154f9906b7e29a64af3f6d3e8e10934701"
+        },
+        "dual": {
+          "authid": "dual",
+          "ticket": "dualticket",
+          "wampcra": "dualsecret"
+        },
+        "failureReasons": ["wamp.error.authentication_failed", "wamp.error.not_authorized"]
+      },
+      "reregisterOptions": {},
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "always",
+        "cancel_reply": "always",
+        "cancel_without_mode_interrupts": "always",
+        "progressive_results": "always",
+        "wildcard_subscribe_answered": "always",
+        "subscribe_match": "always",
+        "register_match": "always",
+        "goodbye_reply_delivered": "sometimes",
+        "abort_delivered": "sometimes",
+        "router_goodbye_trigger": "proxy",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "always",
+        "blackwhite_listing": "always",
+        "publisher_always_disclosed": "never",
+        "meta_kill": "always",
+        "strict_ids": "never",
+        "max_message_bytes": 33554432,
+        "callee_leave_answer": "always",
+        "caller_leave_interrupts": "never",
+        "callee_error_forwarded": "always",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "always",
+        "wildcard_match": "always",
+        "invalid_realm_reply": "sometimes",
+        "self_publish_order": "always",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "always",
+        "multi_method_challenge": "never",
+        "anonymous_welcome_without_provider": "never",
+        "ghost_registrations": "sometimes",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    },
+    "nexus-main": {
+      "title": "Nexus main 0ddca09",
+      "endpoint": "ws",
+      "realm": "realm1",
+      "strictRealm": "realm1.strict",
+      "hostile": false,
+      "auth": {
+        "endpoint": "ws",
+        "realm": "realm1",
+        "ticket": {
+          "authid": "ticketuser",
+          "secret": "ticketsecret",
+          "method": "ticket"
+        },
+        "wampcra": {
+          "authid": "crauser",
+          "secret": "crasecret"
+        },
+        "wampcraSalted": {
+          "authid": "crasalted",
+          "secret": "crasecret"
+        },
+        "cryptosign": {
+          "authid": "csuser",
+          "seed": "93a276a0b622ce7c6dd077120550cd3524ec1eed5ebf8692c4a828da9fc15dd2",
+          "publicKey": "682a35e8c87f7004cbb10679617a29154f9906b7e29a64af3f6d3e8e10934701"
+        },
+        "dual": {
+          "authid": "dual",
+          "ticket": "dualticket",
+          "wampcra": "dualsecret"
+        },
+        "failureReasons": ["wamp.error.authentication_failed", "wamp.error.not_authorized"]
+      },
+      "reregisterOptions": {},
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "always",
+        "cancel_reply": "always",
+        "cancel_without_mode_interrupts": "always",
+        "progressive_results": "always",
+        "wildcard_subscribe_answered": "always",
+        "subscribe_match": "always",
+        "register_match": "always",
+        "goodbye_reply_delivered": "sometimes",
+        "abort_delivered": "sometimes",
+        "router_goodbye_trigger": "proxy",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "always",
+        "blackwhite_listing": "always",
+        "publisher_always_disclosed": "never",
+        "meta_kill": "always",
+        "strict_ids": "always",
+        "max_message_bytes": 33554432,
+        "callee_leave_answer": "always",
+        "caller_leave_interrupts": "never",
+        "callee_error_forwarded": "always",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "always",
+        "wildcard_match": "always",
+        "invalid_realm_reply": "sometimes",
+        "self_publish_order": "always",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "always",
+        "multi_method_challenge": "never",
+        "anonymous_welcome_without_provider": "never",
+        "ghost_registrations": "sometimes",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    },
+    "nxt": {
+      "title": "xconn nxt 683389304fa4",
+      "endpoint": "ws",
+      "realm": "realm1",
+      "strictRealm": null,
+      "hostile": false,
+      "auth": {
+        "endpoint": "ws",
+        "realm": "realm1",
+        "ticket": {
+          "authid": "ticketuser",
+          "secret": "ticketsecret",
+          "method": "ticket"
+        },
+        "wampcra": {
+          "authid": "crauser",
+          "secret": "crasecret"
+        },
+        "wampcraSalted": {
+          "authid": "crasalted",
+          "secret": "crasecret"
+        },
+        "cryptosign": {
+          "authid": "csuser",
+          "seed": "93a276a0b622ce7c6dd077120550cd3524ec1eed5ebf8692c4a828da9fc15dd2",
+          "publicKey": "682a35e8c87f7004cbb10679617a29154f9906b7e29a64af3f6d3e8e10934701"
+        },
+        "dual": {
+          "authid": "dual",
+          "ticket": "dualticket",
+          "wampcra": "dualsecret"
+        },
+        "failureReasons": ["wamp.error.authentication_failed", "wamp.error.not_authorized"]
+      },
+      "reregisterOptions": {},
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "always",
+        "cancel_reply": "always",
+        "cancel_without_mode_interrupts": "always",
+        "progressive_results": "always",
+        "wildcard_subscribe_answered": "always",
+        "subscribe_match": "always",
+        "register_match": "always",
+        "goodbye_reply_delivered": "always",
+        "abort_delivered": "always",
+        "router_goodbye_trigger": "proxy",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "never",
+        "blackwhite_listing": "never",
+        "publisher_always_disclosed": "never",
+        "meta_kill": "never",
+        "strict_ids": "never",
+        "max_message_bytes": 33554432,
+        "callee_leave_answer": "never",
+        "caller_leave_interrupts": "never",
+        "callee_error_forwarded": "always",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "never",
+        "wildcard_match": "never",
+        "invalid_realm_reply": "always",
+        "self_publish_order": "never",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "always",
+        "multi_method_challenge": "never",
+        "anonymous_welcome_without_provider": "never",
+        "ghost_registrations": "sometimes",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    },
+    "fox-wamp": {
+      "title": "fox-wamp 0.7.28",
+      "endpoint": "ws",
+      "realm": "realm1",
+      "strictRealm": null,
+      "hostile": false,
+      "auth": {
+        "endpoint": "ws",
+        "realm": "realm1",
+        "ticket": {
+          "authid": "ticketuser",
+          "secret": "ticketsecret",
+          "method": "ticket"
+        },
+        "wampcra": {
+          "authid": "joe",
+          "secret": "secret2"
+        },
+        "wampcraSalted": {
+          "authid": "peter",
+          "secret": "secret1"
+        },
+        "cryptosign": null,
+        "dual": {
+          "authid": "dual",
+          "ticket": "dualticket",
+          "wampcra": "dualsecret"
+        },
+        "failureReasons": ["wamp.error.authentication_failed"]
+      },
+      "reregisterOptions": {},
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "never",
+        "cancel_reply": "never",
+        "cancel_without_mode_interrupts": "never",
+        "progressive_results": "always",
+        "wildcard_subscribe_answered": "always",
+        "subscribe_match": "never",
+        "register_match": "never",
+        "goodbye_reply_delivered": "always",
+        "abort_delivered": "always",
+        "router_goodbye_trigger": "proxy",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "always",
+        "blackwhite_listing": "never",
+        "publisher_always_disclosed": "always",
+        "meta_kill": "never",
+        "strict_ids": "never",
+        "max_message_bytes": 33554432,
+        "callee_leave_answer": "never",
+        "caller_leave_interrupts": "never",
+        "callee_error_forwarded": "never",
+        "duplicate_register_rejected": "never",
+        "args_nested_array_preserved": "never",
+        "event_details_topic": "never",
+        "wildcard_match": "never",
+        "invalid_realm_reply": "never",
+        "self_publish_order": "never",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "never",
+        "multi_method_challenge": "never",
+        "anonymous_welcome_without_provider": "never",
+        "ghost_registrations": "sometimes",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    },
+    "wamp-server": {
+      "title": "wamp-server 0.0.9 (hostile)",
+      "endpoint": "ws",
+      "realm": "realm1",
+      "strictRealm": null,
+      "hostile": true,
+      "auth": null,
+      "reregisterOptions": {},
+      "restartable": true,
+      "capabilities": {
+        "cancel_interrupts_callee": "never",
+        "cancel_reply": "never",
+        "cancel_without_mode_interrupts": "never",
+        "progressive_results": "never",
+        "wildcard_subscribe_answered": "always",
+        "subscribe_match": "never",
+        "register_match": "never",
+        "goodbye_reply_delivered": "always",
+        "abort_delivered": "always",
+        "router_goodbye_trigger": "proxy",
+        "router_closes_after_goodbye": "always",
+        "exclude_me": "never",
+        "blackwhite_listing": "never",
+        "publisher_always_disclosed": "never",
+        "meta_kill": "never",
+        "strict_ids": "never",
+        "max_message_bytes": 33554432,
+        "callee_leave_answer": "never",
+        "caller_leave_interrupts": "never",
+        "callee_error_forwarded": "never",
+        "duplicate_register_rejected": "always",
+        "args_nested_array_preserved": "always",
+        "event_details_topic": "never",
+        "wildcard_match": "never",
+        "invalid_realm_reply": "always",
+        "self_publish_order": "never",
+        "subprotocol_echo": "always",
+        "shared_subscription_ids": "never",
+        "multi_method_challenge": "never",
+        "anonymous_welcome_without_provider": "never",
+        "ghost_registrations": "sometimes",
+        "probe_answered": "always",
+        "publisher_order_kept": "always",
+        "invocation_receive_progress": "always",
+        "progressive_final_payload": "always"
+      }
+    }
+  }
+}

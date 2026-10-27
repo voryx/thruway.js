@@ -1,0 +1,50 @@
+# Job `unit`: the unit project (unit, sim, model, fuzz and type tests; FC_NUM_RUNS=200) with coverage, then a build and
+# the node project, on the dev Node floor (22.13.0, devEngines) and every supported line. The coverage thresholds are in
+# vitest.config.ts.
+name: unit
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: unit (node ${{ matrix.node }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.13.0', '22.x', '24.x', '26.x']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Unit project with coverage
+        run: npm run test:unit -- --coverage
+        env:
+          FC_NUM_RUNS: '200'
+      - name: Build
+        run: npm run build
+      - name: Node project
+        run: npm run test:node
+      - name: Upload coverage
+        if: always() && matrix.node == '24.x'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: ignore

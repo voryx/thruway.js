@@ -1,0 +1,24 @@
+{
+  "_comment": "fox-wamp test router config (read at start; restart to apply). Realm names must match /^[a-z0-9_]+$/ in fox-wamp.",
+  "host": "0.0.0.0",
+  "port": 8080,
+  "trace": false,
+  "anonymous_realms": ["realm1"],
+  "strict_realms": ["realm_auth"],
+  "wampcra": {
+    "joe": {
+      "secret": "secret2"
+    },
+    "peter": {
+      "secret": "secret1",
+      "salt": "salt123"
+    },
+    "dual": {
+      "secret": "dualsecret"
+    }
+  },
+  "ticket": {
+    "ticketuser": "ticketsecret",
+    "dual": "dualticket"
+  }
+}

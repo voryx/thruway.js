@@ -1,0 +1,12 @@
+{
+  "name": "thruwayjs-test-router-fox-wamp",
+  "private": true,
+  "description": "fox-wamp (Node.js WAMP router) pinned for thruway.js integration/fuzz tests; installed by start.sh into FOX_WAMP_HOME with --ignore-scripts (sqlite3 native module not needed: in-memory engine)",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "fox-wamp": "0.7.28"
+  }
+}

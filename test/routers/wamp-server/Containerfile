@@ -1,0 +1,14 @@
+# wamp-server 0.0.9 (Node.js, Basic Profile only; a deliberately buggy router for the hostile suite).
+#   scripts/routers.mjs build wamp-server   (NODE_IMAGE from ROUTER_NODE_IMAGE; WAMP_SERVER_NODE_MODULES mounts a
+#                                           local node_modules at /deps/node_modules for an offline build, else npm ci)
+ARG NODE_IMAGE=docker.io/library/node:22-alpine
+FROM ${NODE_IMAGE}
+WORKDIR /app
+COPY package.json package-lock.json router.cjs ./
+RUN if [ -d /deps/node_modules/wamp-server ]; then cp -R /deps/node_modules ./node_modules; \
+    else npm ci --ignore-scripts --omit=dev --no-audit --no-fund; fi \
+ && node -e "console.log('wamp-server', require('wamp-server/package.json').version)"
+ENV WAMP_SERVER_HOME=/app WAMP_SERVER_HOST=0.0.0.0 WAMP_SERVER_PORT=8080 WAMP_SERVER_REALMS=realm1
+EXPOSE 8080
+STOPSIGNAL SIGTERM
+CMD ["node", "/app/router.cjs"]

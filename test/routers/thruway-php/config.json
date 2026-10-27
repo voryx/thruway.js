@@ -1,0 +1,19 @@
+{
+  "_comment": "Thruway PHP test router config. Ports here are CONTAINER ports; host ports are set by scripts/routers.mjs, which bind-mounts this file and router.php over the image's copies (no rebuild needed).",
+  "log_level": "notice",
+  "keepalive_seconds": 0,
+  "auth_router": { "host": "0.0.0.0", "port": 8080 },
+  "noauth_router": { "host": "0.0.0.0", "port": 8081, "enabled": true },
+  "auth_realms": ["realm1", "realm-auth"],
+  "anonymous_realms": ["realm1"],
+  "admin_realm": "realm1",
+  "wampcra": {
+    "joe": { "secret": "secret2" },
+    "peter": { "secret": "secret1", "salt": "salt123" },
+    "dual": { "secret": "dualsecret" }
+  },
+  "ticket": {
+    "ticketuser": "ticketsecret",
+    "dual": "dualticket"
+  }
+}

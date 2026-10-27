@@ -1,0 +1,17 @@
+{"connection":1,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":2}
+{"connection":1,"direction":"out","frame":[2,3214911422629214,{"authprovider":"static","authmethod":"anonymous","roles":{"broker":{"features":{"pattern_based_subscription":true,"publisher_exclusion":true,"publisher_identification":true,"session_meta_api":true,"subscriber_blackwhite_listing":true,"subscription_meta_api":true,"payload_passthru_mode":true,"event_history":true}},"dealer":{"features":{"shared_registration":true,"call_canceling":true,"call_timeout":true,"caller_identification":true,"progressive_call_results":true,"registration_meta_api":true,"testament_meta_api":true,"payload_passthru_mode":true,"pattern_based_registration":true,"progressive_call_invocations":true,"session_meta_api":true}}},"authid":"163971cb83cefa","authrole":"anonymous"}],"at":3}
+{"connection":1,"direction":"in","frame":[64,4963787749850366,{},"com.thruwayjs.smoke.tmvpnm9nw7umz1x"],"at":3}
+{"connection":1,"direction":"out","frame":[65,4963787749850366,160],"at":4}
+{"connection":1,"direction":"in","frame":[48,3762842809472470,{},"com.thruwayjs.smoke.tmvpnm9nw7umz1x",[2,3]],"at":25}
+{"connection":1,"direction":"out","frame":[68,1,160,{"progress":false,"procedure":"com.thruwayjs.smoke.tmvpnm9nw7umz1x"},[2,3]],"at":26}
+{"connection":1,"direction":"in","frame":[70,1,{},[5]],"at":26}
+{"connection":1,"direction":"out","frame":[50,3762842809472470,{},[5]],"at":27}
+{"connection":1,"direction":"in","frame":[32,4678664122074226,{},"com.thruwayjs.smoke.tmvpnm9ojfl2ly4"],"at":27}
+{"connection":1,"direction":"in","frame":[16,4070220543296566,{"acknowledge":true,"exclude_me":false},"com.thruwayjs.smoke.tmvpnm9ojfl2ly4",["warmup"]],"at":27}
+{"connection":1,"direction":"out","frame":[33,4678664122074226,120],"at":28}
+{"connection":1,"direction":"out","frame":[36,120,2014136477547611,{},["warmup"]],"at":28}
+{"connection":1,"direction":"out","frame":[17,4070220543296566,2014136477547611],"at":28}
+{"connection":1,"direction":"in","frame":[16,2231891523625118,{"acknowledge":true,"exclude_me":false},"com.thruwayjs.smoke.tmvpnm9ojfl2ly4",["hello"]],"at":28}
+{"connection":1,"direction":"out","frame":[17,2231891523625118,2142868796886409],"at":29}
+{"connection":1,"direction":"out","frame":[36,120,2142868796886409,{},["hello"]],"at":29}
+{"connection":1,"direction":"in","frame":[6,{},"wamp.close.close_realm"],"at":80}

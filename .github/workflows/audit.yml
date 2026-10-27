@@ -1,0 +1,37 @@
+# Job `audit`: every push/PR, nightly and before a release: `npm run audit:gate` —
+# scripts/audit-gate.mjs, npm audit over the whole tree (dev dependencies included); an unlisted high/critical advisory,
+# an expired audit-allowlist.json entry or an entry for a production package fails — and `npm audit --omit=dev
+# --audit-level=low`, which must stay empty (zero runtime dependencies). Same scripts as `npm run ci`.
+name: audit
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Audit gate (whole tree, reviewed expiring allowlist)
+        run: npm run audit:gate
+      - name: No advisory in the runtime dependencies (there are none)
+        run: npm audit --omit=dev --audit-level=low

@@ -1,0 +1,12 @@
+{
+  "name": "thruwayjs-test-router-wamp-server",
+  "private": true,
+  "description": "wamp-server 0.0.9 (Node.js, Basic Profile only, unmaintained since 2018) pinned for thruway.js robustness tests; installed by start.sh into WAMP_SERVER_HOME",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "wamp-server": "0.0.9"
+  }
+}

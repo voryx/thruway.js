@@ -1,0 +1,481 @@
+{
+  "url": "ws://127.0.0.1:18280/",
+  "realm": "realm1",
+  "node": "v26.3.0",
+  "at": "2026-10-25T20:20:41.950Z",
+  "probes": {
+    "welcome": {
+      "desc": "WELCOME details/roles for an anonymous HELLO",
+      "welcome": {
+        "roles": {
+          "broker": {
+            "features": {
+              "subscriber_blackwhite_listing": true,
+              "publisher_exclusion": true,
+              "subscriber_metaevents": true
+            }
+          },
+          "dealer": {
+            "features": {
+              "caller_identification": true,
+              "progressive_call_results": true
+            }
+          }
+        }
+      }
+    },
+    "hello_no_roles": {
+      "desc": "HELLO with empty details (no roles) - spec requires roles",
+      "reply": "WELCOME [2,7632226370815531,{\"roles\":{\"broker\":{\"features\":{\"subscriber_blackwhite_listing\":true,\"publisher_exclusion\":true,\"subscriber_metaevents\":true}},\"dealer\":{\"features\":{\"caller_identification\":true,\"progressive_call_results\":true}}}}]",
+      "closed": null
+    },
+    "invalid_realm": {
+      "desc": "HELLO for realm \"Bad Realm!\" (invalid chars)",
+      "reply": "WELCOME [2,5277456988701960,{\"roles\":{\"broker\":{\"features\":{\"subscriber_blackwhite_listing\":true,\"publisher_exclusion\":true,\"subscriber_metaevents\":true}},\"dealer\":{\"features\":{\"caller_identification\":true,\"progressive_call_results\":true}}}}]",
+      "closed": null
+    },
+    "subprotocol_none": {
+      "desc": "WebSocket offering only \"wamp.2.msgpack\" (no json)",
+      "opened": false,
+      "error": "ws error "
+    },
+    "msg_before_hello": {
+      "desc": "SUBSCRIBE sent before HELLO",
+      "frames": [],
+      "closed": null
+    },
+    "second_hello": {
+      "desc": "second HELLO after WELCOME",
+      "frames": [],
+      "closed": null
+    },
+    "invalid_json": {
+      "desc": "send \"not json{\" after WELCOME",
+      "frames": [],
+      "closed": null
+    },
+    "unknown_type": {
+      "desc": "send [999, 1, {}] after WELCOME",
+      "frames": [],
+      "closed": null
+    },
+    "client_sends_welcome": {
+      "desc": "send a router-only message (WELCOME) after WELCOME",
+      "frames": [],
+      "closed": null
+    },
+    "goodbye": {
+      "desc": "GOODBYE wamp.close.system_shutdown -> reply + who closes the socket",
+      "reply": "GOODBYE [6,{},\"wamp.error.goodbye_and_out\"]",
+      "closed_by_router": {
+        "code": 1000,
+        "reason": ""
+      }
+    },
+    "rid_zero": {
+      "desc": "CALL with request id 0 to an unknown procedure",
+      "frames": ["ERROR [8,48,0,{},\"wamp.error.no_such_procedure\"]"],
+      "closed": null
+    },
+    "rid_2pow53": {
+      "desc": "CALL with request id 9007199254740992 to an unknown procedure",
+      "frames": ["ERROR [8,48,9007199254740992,{},\"wamp.error.no_such_procedure\"]"],
+      "closed": null
+    },
+    "rid_negative": {
+      "desc": "CALL with request id -5 to an unknown procedure",
+      "frames": ["ERROR [8,48,-5,{},\"wamp.error.no_such_procedure\"]"],
+      "closed": null
+    },
+    "rid_string": {
+      "desc": "CALL with request id \"abc\" to an unknown procedure",
+      "frames": ["ERROR [8,48,\"abc\",{},\"wamp.error.no_such_procedure\"]"],
+      "closed": null
+    },
+    "rid_float": {
+      "desc": "CALL with request id 1.5 to an unknown procedure",
+      "frames": ["ERROR [8,48,1.5,{},\"wamp.error.no_such_procedure\"]"],
+      "closed": null
+    },
+    "rid_nonsequential": {
+      "desc": "REGISTER with id 1000 then SUBSCRIBE with id 5 (non-sequential)",
+      "frames": ["REGISTERED [65,1000,97674338775082]", "SUBSCRIBED [33,5,7871028757373036]"],
+      "closed": null
+    },
+    "rid_duplicate_inflight": {
+      "desc": "two CALLs in flight with the same request id",
+      "caller_frames": ["RESULT [50,7,{},[\"first\"]]", "RESULT [50,7,{},[\"second\"]]"],
+      "invocations": 2
+    },
+    "rid_same_across_sessions_cancel_second": {
+      "desc": "two callers both use CALL id 1, the second caller cancels (kill)",
+      "caller1_frames": [],
+      "caller2_frames": ["ERROR [8,48,1,{},\"wamp.error.canceled\"]"],
+      "callee_interrupted_calls": ["b"]
+    },
+    "rid_same_across_sessions_cancel_first": {
+      "desc": "two callers both use CALL id 1, the first caller cancels (kill)",
+      "caller1_frames": [],
+      "caller2_frames": [],
+      "callee_interrupted_calls": []
+    },
+    "uri_uppercase": {
+      "desc": "REGISTER \"probe.C.Upper\"",
+      "reply": "REGISTERED [65,1,5255051242768652]"
+    },
+    "uri_hyphen": {
+      "desc": "REGISTER \"probe.c.with-hyphen\"",
+      "reply": "ERROR [8,64,1,{},\"wamp.error.invalid_uri\"]"
+    },
+    "uri_empty_component": {
+      "desc": "REGISTER \"probe..c\"",
+      "reply": "ERROR [8,64,1,{},\"wamp.error.invalid_uri\"]"
+    },
+    "uri_wamp_reserved": {
+      "desc": "REGISTER \"wamp.probe_c\"",
+      "reply": "REGISTERED [65,1,2698774528706462]"
+    },
+    "uri_publish_invalid": {
+      "desc": "PUBLISH{acknowledge} to \"probe.C.Bad-Topic\"",
+      "reply": "PUBLISHED [17,1,4290550169211573]"
+    },
+    "rpc_errors": {
+      "desc": "CALL unknown procedure; UNREGISTER unknown id; callee ERROR with custom uri/args/kwargs",
+      "call_unknown": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\"]",
+      "unregister_unknown": "ERROR [8,66,2,{},\"wamp.error.no_such_procedure\"]",
+      "callee_error": "ERROR [8,48,3,{\"x\":1},\"app.error.custom\",[\"a1\"],{\"k\":\"v\"}]"
+    },
+    "payload_fidelity": {
+      "desc": "echo callee: args/kwargs edge cases survive the router unchanged?",
+      "no args": {
+        "sent": "[]",
+        "invocation_tail": "[]",
+        "result_tail": "[]"
+      },
+      "args []": {
+        "sent": "[[]]",
+        "invocation_tail": "[]",
+        "result_tail": "[]"
+      },
+      "args [[1,2]]": {
+        "sent": "[[[1,2]]]",
+        "invocation_tail": "[[[1,2]]]",
+        "result_tail": "[[[1,2]]]"
+      },
+      "args [null]": {
+        "sent": "[[null]]",
+        "invocation_tail": "[[null]]",
+        "result_tail": "[[null]]"
+      },
+      "args [1,2,3]": {
+        "sent": "[[1,2,3]]",
+        "invocation_tail": "[[1,2,3]]",
+        "result_tail": "[[1,2,3]]"
+      },
+      "args [] kwargs {}": {
+        "sent": "[[],{}]",
+        "invocation_tail": "[]",
+        "result_tail": "[]"
+      },
+      "args [] kwargs {a:1}": {
+        "sent": "[[],{\"a\":1}]",
+        "invocation_tail": "[[],{\"a\":1}]",
+        "result_tail": "[[],{\"a\":1}]"
+      },
+      "unicode": {
+        "sent": "[[\"héllo 😀 / \\\\ \\\"q\\\"\"]]",
+        "invocation_tail": "[[\"héllo 😀 / \\\\ \\\"q\\\"\"]]",
+        "result_tail": "[[\"héllo 😀 / \\\\ \\\"q\\\"\"]]"
+      },
+      "int 2^53-1": {
+        "sent": "[[9007199254740991]]",
+        "invocation_tail": "[[9007199254740991]]",
+        "result_tail": "[[9007199254740991]]"
+      },
+      "nested": {
+        "sent": "[[{\"a\":[1,{\"b\":null}]}],{\"deep\":{\"x\":[]}}]",
+        "invocation_tail": "[[{\"a\":[1,{\"b\":null}]}],{\"deep\":{\"x\":[]}}]",
+        "result_tail": "[[{\"a\":[1,{\"b\":null}]}],{\"deep\":{\"x\":[]}}]"
+      }
+    },
+    "large_payload": {
+      "desc": "echo a ~1 MiB string argument",
+      "ok": true,
+      "ms": 44,
+      "reply": "RESULT [50,1,{},[\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "closed": null
+    },
+    "caller_identification": {
+      "desc": "REGISTER{disclose_caller:true} -> INVOCATION.details.caller?",
+      "register": "REGISTERED [65,1,3790991412242089]",
+      "invocation_details": {
+        "caller": 3735060082122441,
+        "authid": "anonymous",
+        "authrole": "anonymous",
+        "authroles": ["anonymous"],
+        "authmethod": "anonymous"
+      },
+      "caller_session": 3735060082122441
+    },
+    "progressive_results": {
+      "desc": "CALL{receive_progress} + 2 progressive YIELDs + final",
+      "invocation_details": {
+        "receive_progress": true
+      },
+      "caller_frames": [
+        "RESULT [50,1,{\"progress\":true},[\"p1\"]]",
+        "RESULT [50,1,{\"progress\":true},[\"p2\"]]",
+        "RESULT [50,1,{},[\"final\"]]"
+      ]
+    },
+    "progressive_unrequested": {
+      "desc": "callee sends progressive YIELD although caller did not ask for progress",
+      "caller_frames": ["RESULT [50,1,{},[\"final\"]]"],
+      "callee_frames_after": []
+    },
+    "cancel_skip": {
+      "desc": "CANCEL{mode:skip} on a pending call (callee answers INTERRUPT with ERROR(INVOCATION) wamp.error.canceled)",
+      "caller_frames": ["ERROR [8,48,1,{},\"wamp.error.canceled\"]"],
+      "callee_frames": ["INVOCATION [68,3454340062718741,753805424721446,{}]", "INTERRUPT [69,3454340062718741,{}]"]
+    },
+    "cancel_kill": {
+      "desc": "CANCEL{mode:kill} on a pending call (callee answers INTERRUPT with ERROR(INVOCATION) wamp.error.canceled)",
+      "caller_frames": ["ERROR [8,48,1,{},\"wamp.error.canceled\"]"],
+      "callee_frames": ["INVOCATION [68,6721902679023141,2032481942177632,{}]", "INTERRUPT [69,6721902679023141,{}]"]
+    },
+    "cancel_killnowait": {
+      "desc": "CANCEL{mode:killnowait} on a pending call (callee answers INTERRUPT with ERROR(INVOCATION) wamp.error.canceled)",
+      "caller_frames": ["ERROR [8,49,1,{},\"wamp.error.canceled\"]"],
+      "callee_frames": [
+        "INVOCATION [68,4874693104044117,3472692384257724,{}]",
+        "INTERRUPT [69,4874693104044117,{}]",
+        "ERROR [8,8,4874693104044117,{},\"wamp.error.no_such_procedure\"]"
+      ]
+    },
+    "cancel_callee_no_cancel_feature": {
+      "desc": "CANCEL{kill} when the callee did NOT announce call_canceling",
+      "caller_frames": ["ERROR [8,49,1,{},\"wamp.error.not_supported\"]"],
+      "callee_frames": ["INVOCATION [68,8594348345629421,3046898565036880,{}]"]
+    },
+    "cancel_progressive_kill": {
+      "desc": "CANCEL{kill} on a receive_progress call that already got one progressive result",
+      "caller_frames": ["RESULT [50,1,{\"progress\":true},[\"p1\"]]"],
+      "callee_frames": [
+        "INVOCATION [68,7442608905936174,2806577983984935,{\"receive_progress\":true}]",
+        "INTERRUPT [69,7442608905936174,{}]"
+      ]
+    },
+    "cancel_unknown": {
+      "desc": "CANCEL for a request id that was never used",
+      "frames": ["ERROR [8,49,424242,{},\"wamp.error.no_such_call\"]"],
+      "closed": null
+    },
+    "call_timeout": {
+      "desc": "CALL{timeout:300} to a callee that never answers",
+      "caller_reply": "none within 2s",
+      "after_ms": null,
+      "invocation_details": {},
+      "callee_interrupt": [],
+      "caller_frames": []
+    },
+    "callee_leaves": {
+      "desc": "callee disconnects while an invocation is pending",
+      "caller_reply": "ERROR [8,48,1,{},\"wamp.error.canceled\"]",
+      "caller_frames": ["ERROR [8,48,1,{},\"wamp.error.canceled\"]"]
+    },
+    "caller_leaves": {
+      "desc": "caller disconnects while its call is pending: does the callee get INTERRUPT?",
+      "callee_frames": ["INVOCATION [68,376214237895079,1584140772820987,{}]", "INTERRUPT [69,376214237895079,{}]"]
+    },
+    "registration_duplicate": {
+      "desc": "second session REGISTERs the same URI without options",
+      "first": "REGISTERED [65,1,556105214796665]",
+      "second": "ERROR [8,64,1,{},\"wamp.error.procedure_already_exists\"]"
+    },
+    "shared_roundrobin": {
+      "desc": "two sessions REGISTER {invoke:\"roundrobin\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,5648023611802133]",
+      "register_b": "REGISTERED [65,1,3696143156079535]",
+      "results": ["a", "b", "a", "b", "a", "b"],
+      "counts": {
+        "a": 3,
+        "b": 3
+      }
+    },
+    "shared_random": {
+      "desc": "two sessions REGISTER {invoke:\"random\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,2098181334614591]",
+      "register_b": "REGISTERED [65,1,3588449497912099]",
+      "results": ["a", "a", "b", "b", "a", "a"],
+      "counts": {
+        "a": 4,
+        "b": 2
+      }
+    },
+    "shared_first": {
+      "desc": "two sessions REGISTER {invoke:\"first\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,7405176993805981]",
+      "register_b": "REGISTERED [65,1,8369914285205484]",
+      "results": ["a", "a", "a", "a", "a", "a"],
+      "counts": {
+        "a": 6,
+        "b": 0
+      }
+    },
+    "shared_last": {
+      "desc": "two sessions REGISTER {invoke:\"last\"}; 6 calls - who gets them?",
+      "register_a": "REGISTERED [65,1,4449741112059358]",
+      "register_b": "REGISTERED [65,1,229084425874109]",
+      "results": ["b", "b", "b", "b", "b", "b"],
+      "counts": {
+        "a": 0,
+        "b": 6
+      }
+    },
+    "shared_mismatch": {
+      "desc": "REGISTER {invoke:\"roundrobin\"} then {invoke:\"random\"} on the same URI",
+      "first": "REGISTERED [65,1,7645631122531826]",
+      "second": "ERROR [8,64,1,{},\"wamp.error.unknown\"]"
+    },
+    "register_prefix": {
+      "desc": "REGISTER {match:\"prefix\"} \"probe.c.rp\" then CALL \"probe.c.rp.x.y\"",
+      "register": "REGISTERED [65,1,951533760218951]",
+      "call": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\"]"
+    },
+    "register_wildcard": {
+      "desc": "REGISTER {match:\"wildcard\"} \"probe..rw\" then CALL \"probe.c.rw\"",
+      "register": "ERROR [8,64,1,{},\"wamp.error.invalid_uri\"]",
+      "call": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\"]"
+    },
+    "meta_api": {
+      "desc": "CALL wamp.session.count / wamp.registration.list / wamp.subscription.list",
+      "wamp.session.count": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\"]",
+      "wamp.session.list": "ERROR [8,48,2,{},\"wamp.error.no_such_procedure\"]",
+      "wamp.registration.list": "ERROR [8,48,3,{},\"wamp.error.no_such_procedure\"]",
+      "wamp.subscription.list": "ERROR [8,48,4,{},\"wamp.error.no_such_procedure\"]"
+    },
+    "pubsub_basics": {
+      "desc": "PUBLISH without ack (no reply expected), exclude_me default and false, publisher disclosure",
+      "subscribed": "SUBSCRIBED [33,1,1651362859401844]",
+      "publisher_frames": ["EVENT [36,1651362859401844,7964775887512461,{},[\"exclude_me_false\"]]"],
+      "other_subscriber_frames": [
+        "EVENT [36,7922402808671009,434390697439784,{},[\"default\"]]",
+        "EVENT [36,7922402808671009,7964775887512461,{},[\"exclude_me_false\"]]",
+        "EVENT [36,7922402808671009,5492141197108728,{},[\"disclose_me\"]]"
+      ]
+    },
+    "pubsub_blackwhite": {
+      "desc": "PUBLISH {eligible:[B]} and {exclude:[B]} with subscribers A and B",
+      "A_got": ["exclude_B"],
+      "B_got": ["eligible_B"]
+    },
+    "meta_events": {
+      "desc": "subscribe to session meta topics (spec + Thruway-legacy names), then another session joins and leaves",
+      "subscribe_replies": {
+        "wamp.session.on_join": "SUBSCRIBED",
+        "wamp.session.on_leave": "SUBSCRIBED",
+        "wamp.metaevent.session.on_join": "SUBSCRIBED",
+        "wamp.metaevent.session.on_leave": "SUBSCRIBED"
+      },
+      "events": [
+        "EVENT [36,5979919558522289,7575859554246827,{},[{\"realm\":\"realm1\",\"authprovider\":null,\"authid\":\"anonymous\",\"authrole\":\"anonymous\",\"authroles\":[\"anonymous\"],\"authmethod\":\"anonymous\",\"session\":3204309885839140,\"role_features\":{\"caller\":{\"features\":{\"progressive_call_r...",
+        "EVENT [36,2391113331360989,1579979484013090,{},[{\"realm\":\"realm1\",\"authprovider\":null,\"authid\":\"anonymous\",\"authrole\":\"anonymous\",\"authroles\":[\"anonymous\"],\"authmethod\":\"anonymous\",\"session\":3204309885839140,\"role_features\":{\"caller\":{\"features\":{\"progressive_call_r..."
+      ],
+      "joiner_session": 3204309885839140,
+      "sub_ids": {
+        "5423169286926353": 1,
+        "3376374824400682": 2,
+        "5979919558522289": 3,
+        "2391113331360989": 4
+      }
+    },
+    "subscribe_duplicate": {
+      "desc": "same session SUBSCRIBEs twice to the same topic, then 1 PUBLISH",
+      "first": "SUBSCRIBED [33,1,7204718142758861]",
+      "second": "SUBSCRIBED [33,2,606691960557660]",
+      "events": [
+        "EVENT [36,7204718142758861,3944640021143090,{},[\"x\"]]",
+        "EVENT [36,606691960557660,3944640021143090,{},[\"x\"]]"
+      ]
+    },
+    "subscribe_two_sessions_ids": {
+      "desc": "two sessions subscribe to the same topic: same subscription id?",
+      "a": "SUBSCRIBED [33,1,7654638818948309]",
+      "b": "SUBSCRIBED [33,1,4345099656237047]"
+    },
+    "unsubscribe_unknown": {
+      "desc": "UNSUBSCRIBE an unknown subscription id",
+      "reply": "ERROR [8,34,1,{},\"wamp.error.no_such_subscription\"]"
+    },
+    "sub_prefix": {
+      "desc": "SUBSCRIBE {\"match\":\"prefix\"} \"probe.c.pfx\" then PUBLISH to probe.c.pfx, probe.c.pfx.a.b, probe.c.pfxzzz, probe.c.other",
+      "subscribed": "SUBSCRIBED [33,1,829759181679397]",
+      "publish_acks": ["PUBLISHED", "PUBLISHED", "PUBLISHED", "PUBLISHED"],
+      "delivered": ["probe.c.pfx", "probe.c.pfx.a.b", "probe.c.pfxzzz"],
+      "event_details": [
+        {
+          "topic": "probe_mvo9wnjm_8mp5wl.c.pfx"
+        },
+        {
+          "topic": "probe_mvo9wnjm_8mp5wl.c.pfx.a.b"
+        },
+        {
+          "topic": "probe_mvo9wnjm_8mp5wl.c.pfxzzz"
+        }
+      ]
+    },
+    "sub_wildcard": {
+      "desc": "SUBSCRIBE {\"match\":\"wildcard\"} \"probe.c..w\" then PUBLISH to probe.c.x.w, probe.c.w, probe.c.x.y.w",
+      "subscribed": "none (no reply!)",
+      "publish_acks": ["PUBLISHED", "PUBLISHED", "PUBLISHED"],
+      "delivered": [],
+      "event_details": []
+    },
+    "sub_hash_pattern": {
+      "desc": "SUBSCRIBE {} \"probe.c.h.#\" then PUBLISH to probe.c.h.a, probe.c.h.a.b, probe.c.h",
+      "subscribed": "ERROR [8,32,1,{},\"wamp.error.invalid_uri\"]",
+      "publish_acks": ["PUBLISHED", "PUBLISHED", "PUBLISHED"],
+      "delivered": [],
+      "event_details": []
+    },
+    "sub_star_pattern": {
+      "desc": "SUBSCRIBE {} \"probe.c.*.s\" then PUBLISH to probe.c.a.s, probe.c.a.b.s",
+      "subscribed": "ERROR [8,32,1,{},\"wamp.error.invalid_uri\"]",
+      "publish_acks": ["PUBLISHED", "PUBLISHED"],
+      "delivered": [],
+      "event_details": []
+    },
+    "retained_spec": {
+      "desc": "PUBLISH {\"retain\":true,\"acknowledge\":true} then late SUBSCRIBE {\"get_retained\":true}; then a live PUBLISH",
+      "publish_ack": "PUBLISHED [17,1,8802460259134815]",
+      "subscribed": "SUBSCRIBED [33,1,2919822883421986]",
+      "late_subscriber_frames": [
+        "SUBSCRIBED [33,1,2919822883421986]",
+        "EVENT [36,2919822883421986,6021213778565781,{},[\"live-value\"]]"
+      ]
+    },
+    "retained_fox": {
+      "desc": "PUBLISH {\"retain\":true,\"acknowledge\":true} then late SUBSCRIBE {\"retained\":true}; then a live PUBLISH",
+      "publish_ack": "PUBLISHED [17,1,6753336215862041]",
+      "subscribed": "SUBSCRIBED [33,1,8253217764759340]",
+      "late_subscriber_frames": [
+        "SUBSCRIBED [33,1,8253217764759340]",
+        "EVENT [36,8253217764759340,3626279420268936,{},[\"live-value\"]]"
+      ]
+    },
+    "auth_during_challenge": {
+      "desc": "HELLO authmethods [wampcra] authid joe, ignore CHALLENGE, send PUBLISH{acknowledge}",
+      "first_reply": "CHALLENGE [4,\"wampcra\",{\"challenge\":\"{\\\"authid\\\":\\\"joe\\\",\\\"authrole\\\":\\\"user\\\",\\\"authprovider\\\":\\\"userdb\\\",\\\"authmethod\\\":\\\"wampcra\\\",\\\"nonce\\\":\\\"87d5e2916d4602e4f5610a6d7b67827cb6e1d9de02e9\\\",\\\"timestamp\\\":\\\"2026-10-25T20:21:35+0000\\\",\\\"session\\\":4864878287284213}\",\"ch...",
+      "after": ["PUBLISHED [17,77,3340895050837007]", "ERROR [8,48,78,{},\"wamp.error.no_such_procedure\"]"],
+      "closed": null
+    },
+    "auth_two_methods": {
+      "desc": "HELLO authmethods [\"ticket\",\"wampcra\"] authid joe: how many CHALLENGEs?",
+      "frames": [
+        "CHALLENGE [4,\"wampcra\",{\"challenge\":\"{\\\"authid\\\":\\\"joe\\\",\\\"authrole\\\":\\\"user\\\",\\\"authprovider\\\":\\\"userdb\\\",\\\"authmethod\\\":\\\"wampcra\\\",\\\"nonce\\\":\\\"d87bb14bf851912540b9ced560250be6ddb858f1c434\\\",\\\"timestamp\\\":\\\"2026-10-25T20:21:37+0000\\\",\\\"session\\\":8640234487875984}\",\"ch...",
+        "CHALLENGE [4,\"ticket\",{\"challenge\":{},\"challenge_method\":\"ticket\"}]"
+      ],
+      "closed": null
+    }
+  }
+}

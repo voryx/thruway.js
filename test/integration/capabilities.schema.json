@@ -1,0 +1,363 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "capabilities.schema.json",
+  "title": "thruway.js integration: router capabilities",
+  "description": "Every router has every capability key; values are always/never/sometimes except router_goodbye_trigger (a mechanism) and max_message_bytes (a size). Checked by test/integration/capabilities.test.ts, which also re-derives the deterministic flags from live probes.",
+  "type": "object",
+  "required": ["routers"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "routers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/router"
+      }
+    }
+  },
+  "$defs": {
+    "router": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "endpoint",
+        "realm",
+        "strictRealm",
+        "hostile",
+        "auth",
+        "reregisterOptions",
+        "restartable",
+        "capabilities"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "realm": {
+          "type": "string"
+        },
+        "strictRealm": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "hostile": {
+          "type": "boolean"
+        },
+        "auth": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/auth"
+            }
+          ]
+        },
+        "capabilities": {
+          "$ref": "#/$defs/capabilities"
+        },
+        "reregisterOptions": {
+          "type": "object",
+          "description": "REGISTER options of recipe 16 for this router (ghost eviction): Thruway replace_orphaned_session, Crossbar force_reregister"
+        },
+        "restartable": {
+          "type": "boolean",
+          "description": "the chaos schedules may restart it (false: a restart takes too long, Bondy ~15 s)"
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint", "realm", "ticket", "wampcra", "wampcraSalted", "cryptosign", "dual", "failureReasons"],
+      "properties": {
+        "endpoint": {
+          "type": "string"
+        },
+        "realm": {
+          "type": "string"
+        },
+        "ticket": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["authid", "secret", "method"],
+              "properties": {
+                "authid": {
+                  "type": "string"
+                },
+                "secret": {
+                  "type": "string"
+                },
+                "method": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "wampcra": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": ["authid", "secret"],
+              "additionalProperties": false,
+              "properties": {
+                "authid": {
+                  "type": "string"
+                },
+                "secret": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "wampcraSalted": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": ["authid", "secret"],
+              "additionalProperties": false,
+              "properties": {
+                "authid": {
+                  "type": "string"
+                },
+                "secret": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "cryptosign": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["authid", "seed", "publicKey"],
+              "properties": {
+                "authid": {
+                  "type": "string"
+                },
+                "seed": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "publicKey": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          ]
+        },
+        "dual": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["authid", "ticket", "wampcra"],
+              "properties": {
+                "authid": {
+                  "type": "string"
+                },
+                "ticket": {
+                  "type": "string"
+                },
+                "wampcra": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "failureReasons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cancel_interrupts_callee",
+        "cancel_reply",
+        "cancel_without_mode_interrupts",
+        "progressive_results",
+        "wildcard_subscribe_answered",
+        "subscribe_match",
+        "register_match",
+        "goodbye_reply_delivered",
+        "abort_delivered",
+        "router_goodbye_trigger",
+        "router_closes_after_goodbye",
+        "exclude_me",
+        "blackwhite_listing",
+        "publisher_always_disclosed",
+        "meta_kill",
+        "strict_ids",
+        "max_message_bytes",
+        "callee_leave_answer",
+        "caller_leave_interrupts",
+        "callee_error_forwarded",
+        "duplicate_register_rejected",
+        "args_nested_array_preserved",
+        "event_details_topic",
+        "wildcard_match",
+        "invalid_realm_reply",
+        "self_publish_order",
+        "subprotocol_echo",
+        "shared_subscription_ids",
+        "multi_method_challenge",
+        "anonymous_welcome_without_provider",
+        "ghost_registrations",
+        "probe_answered",
+        "publisher_order_kept",
+        "invocation_receive_progress",
+        "progressive_final_payload"
+      ],
+      "properties": {
+        "cancel_interrupts_callee": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "cancel_reply": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "cancel_without_mode_interrupts": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "progressive_results": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "wildcard_subscribe_answered": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "subscribe_match": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "register_match": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "goodbye_reply_delivered": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "abort_delivered": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "router_goodbye_trigger": {
+          "enum": ["rpc", "meta", "sigterm", "proxy"]
+        },
+        "router_closes_after_goodbye": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "exclude_me": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "blackwhite_listing": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "publisher_always_disclosed": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "meta_kill": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "strict_ids": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "max_message_bytes": {
+          "type": "integer",
+          "minimum": 1024
+        },
+        "callee_leave_answer": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "caller_leave_interrupts": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "callee_error_forwarded": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "duplicate_register_rejected": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "args_nested_array_preserved": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "event_details_topic": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "wildcard_match": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "invalid_realm_reply": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "self_publish_order": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "subprotocol_echo": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "shared_subscription_ids": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "multi_method_challenge": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "anonymous_welcome_without_provider": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "ghost_registrations": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "probe_answered": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "publisher_order_kept": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "invocation_receive_progress": {
+          "enum": ["always", "never", "sometimes"]
+        },
+        "progressive_final_payload": {
+          "enum": ["always", "never", "sometimes"]
+        }
+      }
+    }
+  }
+}

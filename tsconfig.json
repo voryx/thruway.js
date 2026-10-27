@@ -1,20 +1,10 @@
 {
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "es5",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "sourceMap": true,
-    "declaration": true,
-    "removeComments": true,
-    "skipLibCheck": true
-  },
-  "typeRoots": [
-    "node_modules/@types"
-  ],
-  "include": [
-    "./index.ts",
-    "./src/**/*.ts"
+  // Solution-style root: never compiled itself. tsserver and typescript-eslint's projectService follow the
+  // references to find the project of every file. Every `tsc -p` names one of the referenced projects.
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.src.json" },
+    { "path": "./test/tsconfig.json" },
+    { "path": "./tsconfig.tools.json" }
   ]
 }

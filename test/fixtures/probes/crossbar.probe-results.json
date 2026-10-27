@@ -1,0 +1,476 @@
+{
+  "progressive_call_results": {
+    "ok": true,
+    "invocationDetails": {
+      "receive_progress": true,
+      "caller": 3054669989005115,
+      "caller_authid": "MXXG-7WMT-V5VU-K4RK-F4GE-5UCX",
+      "caller_authrole": "anonymous"
+    },
+    "results": [
+      [
+        "RESULT",
+        {
+          "progress": true,
+          "callee": 3335142295725688,
+          "callee_authid": "RV54-QCPR-K76C-6A7W-GXWQ-YXMT",
+          "callee_authrole": "anonymous"
+        },
+        [1]
+      ],
+      [
+        "RESULT",
+        {
+          "progress": true,
+          "callee": 3335142295725688,
+          "callee_authid": "RV54-QCPR-K76C-6A7W-GXWQ-YXMT",
+          "callee_authrole": "anonymous"
+        },
+        [2]
+      ],
+      [
+        "RESULT",
+        {
+          "progress": true,
+          "callee": 3335142295725688,
+          "callee_authid": "RV54-QCPR-K76C-6A7W-GXWQ-YXMT",
+          "callee_authrole": "anonymous"
+        },
+        [3]
+      ],
+      [
+        "RESULT",
+        {
+          "callee": 3335142295725688,
+          "callee_authid": "RV54-QCPR-K76C-6A7W-GXWQ-YXMT",
+          "callee_authrole": "anonymous"
+        },
+        ["done"]
+      ]
+    ],
+    "progressWithoutReceiveProgress": [
+      "RESULT [50,2,{\"progress\":true,\"callee\":3335142295725688,\"callee_authid\":\"RV54-QCPR-K76C-6A7W-GXWQ-YXMT\",\"callee_authrole\":\"anonymous\"},[\"p\"]]",
+      "RESULT [50,2,{\"callee\":3335142295725688,\"callee_authid\":\"RV54-QCPR-K76C-6A7W-GXWQ-YXMT\",\"callee_authrole\":\"anonymous\"},[\"final\"]]"
+    ],
+    "ms": 47
+  },
+  "progressive_call_invocations": {
+    "ok": false,
+    "invocationsSeenByCallee": [
+      {
+        "invId": 14,
+        "details": {
+          "caller": 4640122752843541,
+          "caller_authid": "WUFE-H3YF-FNXV-JTPY-R3N3-5QVY",
+          "caller_authrole": "anonymous"
+        },
+        "args": [1]
+      },
+      {
+        "invId": 15,
+        "details": {
+          "caller": 4640122752843541,
+          "caller_authid": "WUFE-H3YF-FNXV-JTPY-R3N3-5QVY",
+          "caller_authrole": "anonymous"
+        },
+        "args": [2]
+      },
+      {
+        "invId": 16,
+        "details": {
+          "caller": 4640122752843541,
+          "caller_authid": "WUFE-H3YF-FNXV-JTPY-R3N3-5QVY",
+          "caller_authrole": "anonymous"
+        },
+        "args": [3]
+      }
+    ],
+    "callerGot": [
+      "RESULT [50,1,{\"callee\":1967566962974575,\"callee_authid\":\"FWME-UM9X-GH4A-FYL6-JG5E-YAGP\",\"callee_authrole\":\"anonymous\"},[1]]",
+      "RESULT [50,1,{\"callee\":1967566962974575,\"callee_authid\":\"FWME-UM9X-GH4A-FYL6-JG5E-YAGP\",\"callee_authrole\":\"anonymous\"},[2]]",
+      "RESULT [50,1,{\"callee\":1967566962974575,\"callee_authid\":\"FWME-UM9X-GH4A-FYL6-JG5E-YAGP\",\"callee_authrole\":\"anonymous\"},[3]]"
+    ],
+    "callerClosed": null,
+    "ms": 514
+  },
+  "call_canceling_skip": {
+    "ok": false,
+    "calleeGotInterrupt": "null (timeout or socket closed)",
+    "callerGot": "null (timeout or socket closed)",
+    "callerLatencyMs": 3004,
+    "lateYieldLeaked": false,
+    "calleeStillUp": true,
+    "ms": 3618
+  },
+  "call_canceling_kill": {
+    "ok": true,
+    "calleeGotInterrupt": "INTERRUPT [69,18,{\"mode\":\"kill\"}]",
+    "callerGot": "ERROR [8,48,1,{},\"wamp.error.canceled\"]",
+    "callerLatencyMs": 304,
+    "lateYieldLeaked": false,
+    "calleeStillUp": true,
+    "ms": 917
+  },
+  "call_canceling_killnowait": {
+    "ok": true,
+    "calleeGotInterrupt": "INTERRUPT [69,19,{\"mode\":\"killnowait\"}]",
+    "callerGot": "ERROR [8,48,1,{},\"wamp.error.canceled\"]",
+    "callerLatencyMs": 1,
+    "lateYieldLeaked": false,
+    "calleeStillUp": true,
+    "ms": 614
+  },
+  "call_timeout": {
+    "ok": true,
+    "invocationDetails": [
+      {
+        "timeout": 1,
+        "caller": 3847288375069930,
+        "caller_authid": "E7CR-33YT-4R7V-KVSQ-F33X-5KMJ",
+        "caller_authrole": "anonymous"
+      },
+      {
+        "timeout": 2,
+        "caller": 3847288375069930,
+        "caller_authid": "E7CR-33YT-4R7V-KVSQ-F33X-5KMJ",
+        "caller_authrole": "anonymous"
+      },
+      {
+        "timeout": 1500,
+        "caller": 3847288375069930,
+        "caller_authid": "E7CR-33YT-4R7V-KVSQ-F33X-5KMJ",
+        "caller_authrole": "anonymous"
+      }
+    ],
+    "timeout_1": {
+      "callerGot": "ERROR [8,48,1,{},\"wamp.error.canceled\",[\"timeout reached\"]]",
+      "afterMs": 590,
+      "calleeInterrupt": "INTERRUPT [69,20,{\"mode\":\"killnowait\"}]"
+    },
+    "timeout_2": {
+      "callerGot": "ERROR [8,48,2,{},\"wamp.error.canceled\",[\"timeout reached\"]]",
+      "afterMs": 1797,
+      "calleeInterrupt": "INTERRUPT [69,21,{\"mode\":\"killnowait\"}]"
+    },
+    "timeout_1500": {
+      "callerGot": "null (timeout or socket closed)",
+      "afterMs": 3204,
+      "calleeInterrupt": "null (timeout or socket closed)"
+    },
+    "timeout_float": {
+      "callerGot": "null (timeout or socket closed)",
+      "closed": {
+        "code": 1002,
+        "reason": "WAMP Protocol Error (invalid type <class 'float'> for 'timeout' option in CALL)",
+        "wasClean": true,
+        "at": 11963.91725
+      },
+      "abort": "null (timeout or socket closed)"
+    },
+    "ms": 6211
+  },
+  "shared_registration": {
+    "ok": true,
+    "roundrobin": {
+      "regIdsEqual": true,
+      "hits": "ABABAB"
+    },
+    "first": {
+      "regIdsEqual": true,
+      "hits": "AAAAAA"
+    },
+    "last": {
+      "regIdsEqual": true,
+      "hits": "BBBBBB"
+    },
+    "random": {
+      "regIdsEqual": true,
+      "hits": "BABAAA"
+    },
+    "mismatchedPolicy": "ERROR [8,64,5,{},\"wamp.error.procedure_exists_with_different_invocation_policy\",[\"register for already registered procedure 'com.thruway.probe.shared_mismatch.le98xp' with conflicting invocation policy (has roundrobin and random was requested)\"]]",
+    "secondSingleRegistration": "ERROR [8,64,6,{},\"wamp.error.procedure_already_exists\",[\"register for already registered procedure 'com.thruway.probe.single.dm3grj'\"]]",
+    "sameSessionTwice": "ERROR [8,64,7,{},\"wamp.error.procedure_already_exists\",[\"register for already registered procedure 'com.thruway.probe.single.dm3grj'\"]]",
+    "ms": 36
+  },
+  "pattern_based_registration": {
+    "ok": true,
+    "calls": {
+      ".p.foo.bar": {
+        "reg": "prefix",
+        "procedure": "com.thruway.probe.pat.b8kd9r.p.foo.bar"
+      },
+      ".p.q.r": {
+        "reg": "prefix_longer",
+        "procedure": "com.thruway.probe.pat.b8kd9r.p.q.r"
+      },
+      ".y.w": {
+        "reg": "wildcard",
+        "procedure": "com.thruway.probe.pat.b8kd9r.y.w"
+      },
+      ".p.x": {
+        "reg": "exact",
+        "procedure": "(absent: exact)"
+      },
+      ".p.k.z": {
+        "reg": "prefix",
+        "procedure": "com.thruway.probe.pat.b8kd9r.p.k.z"
+      }
+    },
+    "note": "precedence: exact > longest prefix > wildcard (\".p.k.z\" matches prefix \".p\" and wildcard \".p..z\")",
+    "ms": 15
+  },
+  "pattern_based_subscription": {
+    "ok": true,
+    "events": [
+      {
+        "sub": "prefix",
+        "details": {
+          "publisher": 3429420433329067,
+          "publisher_authid": "M4W7-5N5R-MQM5-YXCN-U443-WFJV",
+          "publisher_authrole": "anonymous",
+          "topic": "com.thruway.probe.pats.exh65d.a.end"
+        }
+      },
+      {
+        "sub": "wildcard",
+        "details": {
+          "publisher": 3429420433329067,
+          "publisher_authid": "M4W7-5N5R-MQM5-YXCN-U443-WFJV",
+          "publisher_authrole": "anonymous",
+          "topic": "com.thruway.probe.pats.exh65d.a.end"
+        }
+      }
+    ],
+    "ms": 308
+  },
+  "event_retention": {
+    "ok": true,
+    "retainedEvent": "EVENT [36,1221691313316154,2805554092305850,{\"publisher\":6751682924939277,\"publisher_authid\":\"3L64-6YYH-GFJY-YSPQ-JVNA-4X7Q\",\"publisher_authrole\":\"anonymous\",\"retained\":true},[\"second\"],{\"k\":1}]",
+    "withoutGetRetained": "null (timeout or socket closed)",
+    "ms": 514
+  },
+  "publisher_exclusion_and_bw_listing": {
+    "ok": true,
+    "default": "B,C",
+    "exclude_me_false": "A,B,C",
+    "exclude_B": "A,C",
+    "eligible_B": "B",
+    "eligible_authrole_authenticated": "C",
+    "exclude_authid_ticketuser": "A,B",
+    "ms": 2752
+  },
+  "disclosure": {
+    "ok": true,
+    "invocationDetails_plain": {},
+    "invocationDetails_disclose_me": {},
+    "eventDetails_disclose_me": {},
+    "ms": 15
+  },
+  "session_meta_api": {
+    "ok": true,
+    "count": "RESULT [50,1,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[2]]",
+    "list": "RESULT [50,2,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[[187070815690054,8177131675514271]]]",
+    "get_self": "RESULT [50,3,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[{\"realm\":\"realm1\",\"session\":187070815690054,\"authid\":\"RRNK-AXKX-Y9UT-JMPK-57NV-NK4H\",\"authrole\":\"anonymous\",\"authmethod\":\"anonymous\",\"authprovider\":\"static\",\"authextra\":{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:54190\",\"…",
+    "get_unknown": "ERROR [8,48,4,{},\"wamp.error.runtime_error\",[\"'RealmStoreMemory' object has no attribute 'get_session_by_session_id'\"]]",
+    "on_join": "EVENT [36,7235562043609320,5221372443463452,{\"publisher\":7172869416278730,\"publisher_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"publisher_authrole\":\"trusted\"},[{\"realm\":\"realm1\",\"session\":8791331416642122,\"authid\":\"J6R6-G345-M5PP-4P7E-M5JR-5VQP\",\"authrole\":\"anonymous\",\"authmethod\":\"anonymous\",\"authprovider\":\"static\",\"authextra\":{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001…",
+    "on_leave": "EVENT [36,6770123029861543,6907433226979953,{\"publisher\":7172869416278730,\"publisher_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"publisher_authrole\":\"trusted\"},[8791331416642122]]",
+    "kill": "RESULT [50,5,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[null]]",
+    "victimGot": "GOODBYE [6,{\"message\":\"bye now\"},\"com.thruway.kicked\"]",
+    "victimSocketClose": null,
+    "kill_self": "RESULT [50,6,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[null]]",
+    "kill_self_effect": "GOODBYE [6,{},\"wamp.close.normal\"]",
+    "kill_unknown": "ERROR [8,48,7,{},\"wamp.error.no_such_session\",[\"no session with ID 1 exists on this router\"]]",
+    "get_unknown_realm2_no_store": "ERROR [8,48,1,{},\"wamp.error.no_such_session\",[\"no session with ID 1 exists on this router\"]]",
+    "kill_by_authid": "RESULT [50,2,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[[4346774627718907]]]",
+    "kill_by_authid_victim": "GOODBYE [6,{},\"wamp.close.killed\"]",
+    "ms": 2043
+  },
+  "registration_and_subscription_meta_api": {
+    "ok": true,
+    "reg_list": "RESULT [50,3,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[{\"exact\":[6472952058773327],\"prefix\":[],\"wildcard\":[]}]]",
+    "reg_lookup": "RESULT [50,4,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[6472952058773327]]",
+    "reg_match": "RESULT [50,5,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[6472952058773327]]",
+    "reg_get": "RESULT [50,6,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[{\"id\":6472952058773327,\"created\":\"2026-10-25T20:19:27.302Z\",\"uri\":\"com.thruway.probe.meta.096c9c\",\"match\":\"exact\",\"invoke\":\"single\"}]]",
+    "reg_list_callees": "RESULT [50,7,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[[968431323148513]]]",
+    "reg_count_callees": "RESULT [50,8,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[1]]",
+    "sub_lookup": "RESULT [50,9,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[7047211248676834]]",
+    "sub_match": "RESULT [50,10,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[[7047211248676834]]]",
+    "sub_get": "RESULT [50,11,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[{\"id\":7047211248676834,\"created\":\"2026-10-25T20:19:27.303Z\",\"uri\":\"com.thruway.probe.meta.096c9c\",\"match\":\"exact\"}]]",
+    "sub_list_subscribers": "RESULT [50,12,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[[968431323148513]]]",
+    "sub_count_subscribers": "RESULT [50,13,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[1]]",
+    "reg_lookup_unknown": "RESULT [50,14,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[null]]",
+    "reg_get_unknown": "ERROR [8,48,15,{},\"wamp.error.no_such_registration\",[\"no registration with ID 12345 exists on this dealer\"]]",
+    "ms": 18
+  },
+  "testament": {
+    "ok": true,
+    "add": "RESULT [50,1,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[2397400093306441]]",
+    "onAbruptClose": "EVENT [36,6628262490130703,2039674151062991,{\"publisher\":8940705024787478,\"publisher_authid\":\"GLXY-9YHS-RKYG-3SUV-SNYV-5M6L\",\"publisher_authrole\":\"anonymous\"},[\"abrupt\"],{\"who\":\"A\"}]",
+    "onCleanGoodbye": "EVENT [36,6628262490130703,4528157768692520,{\"publisher_authid\":\"LPFW-SC5W-RRUW-VTJM-H39L-GGQR\",\"publisher_authrole\":\"anonymous\"},[\"clean\"]]",
+    "flush": "RESULT [50,2,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[1]]",
+    "afterFlush": "null (timeout or socket closed)",
+    "ms": 1031
+  },
+  "event_history": {
+    "ok": true,
+    "lookup": "RESULT [50,6,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[7262160854411279]]",
+    "prefixSubIdEqualsLookup": true,
+    "get_events_prefix_sub": "RESULT [50,7,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[[{\"time_ns\":1792959568368734200,\"realm\":\"realm1\",\"session_id\":464724082753312,\"authid\":\"NKVW-9AGR-L9QK-HXQF-7P45-JQ7V\",\"authrole\":\"anonymous\",\"publication\":6257295275136493,\"topic\":\"com.thruway.history.k259uv\",\"args\":[4],\"kwargs\":null},{\"time_ns\":1792959568368204500,\"…",
+    "get_events_exact_sub": "ERROR [8,48,8,{},\"wamp.error.history_unavailable\",[],{\"message\":\"event history for the given subscription is not available or enabled\"}]",
+    "get_events_realm_without_store": "ERROR [8,48,2,{},\"wamp.error.history_unavailable\",[],{\"message\":\"event history not available or enabled\"}]",
+    "ms": 32
+  },
+  "error_semantics": {
+    "ok": true,
+    "no_such_procedure": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\",[\"no callee registered for procedure <com.thruway.does.not.exist>\"]]",
+    "invalid_uri_call_empty_component": "null (timeout or socket closed) | socket closed 1011 \"WAMP Internal Error ('procedure' in CALL: invalid value \\\"com..bad\\\" for URI (did not match pattern \\\"^([^\\\\s\\\\.#]+\\\\.)*([^\\\\s\\\\\"",
+    "invalid_uri_call_space": "null (timeout or socket closed) | socket closed 1011 \"WAMP Internal Error ('procedure' in CALL: invalid value \\\"com.bad uri\\\" for URI (did not match pattern \\\"^([^\\\\s\\\\.#]+\\\\.)*([^\"",
+    "invalid_uri_call_hash": "null (timeout or socket closed) | socket closed 1011 \"WAMP Internal Error ('procedure' in CALL: invalid value \\\"com.bad#x\\\" for URI (did not match pattern \\\"^([^\\\\s\\\\.#]+\\\\.)*([^\\\\s\"",
+    "invalid_uri_publish": "null (timeout or socket closed) | socket closed 1011 \"WAMP Internal Error ('topic' in PUBLISH: invalid value \\\"com..bad\\\" for URI (did not match pattern \\\"^([^\\\\s\\\\.#]+\\\\.)*([^\\\\s\\\\.\"",
+    "invalid_uri_subscribe": "ERROR [8,32,1,{},\"wamp.error.invalid_uri\",[\"subscribe for invalid topic URI 'com..bad'\"]]",
+    "invalid_uri_register": "null (timeout or socket closed) | socket closed 1011 \"WAMP Internal Error ('procedure' in REGISTER: invalid value \\\"com..bad\\\" for URI (did not match pattern \\\"^([^\\\\s\\\\.#]+\\\\.)*([\"",
+    "register_reserved_wamp": "ERROR [8,64,1,{},\"wamp.error.invalid_uri\",[\"register for restricted procedure URI 'wamp.thruway.mine')\"]]",
+    "publish_reserved_wamp": "ERROR [8,16,1,{},\"wamp.error.invalid_uri\",[\"publish with restricted topic URI 'wamp.thruway.mine'\"]]",
+    "subscribe_reserved_wamp_session_on_join": "SUBSCRIBED [33,1,190827025789062]",
+    "register_empty_uri": "null (timeout or socket closed) | socket closed 1011 \"WAMP Internal Error ('procedure' in REGISTER: invalid value \\\"\\\" for URI (did not match pattern \\\"^([^\\\\s\\\\.#]+\\\\.)*([^\\\\s\\\\.#]+\"",
+    "register_camelCase_loose_realm1": "REGISTERED [65,1,3345078293538624]",
+    "register_camelCase_strict_realm2": "ERROR [8,64,1,{},\"wamp.error.invalid_uri\",[\"register for invalid procedure URI 'com.thruway.camelCase' (URI strict checking True)\"]]",
+    "register_wildcard_with_exact_match": "null (timeout or socket closed) | socket closed 1011 \"WAMP Internal Error ('procedure' in REGISTER: invalid value \\\"com..x\\\" for URI (did not match pattern \\\"^([^\\\\s\\\\.#]+\\\\.)*([^\\\\\"",
+    "register_bad_match_policy": "null (timeout or socket closed) | socket closed 1002 \"WAMP Protocol Error (invalid value regex for 'match' option in REGISTER)\"",
+    "register_bad_invoke_policy": "null (timeout or socket closed) | socket closed 1002 \"WAMP Protocol Error (invalid value sometimes for 'invoke' option in REGISTER)\"",
+    "not_authorized_register": "ERROR [8,64,1,{},\"wamp.error.not_authorized\",[\"session (session_id=4095855453550042, authid=\\\"limited\\\", authrole=\\\"restricted\\\") is not authorized to register procedure \\\"com.thruway.public.x\\\" on realm \\\"realm1\\\"\"]]",
+    "not_authorized_publish": "ERROR [8,16,1,{},\"wamp.error.not_authorized\",[\"session not authorized to publish to topic 'com.thruway.public.x'\"]]",
+    "not_authorized_publish_unacknowledged": "null (timeout or socket closed)",
+    "not_authorized_call_outside_prefix": "ERROR [8,48,1,{},\"wamp.error.not_authorized\",[\"session (session_id=6739273338811023, authid=\\\"limited\\\", authrole=\\\"restricted\\\") is not authorized to call procedure \\\"com.thruway.private.x\\\" on realm \\\"realm1\\\"\"]]",
+    "authorized_subscribe_in_prefix": "SUBSCRIBED [33,1,2273847194053048]",
+    "no_such_subscription": "ERROR [8,34,1,{},\"wamp.error.no_such_subscription\"]",
+    "no_such_registration": "ERROR [8,66,1,{},\"wamp.error.no_such_registration\"]",
+    "yield_unknown_invocation": "null (timeout or socket closed)",
+    "error_for_unknown_invocation": "null (timeout or socket closed)",
+    "cancel_unknown_call": "null (timeout or socket closed)",
+    "cancel_bad_mode": "null (timeout or socket closed) | socket closed 1002 \"WAMP Protocol Error (invalid value 'nuke' for 'mode' option in CANCEL)\"",
+    "application_error": "ERROR [8,48,1,{},\"com.thruway.error.custom\",[\"bad\",1],{\"why\":\"because\"}]",
+    "application_error_invalid_error_uri": "ERROR [8,48,2,{},\"wamp.error.canceled\",[\"callee disconnected from in-flight request\"]]",
+    "calleeAfterInvalidErrorUri": "closed 1011 WAMP Internal Error ('error' in ERROR: invalid value \"not a uri!\" for URI (did not match pattern \"^([^\\s\\.#]+\\.)*([^\\s\\.",
+    "yield_for_foreign_invocation": {
+      "thief": "closed 1002 WAMP Protocol Error (Dealer.onYield(): YIELD received for non-owned request ID 85)",
+      "callerGot": "null (timeout or socket closed)"
+    },
+    "ms": 7933
+  },
+  "callee_or_caller_vanishes": {
+    "ok": true,
+    "callerAfterCalleeLost": "ERROR [8,48,1,{},\"wamp.error.canceled\",[\"callee disconnected from in-flight request\"]]",
+    "calleeAfterCallerLost": "INTERRUPT [69,87,{\"mode\":\"killnowait\"}]",
+    "ms": 422
+  },
+  "registration_leak_race": {
+    "ok": false,
+    "leakedRegistrations": "3/6",
+    "ms": 3093
+  },
+  "session_establishment_errors": {
+    "ok": true,
+    "no_such_realm": "ABORT [3,{\"message\":\"no realm \\\"nope\\\" exists on this router\"},\"wamp.error.no_such_realm\"] | socket: still open after 1s",
+    "anonymous_on_auth_path": "ABORT [3,{\"message\":\"cannot authenticate [2] using any of the offered authmethods ['anonymous']\"},\"wamp.error.no_auth_method\"] | socket: still open after 1s",
+    "ticket_on_anon_path": "ABORT [3,{\"message\":\"cannot authenticate [2] using any of the offered authmethods ['ticket']\"},\"wamp.error.no_auth_method\"] | socket: still open after 1s",
+    "bad_ticket": "ABORT [3,{\"message\":\"ticket in static WAMP-Ticket authentication is invalid\"},\"wamp.error.not_authorized\"] | socket: still open after 1s",
+    "unknown_authid": "ABORT [3,{\"message\":\"no principal with authid \\\"nobody\\\" exists\"},\"wamp.error.not_authorized\"] | socket: still open after 1s",
+    "wampcra_bad_signature": "ABORT [3,{\"message\":\"WAMP-CRA client signature is invalid\"},\"wamp.error.not_authorized\"] | socket: still open after 1s",
+    "cryptosign_64byte_sig": "ABORT [3,{\"message\":\"signed message has invalid length (was 64, but should have been 96)\"},\"wamp.error.not_authorized\"] | socket: still open after 1s",
+    "no_authmethods_field": "WELCOME [2,7069669262106090,{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:17102\",\"x_cb_pid\":12,\"realm\":\"realm1\",\"authid\":\"R4JS-LUQM-GEKH-XXM7-TC64-WFUX\",\"authrole\":\"anonymous\",\"authmethod\":\"anonymous\",\"authprovider\":\"static\",\"authextra\":{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:17102\",\"x_cb_pid\":12},\"roles\":{\"bro… | socket: still open after 1s",
+    "empty_roles": "null (timeout or socket closed) | socket: closed 1002",
+    "hello_again_after_abort_same_socket": "ABORT [3,{\"message\":\"no realm \\\"nope\\\" exists on this router\"},\"wamp.error.no_such_realm\"] THEN WELCOME [2,1465960827778788,{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:46823\",\"x_cb_pid\":12,\"realm\":\"realm1\",\"authid\":\"UWWF-6USH-5EGF-4X5U-4UFT-94V3\",\"authrole\":\"anonymous\",\"authmethod\":\"anonymous\",\"authprovider\":\"static\",\"authextra\":{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:46823\",\"x_cb_pid\":12},\"roles\":{\"bro…",
+    "method_order_ticket_then_anonymous_on_any": "WELCOME [2,8357270753621245,{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:58789\",\"x_cb_pid\":12,\"realm\":\"realm1\",\"authid\":\"ticketuser\",\"authrole\":\"authenticated\",\"authmethod\":\"ticket\",\"authprovider\":\"static\",\"authextra\":{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:58789\",\"x_cb_pid\":12},\"roles\":{\"broker\":{\"features\":{… | socket: still open after 1s",
+    "method_order_anonymous_then_ticket_on_any": "WELCOME [2,5270939931449094,{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:60110\",\"x_cb_pid\":12,\"realm\":\"realm1\",\"authid\":\"WFSV-459T-V99M-NEJM-7U6V-79VC\",\"authrole\":\"anonymous\",\"authmethod\":\"anonymous\",\"authprovider\":\"static\",\"authextra\":{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:60110\",\"x_cb_pid\":12},\"roles\":{\"bro… | socket: still open after 1s",
+    "ms": 10063
+  },
+  "protocol_violations": {
+    "ok": true,
+    "second_hello": "null (timeout or socket closed) | socket: still open",
+    "unknown_message_type_999": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid WAMP message type 999)\"",
+    "router_only_message_WELCOME_from_client": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (missing mandatory roles attribute in options in WELCOME)\"",
+    "malformed_json": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid serialization of WAMP message: JSONDecodeError Expecting ',' delimiter: line 1 column 16 (char\"",
+    "json_not_array": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid type <class 'dict'> for WAMP message)\"",
+    "binary_frame_on_json": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid serialization of WAMP message (binary True, but expected False))\"",
+    "call_wrong_arity": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid message length 2 for CALL)\"",
+    "call_args_not_list": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid type <class 'dict'> for 'args' in CALL)\"",
+    "call_options_not_dict": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error ('options' in CALL: invalid type <class 'list'> for WAMP extra)\"",
+    "call_request_id_zero": "ERROR [8,48,0,{},\"wamp.error.no_such_procedure\",[\"no callee registered for procedure <com.thruway.nope>\"]] | socket: still open",
+    "call_request_id_2pow53": "ERROR [8,48,9007199254740992,{},\"wamp.error.no_such_procedure\",[\"no callee registered for procedure <com.thruway.nope>\"]] | socket: still open",
+    "call_request_id_negative": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error ('request' in CALL: invalid value -5 for ID)\"",
+    "receive_progress_not_bool": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid type <class 'str'> for 'receive_progress' option in CALL)\"",
+    "publish_acknowledge_not_bool": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid type <class 'int'> for 'acknowledge' option in PUBLISH)\"",
+    "unknown_option_ignored": "ERROR [8,48,1,{},\"wamp.error.no_such_procedure\",[\"no callee registered for procedure <com.thruway.nope>\"]] | socket: still open",
+    "oversize_message_ws_ping": "null (timeout or socket closed) | socket: closed 1009 \"received WebSocket message size 70050 exceeds payload limit of 65536 octets\"",
+    "goodbye_without_reason": "null (timeout or socket closed) | socket: closed 1002 \"WAMP Protocol Error (invalid message length 2 for GOODBYE)\"",
+    "ms": 7603
+  },
+  "pre_session_violations": {
+    "ok": true,
+    "call_before_hello": "null (timeout or socket closed) | socket: still open",
+    "goodbye_before_hello": "null (timeout or socket closed) | socket: still open",
+    "authenticate_without_challenge": "ABORT [3,{\"message\":\"no pending authentication\"},\"wamp.error.not_authorized\"] | socket: still open",
+    "hello_realm_not_string": "null (timeout or socket closed) | socket: closed 1011",
+    "ms": 7520
+  },
+  "subprotocol_negotiation": {
+    "ok": true,
+    "json": "open protocol=\"wamp.2.json\"",
+    "msgpack_then_json": "open protocol=\"wamp.2.msgpack\"",
+    "json_batched": "open protocol=\"wamp.2.json.batched\"",
+    "none": "rejected close=1006",
+    "unknown": "rejected close=1006",
+    "ms": 18
+  },
+  "goodbye_handshake": {
+    "ok": true,
+    "reply": "GOODBYE [6,{},\"wamp.close.normal\"]",
+    "routerClosesSocketAfterGoodbye": "no (client must close)",
+    "callAfterGoodbye": "null (timeout or socket closed)",
+    "rehelloAfterGoodbye": "WELCOME [2,784714346674264,{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:29873\",\"x_cb_pid\":12,\"realm\":\"realm1\",\"authid\":\"S73N-U79C-X6UM-YX4K-3C95-QC7R\",\"authrole\":\"anonymous\",\"authmethod\":\"anonymous\",\"authprovider\":\"static\",\"authextra\":{\"x_cb_node\":\"thruway_test_node\",\"x_cb_worker\":\"worker001\",\"x_cb_peer\":\"tcp4:192.168.127.1:29873\",\"x_cb_pid\":12},\"roles\":{\"brok…",
+    "ms": 3520
+  },
+  "auto_ping_keepalive": {
+    "ok": true,
+    "stillOpen": true,
+    "countWorks": "RESULT [50,1,{\"callee\":7172869416278730,\"callee_authid\":\"routerworker-worker001-realm-realm001-serviceagent\",\"callee_authrole\":\"trusted\"},[1]]",
+    "ms": 4506
+  },
+  "payload_fidelity": {
+    "ok": true,
+    "args_roundtrip": [
+      0,
+      1e308,
+      "üñí©ødé ☃ 😀",
+      "\u0000ctrl",
+      null,
+      true,
+      [],
+      {},
+      {
+        "nested": [
+          1,
+          {
+            "a": [2]
+          }
+        ]
+      }
+    ],
+    "rawBigIntInvocationFrame": "[68,102,7230837278583751,{\"caller\":2970887698102352,\"caller_authid\":\"GA66-Q4T3-XXSS-HS7S-9KQ3-GLP7\",\"caller_authrole\":\"anonymous\"},[9007199254740993,18446744073709551615,-9223372036854775808,1.0]]",
+    "note": "router (Python) keeps arbitrary-precision ints and echoes 1e400 as the invalid JSON token Infinity, NaN as NaN",
+    "noArgsResult": "RESULT [50,3,{\"callee\":7065864955483375,\"callee_authid\":\"6467-NW39-53AF-UHTC-VCH9-FTC5\",\"callee_authrole\":\"anonymous\"}]",
+    "kwargsOnly": "RESULT [50,4,{\"callee\":7065864955483375,\"callee_authid\":\"6467-NW39-53AF-UHTC-VCH9-FTC5\",\"callee_authrole\":\"anonymous\"},[],{\"only\":\"kw\"}]",
+    "ms": 11
+  },
+  "request_id_reuse": {
+    "ok": true,
+    "callerGot": [
+      "RESULT [50,77,{\"callee\":8706027285578491,\"callee_authid\":\"X9W3-4LQ3-3SF7-FGKS-7KFG-3RLN\",\"callee_authrole\":\"anonymous\"},[1]]",
+      "RESULT [50,77,{\"callee\":8706027285578491,\"callee_authid\":\"X9W3-4LQ3-3SF7-FGKS-7KFG-3RLN\",\"callee_authrole\":\"anonymous\"},[2]]"
+    ],
+    "invocations": 2,
+    "callerClosed": null,
+    "ms": 811
+  }
+}

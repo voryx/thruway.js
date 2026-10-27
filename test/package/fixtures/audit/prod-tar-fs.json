@@ -1,0 +1,18 @@
+{
+  "version": "3.0.0",
+  "name": "thruway.js",
+  "dependencies": {
+    "archiver": {
+      "version": "7.0.1",
+      "resolved": "https://registry.npmjs.org/archiver/-/archiver-7.0.1.tgz",
+      "overridden": false,
+      "dependencies": {
+        "tar-fs": {
+          "version": "3.0.8",
+          "resolved": "https://registry.npmjs.org/tar-fs/-/tar-fs-3.0.8.tgz",
+          "overridden": false
+        }
+      }
+    }
+  }
+}

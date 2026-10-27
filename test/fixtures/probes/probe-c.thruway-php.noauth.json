@@ -1,0 +1,80 @@
+{
+  "url": "ws://127.0.0.1:18281/",
+  "realm": "realm1",
+  "node": "v26.3.0",
+  "at": "2026-10-25T20:21:39.286Z",
+  "probes": {
+    "welcome": {
+      "desc": "WELCOME details/roles for an anonymous HELLO",
+      "welcome": {
+        "agent": "probe-c",
+        "roles": {
+          "broker": {
+            "features": {
+              "subscriber_blackwhite_listing": true,
+              "publisher_exclusion": true,
+              "subscriber_metaevents": true
+            }
+          },
+          "dealer": {
+            "features": {
+              "caller_identification": true,
+              "progressive_call_results": true
+            }
+          }
+        },
+        "transport": {
+          "type": "ratchet",
+          "transport_address": "192.168.127.1",
+          "headers": {
+            "host": ["127.0.0.1:18281"],
+            "connection": ["upgrade"],
+            "upgrade": ["websocket"],
+            "sec-websocket-key": ["rY0a1EHLgycx3rTMc7id3A=="],
+            "sec-websocket-version": ["13"],
+            "sec-websocket-protocol": ["wamp.2.json"],
+            "sec-websocket-extensions": ["permessage-deflate; client_max_window_bits"],
+            "accept": ["*/*"],
+            "accept-language": ["*"],
+            "sec-fetch-mode": ["websocket"],
+            "user-agent": ["node"],
+            "pragma": ["no-cache"],
+            "cache-control": ["no-cache"],
+            "accept-encoding": ["gzip, deflate"]
+          },
+          "url": "/",
+          "query_params": [],
+          "cookies": []
+        }
+      }
+    },
+    "hello_no_roles": {
+      "desc": "HELLO with empty details (no roles) - spec requires roles",
+      "reply": "WELCOME [2,7919353051686947,{\"transport\":{\"type\":\"ratchet\",\"transport_address\":\"192.168.127.1\",\"headers\":{\"host\":[\"127.0.0.1:18281\"],\"connection\":[\"upgrade\"],\"upgrade\":[\"websocket\"],\"sec-websocket-key\":[\"zFkdjXwfIdRuFsu+cVuN3A==\"],\"sec-websocket-version\":[\"13\"],\"sec-w...",
+      "closed": null
+    },
+    "invalid_realm": {
+      "desc": "HELLO for realm \"Bad Realm!\" (invalid chars)",
+      "reply": "WELCOME [2,6414215855044146,{\"roles\":{\"broker\":{\"features\":{\"subscriber_blackwhite_listing\":true,\"publisher_exclusion\":true,\"subscriber_metaevents\":true}},\"dealer\":{\"features\":{\"caller_identification\":true,\"progressive_call_results\":true}}},\"transport\":{\"type\":\"ratche...",
+      "closed": null
+    },
+    "caller_identification": {
+      "desc": "REGISTER{disclose_caller:true} -> INVOCATION.details.caller?",
+      "register": "REGISTERED [65,1,5092574474484427]",
+      "invocation_details": {
+        "caller": 858633035765509,
+        "authid": "anonymous",
+        "authrole": "anonymous",
+        "authroles": ["anonymous"],
+        "authmethod": "anonymous"
+      },
+      "caller_session": 858633035765509
+    },
+    "auth_during_challenge": {
+      "desc": "HELLO authmethods [wampcra] authid joe, ignore CHALLENGE, send PUBLISH{acknowledge}",
+      "first_reply": "WELCOME [2,8720905205103468,{\"roles\":{\"broker\":{\"features\":{\"subscriber_blackwhite_listing\":true,\"publisher_exclusion\":true,\"subscriber_metaevents\":true}},\"dealer\":{\"features\":{\"caller_identification\":true,\"progressive_call_results\":true}}},\"authmethods\":[\"wampcra\"],\"...",
+      "after": ["PUBLISHED [17,77,2242174224079900]", "ERROR [8,48,78,{},\"wamp.error.no_such_procedure\"]"],
+      "closed": null
+    }
+  }
+}

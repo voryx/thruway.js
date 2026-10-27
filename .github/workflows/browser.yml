@@ -1,0 +1,50 @@
+# Job `browser`: Thruway PHP under podman (the browser project's globalSetup starts it through scripts/routers.mjs from
+# the image built here, test/browser/routers.ts; BROWSER_ROUTER=thruway-php,crossbar adds Crossbar); playwright chromium
+# + webkit (firefox continue-on-error); build; the browser project against the reference server and the router with
+# REQUIRE_ROUTERS=1; the plain playwright bundle smoke. Same scripts as `npm run ci`. The router image is built from the
+# vendored test/routers/**.
+name: browser
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      BROWSER_ROUTER: thruway-php
+      REQUIRE_ROUTERS: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Router image (Thruway PHP 0.6.1)
+        run: node scripts/routers.mjs build "$BROWSER_ROUTER"
+      - name: Playwright browsers
+        run: npx playwright install --with-deps --only-shell chromium webkit firefox
+      - name: Build
+        run: npm run build
+      - name: Browser project (chromium + webkit, reference server + Thruway PHP)
+        run: npm run test:browser
+      - name: Browser project (firefox, best effort)
+        continue-on-error: true
+        run: npm run test:browser
+        env:
+          BROWSERS: firefox
+      - name: Bundles in chromium + webkit without a test runner
+        run: node scripts/smoke-browser-bundles.mjs

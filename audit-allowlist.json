@@ -1,0 +1,4 @@
+{
+  "$comment": "Reviewed, expiring exceptions to scripts/audit-gate.mjs: one entry per high/critical advisory of a DEV-ONLY package, {id: GHSA id, package, reason, reviewedBy, added: YYYY-MM-DD, expires: at most 90 days after added}. An expired entry fails the gate; an entry for a package in the production tree is refused.",
+  "entries": []
+}

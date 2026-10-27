@@ -1,0 +1,80 @@
+[
+  {
+    "uri": "realm1",
+    "description": "thruway.js v3 test realm: anonymous + password + wampcra + cryptosign + (Bondy-issued) ticket, permissive grants",
+    "authmethods": ["anonymous", "password", "wampcra", "cryptosign", "ticket"],
+    "security_enabled": true,
+    "users": [
+      {
+        "username": "ticketuser",
+        "password": "ticketsecret",
+        "groups": ["testers"],
+        "meta": { "comment": "cleartext 'password' authmethod (Bondy's equivalent of a static WAMP ticket)" }
+      },
+      {
+        "username": "crauser",
+        "password": "crasecret",
+        "groups": ["testers"],
+        "meta": { "comment": "wampcra; Bondy always sends salt/iterations/keylen (PBKDF2-SHA256)" }
+      },
+      {
+        "username": "csuser",
+        "authorized_keys": ["682a35e8c87f7004cbb10679617a29154f9906b7e29a64af3f6d3e8e10934701"],
+        "groups": ["testers"],
+        "meta": {
+          "comment": "cryptosign; test-only private seed 93a276a0b622ce7c6dd077120550cd3524ec1eed5ebf8692c4a828da9fc15dd2"
+        }
+      }
+    ],
+    "groups": [{ "name": "testers", "groups": [], "meta": {} }],
+    "sources": [
+      { "usernames": ["anonymous"], "authmethod": "anonymous", "cidr": "0.0.0.0/0", "meta": {} },
+      { "usernames": "all", "authmethod": "password", "cidr": "0.0.0.0/0", "meta": {} },
+      { "usernames": "all", "authmethod": "wampcra", "cidr": "0.0.0.0/0", "meta": {} },
+      { "usernames": "all", "authmethod": "cryptosign", "cidr": "0.0.0.0/0", "meta": {} },
+      { "usernames": "all", "authmethod": "ticket", "cidr": "0.0.0.0/0", "meta": {} }
+    ],
+    "grants": [
+      {
+        "permissions": [
+          "wamp.register",
+          "wamp.unregister",
+          "wamp.subscribe",
+          "wamp.unsubscribe",
+          "wamp.call",
+          "wamp.cancel",
+          "wamp.publish",
+          "wamp.disclose_caller",
+          "wamp.disclose_publisher",
+          "wamp.disclose_session_info"
+        ],
+        "uri": "",
+        "match": "prefix",
+        "roles": "all"
+      },
+      {
+        "permissions": [
+          "wamp.register",
+          "wamp.unregister",
+          "wamp.subscribe",
+          "wamp.unsubscribe",
+          "wamp.call",
+          "wamp.cancel",
+          "wamp.publish",
+          "wamp.disclose_caller",
+          "wamp.disclose_publisher",
+          "wamp.disclose_session_info"
+        ],
+        "uri": "",
+        "match": "prefix",
+        "roles": ["anonymous"]
+      },
+      {
+        "permissions": ["bondy.issue"],
+        "uri": "bondy.ticket.scope.",
+        "match": "prefix",
+        "roles": "all"
+      }
+    ]
+  }
+]

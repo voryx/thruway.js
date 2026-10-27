@@ -1,0 +1,88 @@
+# Job `package`: build (TS 7 ESM + CJS, rspack bundles); the declaration gate; `npm run package:check` (ES2020 gate,
+# publint --strict, attw, size budget, consumer matrix incl. the RxJS 6 cell, Jest 29 consumer, Node 22.0.0/22.4.0
+# smoke); the package tests (smoke, hazard, bundle-semantics, release guard, audit gate); scripts/prepublish-guard.mjs
+# on the checkout (with --release on a v* tag); the packed tarball as the release artifact. The Hermes smoke needs the
+# macOS hermes-ios VM and runs in the `hermes` job. Same scripts as `npm run ci`.
+name: package
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # installs of the TypeScript versions, Jest 29 and the Hermes tarball may download (locally they are offline only)
+  THRUWAY_ALLOW_NETWORK: '1'
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PACKAGE_CHECK_SKIP: hermes
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Node 22.0.0 (runtime floor smoke)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.0.0
+      - run: echo "NODE_22_0_0=$(command -v node)" >> "$GITHUB_ENV"
+      - name: Node 22.4.0 (runtime floor smoke)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.4.0
+      - run: echo "NODE_22_4_0=$(command -v node)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Declaration gate
+        run: node scripts/dts-check.mjs
+      - name: Package checks
+        run: npm run package:check
+      - name: Package tests (smoke, hazard, bundle-semantics, release guard, audit gate)
+        run: npm run test:node -- test/package
+      - name: Release guard
+        run: node scripts/prepublish-guard.mjs
+      - name: Release guard (tagged release)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: node scripts/prepublish-guard.mjs --release
+      - name: Pack the release artifact
+        run: npm pack --ignore-scripts
+      - name: Upload the tarball
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: thruway.js-tarball
+          path: thruway.js-*.tgz
+          if-no-files-found: error
+
+  hermes:
+    runs-on: macos-15
+    timeout-minutes: 20
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Hermes smoke (hermes-ios 250829098.0.17 from Maven Central, SHA-256 pinned)
+        run: node scripts/hermes-smoke.mjs

@@ -1,0 +1,32 @@
+no-such-realm                       54ms  ABORT(wamp.error.no_such_realm) closed(1005)
+hello-empty-details                 15ms  ABORT(wamp.error.protocol_violation) closed(1005)
+call-before-hello                   13ms  ABORT(wamp.error.protocol_violation) closed(1005)
+double-hello                        24ms  ABORT(wamp.error.protocol_violation) closed(1005)
+invalid-json                        24ms  ABORT(bondy.error.internal_error) closed(1005)
+unknown-message-type                24ms  ABORT(wamp.error.protocol_violation) closed(1005)
+binary-frame-on-json              1518ms  open
+request-id-0                       832ms  ERROR(CALL,wamp.error.no_such_procedure) open
+request-id-2^53                    827ms  ERROR(CALL,wamp.error.no_such_procedure) open
+request-id-non-sequential          541ms  SUBSCRIBED SUBSCRIBED open
+request-id-reuse-inflight         1326ms  2 INVOCATION(s); then REGISTERED INVOCATION INVOCATION RESULT RESULT open
+invalid-uri                        549ms  ERROR(REGISTER,wamp.error.invalid_uri) ERROR(SUBSCRIBE,wamp.error.invalid_uri) ERROR(CALL,wamp.error.no_such_procedure) open
+subscribe-same-topic-twice         347ms  same subscription id; SUBSCRIBED SUBSCRIBED open
+unsubscribe-unknown                 24ms  closed(1011)
+yield-unknown-invocation          1223ms  open
+call-timeout-option               1546ms  ERROR(CALL,wamp.error.timeout) after 1213ms; rest: REGISTERED INVOCATION ERROR(CALL,wamp.error.timeout) open
+cancel-kill                       1844ms  INTERRUPT:none caller:ERROR(CANCEL,bondy.error.internal_error); rest: REGISTERED INVOCATION ERROR(CANCEL,bondy.error.internal_error) open
+cancel-skip                        548ms  caller:ERROR(CANCEL,bondy.error.internal_error); after late YIELD: REGISTERED INVOCATION ERROR(CANCEL,bondy.error.internal_error) RESULT open
+callee-error-uri                   354ms  [8,48,2,{"x":1},"com.thruway.custom_error",["a"],{"k":"v"}]; REGISTERED INVOCATION ERROR(CALL,com.thruway.custom_error) open
+callee-leaves-mid-call             364ms  caller got ERROR(CALL,wamp.error.no_eligible_callee); ERROR(CALL,wamp.error.no_eligible_callee) open
+publish-no-subscribers-ack         332ms  PUBLISHED open
+publish-exclude-me-default         439ms  1 self EVENT(s) (spec: 0); SUBSCRIBED EVENT PUBLISHED open
+publish-eligible-exclude           474ms  B got ["exclude-b"] (expect ["eligible-b"]), D got ["exclude-b"] (expect ["exclude-b"])
+pattern-subscription               460ms  prefix:SUBSCRIBED wildcard:SUBSCRIBED events:["p:com.thruway.q.pfx.deep.er","w:com.thruway.x.wc"]
+shared-registration-roundrobin     104ms  register: REGISTERED,REGISTERED; invocations: c1,c2,c1,c2
+progressive-call-results           844ms  INVOCATION.receive_progress=false; RESULTs: p1; REGISTERED INVOCATION RESULT open
+payload-1MiB                       380ms  RESULT len=1048576; REGISTERED INVOCATION RESULT open
+payload-20MiB                       65ms  closed(1006)
+router-goodbye-via-kill           4542ms  kill call: ERROR(CALL,wamp.error.no_such_procedure); victim got nothing; victim: open
+goodbye-close-code                  24ms  GOODBYE(wamp.close.goodbye_and_out) closed(1005)
+message-after-goodbye               25ms  GOODBYE(wamp.close.goodbye_and_out) closed(1005)
+rejoin-after-goodbye-same-socket    25ms  router closed socket after GOODBYE (1005); cannot re-HELLO

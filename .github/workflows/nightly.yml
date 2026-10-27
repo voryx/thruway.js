@@ -1,0 +1,144 @@
+# Job group `nightly`: the long runs that do not fit a push — the 60-minute soak with chaos, the herd soak (200 clients
+# through a Thruway PHP restart), the full chaos run (20 schedules × 60 s), Thruway PHP only by default (a manual run
+# takes a JSON list of routers in `routers`, e.g. ["thruway-php","crossbar","bondy"]), and the upstream-main router
+# builds (non-gating: tells early when a router's main branch changes behaviour). Reports are uploaded. Deeper
+# model/fuzz runs (a higher FC_NUM_RUNS) and Stryker are run by hand.
+name: nightly
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      routers:
+        description: 'JSON list of routers for the soak and chaos jobs (default: ["thruway-php"])'
+        required: false
+        default: '["thruway-php"]'
+
+permissions:
+  contents: read
+
+env:
+  ROUTER_PREFIX: thruwayjs-nightly
+  ROUTER_PODMAN: sudo podman
+
+jobs:
+  soak:
+    name: soak 60 min (${{ matrix.router }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        router: ${{ fromJSON(inputs.routers || '["thruway-php"]') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - run: node scripts/routers.mjs build ${{ matrix.router }}
+      - name: Soak (chaos every 30–120 s, online checks, heap and handle growth)
+        run: node scripts/soak.mjs --router ${{ matrix.router }} --minutes 60 --clients 20 --out soak-results
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: soak-${{ matrix.router }}
+          path: soak-results/
+          if-no-files-found: ignore
+
+  herd:
+    name: herd soak (thruway-php, 200 clients)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - run: node scripts/routers.mjs build thruway-php
+      - run: node scripts/soak.mjs --router thruway-php --herd --clients 200 --out soak-results
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: herd-thruway-php
+          path: soak-results/
+          if-no-files-found: ignore
+
+  chaos:
+    name: chaos 20 × 60 s (${{ matrix.router }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        router: ${{ fromJSON(inputs.routers || '["thruway-php"]') }}
+    env:
+      ROUTERS: ${{ matrix.router }}
+      REQUIRE_ROUTERS: '1'
+      CHAOS_SCHEDULES: '20'
+      CHAOS_SECONDS: '60'
+      INTEGRATION_TRACES: ${{ github.workspace }}/integration-traces
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - run: node scripts/routers.mjs build "$ROUTERS"
+      - name: Chaos
+        run: |
+          node scripts/routers.mjs --require-env ROUTERS
+          node node_modules/vitest/vitest.mjs run --project integration test/integration/chaos.test.ts
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: chaos-${{ matrix.router }}
+          path: integration-traces/
+          if-no-files-found: ignore
+
+  upstream-main:
+    name: upstream main (${{ matrix.router }}, non-gating)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    continue-on-error: true
+    # other routers than Thruway PHP run on demand only (a manual run of this workflow)
+    if: github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - router: nexus-main
+            args: --build-arg NEXUS_VERSION=main
+          - router: nxt
+            args: --build-arg XCONN_REF=main
+    env:
+      ROUTERS: ${{ matrix.router }}
+      REQUIRE_ROUTERS: '1'
+      CHAOS_SCHEDULES: '1'
+      CHAOS_SECONDS: '20'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - name: Build the router from its upstream main branch (under the pinned image tag, so the suite uses it)
+        run: |
+          image="$(node scripts/routers.mjs describe "$ROUTERS" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(Object.values(JSON.parse(s))[0].image))')"
+          dir="$([ "$ROUTERS" = nxt ] && echo xconn-nxt || echo nexus)"
+          sudo podman build -t "$image" ${{ matrix.args }} -f "test/routers/$dir/Containerfile" "test/routers/$dir"
+      - run: npm run test:integration

@@ -1,0 +1,61 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "tar-fs": {
+      "name": "tar-fs",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1105101,
+          "name": "tar-fs",
+          "dependency": "tar-fs",
+          "title": "tar-fs can extract outside the specified dir with a specific tarball",
+          "url": "https://github.com/advisories/GHSA-8cj5-5rvv-wf4v",
+          "severity": "high",
+          "cwe": ["CWE-22"],
+          "cvss": { "score": 7.5, "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N" },
+          "range": ">=3.0.0 <3.0.9"
+        }
+      ],
+      "effects": ["some-dev-tool"],
+      "range": "3.0.0 - 3.0.8",
+      "nodes": ["node_modules/tar-fs"],
+      "fixAvailable": true
+    },
+    "some-dev-tool": {
+      "name": "some-dev-tool",
+      "severity": "high",
+      "isDirect": true,
+      "via": ["tar-fs"],
+      "effects": [],
+      "range": "*",
+      "nodes": ["node_modules/some-dev-tool"],
+      "fixAvailable": true
+    },
+    "qs": {
+      "name": "qs",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1119502,
+          "name": "qs",
+          "dependency": "qs",
+          "title": "qs has a remotely triggerable DoS",
+          "url": "https://github.com/advisories/GHSA-q8mj-m7cp-5q26",
+          "severity": "moderate",
+          "range": ">=6.11.1 <=6.15.1"
+        }
+      ],
+      "effects": [],
+      "range": "2.2.5 - 6.15.3",
+      "nodes": ["node_modules/qs"],
+      "fixAvailable": true
+    }
+  },
+  "metadata": {
+    "vulnerabilities": { "info": 0, "low": 0, "moderate": 1, "high": 2, "critical": 0, "total": 3 },
+    "dependencies": { "prod": 1, "dev": 412, "optional": 40, "peer": 0, "peerOptional": 0, "total": 412 }
+  }
+}

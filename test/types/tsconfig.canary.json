@@ -1,0 +1,8 @@
+{
+  // The canary: a type test that MUST fail. scripts/typecheck.mjs compiles it with TS 7 and TS 6 (and
+  // through vitest's typecheck) and fails when it compiles cleanly, proving that type tests are really checked.
+  "extends": "../tsconfig.json",
+  "include": [],
+  "exclude": [],
+  "files": ["./canary-fail.test-d.ts"]
+}

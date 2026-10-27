@@ -1,0 +1,404 @@
+{
+  "$schema": "https://raw.githubusercontent.com/crossbario/crossbar/master/crossbar.json",
+  "version": 2,
+  "controller": {
+    "id": "thruway_test_node"
+  },
+  "workers": [
+    {
+      "type": "router",
+      "options": {
+        "title": "thruway-test-router"
+      },
+      "realms": [
+        {
+          "name": "realm1",
+          "options": {
+            "uri_check": "loose",
+            "enable_meta_api": true,
+            "bridge_meta_api": false,
+            "event_dispatching_chunk_size": 100
+          },
+          "store": {
+            "type": "memory",
+            "limit": 100,
+            "event-history": [
+              {
+                "uri": "com.thruway.history.",
+                "match": "prefix",
+                "limit": 50
+              }
+            ]
+          },
+          "roles": [
+            {
+              "name": "anonymous",
+              "permissions": [
+                {
+                  "uri": "",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "register": true,
+                    "publish": true,
+                    "subscribe": true
+                  },
+                  "disclose": {
+                    "caller": true,
+                    "publisher": true
+                  },
+                  "cache": true
+                }
+              ]
+            },
+            {
+              "name": "authenticated",
+              "permissions": [
+                {
+                  "uri": "",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "register": true,
+                    "publish": true,
+                    "subscribe": true
+                  },
+                  "disclose": {
+                    "caller": true,
+                    "publisher": true
+                  },
+                  "cache": true
+                }
+              ]
+            },
+            {
+              "name": "undisclosed",
+              "permissions": [
+                {
+                  "uri": "",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "register": true,
+                    "publish": true,
+                    "subscribe": true
+                  },
+                  "disclose": {
+                    "caller": false,
+                    "publisher": false
+                  },
+                  "cache": true
+                }
+              ]
+            },
+            {
+              "name": "restricted",
+              "permissions": [
+                {
+                  "uri": "com.thruway.public.",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "register": false,
+                    "publish": false,
+                    "subscribe": true
+                  },
+                  "disclose": {
+                    "caller": false,
+                    "publisher": false
+                  },
+                  "cache": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "realm2",
+          "options": {
+            "uri_check": "strict"
+          },
+          "roles": [
+            {
+              "name": "anonymous",
+              "permissions": [
+                {
+                  "uri": "",
+                  "match": "prefix",
+                  "allow": {
+                    "call": true,
+                    "register": true,
+                    "publish": true,
+                    "subscribe": true
+                  },
+                  "disclose": {
+                    "caller": false,
+                    "publisher": false
+                  },
+                  "cache": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "transports": [
+        {
+          "id": "web18080",
+          "type": "web",
+          "endpoint": {
+            "type": "tcp",
+            "port": 18080,
+            "backlog": 1024
+          },
+          "paths": {
+            "/": {
+              "type": "json",
+              "value": {
+                "service": "thruway-crossbar-test",
+                "ready": true
+              }
+            },
+            "info": {
+              "type": "nodeinfo"
+            },
+            "ws": {
+              "type": "websocket",
+              "serializers": ["json", "msgpack", "cbor"],
+              "options": {
+                "require_websocket_subprotocol": true,
+                "max_message_size": 16777216,
+                "open_handshake_timeout": 5000,
+                "close_handshake_timeout": 2000
+              },
+              "auth": {
+                "anonymous": {
+                  "type": "static",
+                  "role": "anonymous"
+                }
+              }
+            },
+            "auth": {
+              "type": "websocket",
+              "serializers": ["json", "msgpack", "cbor"],
+              "options": {
+                "require_websocket_subprotocol": true,
+                "max_message_size": 16777216
+              },
+              "auth": {
+                "ticket": {
+                  "type": "static",
+                  "principals": {
+                    "ticketuser": {
+                      "ticket": "ticket-secret",
+                      "role": "authenticated"
+                    },
+                    "limited": {
+                      "ticket": "limited-secret",
+                      "role": "restricted"
+                    },
+                    "quiet": {
+                      "ticket": "quiet-secret",
+                      "role": "undisclosed"
+                    },
+                    "dual": {
+                      "ticket": "dualticket",
+                      "role": "authenticated"
+                    }
+                  }
+                },
+                "wampcra": {
+                  "type": "static",
+                  "users": {
+                    "crauser": {
+                      "secret": "cra-secret",
+                      "role": "authenticated"
+                    },
+                    "crasalted": {
+                      "secret": "salted-secret",
+                      "role": "authenticated",
+                      "salt": "thruway-salt",
+                      "iterations": 1000,
+                      "keylen": 32
+                    },
+                    "dual": {
+                      "secret": "dualsecret",
+                      "role": "authenticated"
+                    }
+                  }
+                },
+                "cryptosign": {
+                  "type": "static",
+                  "principals": {
+                    "csuser": {
+                      "realm": "realm1",
+                      "role": "authenticated",
+                      "authorized_keys": ["f41bb129ab45887291e77ea03eb5a0ed5318e87231fc12d46b54e2b2a66347f0"]
+                    }
+                  }
+                }
+              }
+            },
+            "any": {
+              "type": "websocket",
+              "serializers": ["json", "msgpack", "cbor"],
+              "options": {
+                "require_websocket_subprotocol": true,
+                "max_message_size": 16777216
+              },
+              "auth": {
+                "anonymous": {
+                  "type": "static",
+                  "role": "anonymous"
+                },
+                "ticket": {
+                  "type": "static",
+                  "principals": {
+                    "ticketuser": {
+                      "ticket": "ticket-secret",
+                      "role": "authenticated"
+                    },
+                    "limited": {
+                      "ticket": "limited-secret",
+                      "role": "restricted"
+                    }
+                  }
+                },
+                "wampcra": {
+                  "type": "static",
+                  "users": {
+                    "crauser": {
+                      "secret": "cra-secret",
+                      "role": "authenticated"
+                    },
+                    "crasalted": {
+                      "secret": "salted-secret",
+                      "role": "authenticated",
+                      "salt": "thruway-salt",
+                      "iterations": 1000,
+                      "keylen": 32
+                    }
+                  }
+                },
+                "cryptosign": {
+                  "type": "static",
+                  "principals": {
+                    "csuser": {
+                      "realm": "realm1",
+                      "role": "authenticated",
+                      "authorized_keys": ["f41bb129ab45887291e77ea03eb5a0ed5318e87231fc12d46b54e2b2a66347f0"]
+                    }
+                  }
+                }
+              }
+            },
+            "ws-deflate": {
+              "type": "websocket",
+              "serializers": ["json", "msgpack", "cbor"],
+              "options": {
+                "require_websocket_subprotocol": true,
+                "max_message_size": 16777216,
+                "compression": {
+                  "deflate": {
+                    "request_no_context_takeover": false,
+                    "request_max_window_bits": 13,
+                    "no_context_takeover": false,
+                    "max_window_bits": 13,
+                    "memory_level": 5
+                  }
+                }
+              },
+              "auth": {
+                "anonymous": {
+                  "type": "static",
+                  "role": "anonymous"
+                }
+              }
+            },
+            "ws-ping": {
+              "type": "websocket",
+              "serializers": ["json"],
+              "options": {
+                "require_websocket_subprotocol": true,
+                "auto_ping_interval": 1000,
+                "auto_ping_timeout": 3000,
+                "auto_ping_size": 12,
+                "max_message_size": 65536,
+                "max_frame_size": 65536,
+                "open_handshake_timeout": 2500,
+                "close_handshake_timeout": 1000
+              },
+              "auth": {
+                "anonymous": {
+                  "type": "static",
+                  "role": "anonymous"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "cryptosign18081",
+          "type": "websocket",
+          "endpoint": {
+            "type": "tcp",
+            "port": 18081
+          },
+          "serializers": ["json", "msgpack", "cbor"],
+          "options": {
+            "require_websocket_subprotocol": true,
+            "max_message_size": 16777216
+          },
+          "auth": {
+            "cryptosign": {
+              "type": "static",
+              "principals": {
+                "csuser": {
+                  "realm": "realm1",
+                  "role": "authenticated",
+                  "authorized_keys": ["f41bb129ab45887291e77ea03eb5a0ed5318e87231fc12d46b54e2b2a66347f0"]
+                }
+              }
+            },
+            "ticket": {
+              "type": "static",
+              "principals": {
+                "ticketuser": {
+                  "ticket": "ticket-secret",
+                  "role": "authenticated"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "rawsocket18082",
+          "type": "rawsocket",
+          "endpoint": {
+            "type": "tcp",
+            "port": 18082
+          },
+          "serializers": ["json", "msgpack", "cbor"],
+          "options": {
+            "max_message_size": 16777216
+          },
+          "auth": {
+            "anonymous": {
+              "type": "static",
+              "role": "anonymous"
+            },
+            "ticket": {
+              "type": "static",
+              "principals": {
+                "ticketuser": {
+                  "ticket": "ticket-secret",
+                  "role": "authenticated"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

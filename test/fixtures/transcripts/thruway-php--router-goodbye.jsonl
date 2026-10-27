@@ -1,0 +1,55 @@
+{"connection":1,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":9}
+{"connection":1,"direction":"out","frame":[2,2248978103776167,{"roles":{"broker":{"features":{"subscriber_blackwhite_listing":true,"publisher_exclusion":true,"subscriber_metaevents":true}},"dealer":{"features":{"caller_identification":true,"progressive_call_results":true}}}}],"at":9}
+{"connection":1,"direction":"in","frame":[64,5845879874483844,{},"com.thruwayjs.goodbye.tmvpxvztg4qiyke"],"at":11}
+{"connection":1,"direction":"out","frame":[65,5845879874483844,1856865738706091],"at":11}
+{"connection":1,"direction":"out","frame":[68,1688207582586474,1856865738706091,{}],"at":67}
+{"connection":1,"direction":"in","frame":[48,4684637609477581,{},"thruway_test.goodbye_session",[5124821043169022,"com.example.session_ended","Expired token"]],"at":87}
+{"connection":1,"direction":"out","frame":[50,4684637609477581,{},[true]],"at":89}
+{"connection":1,"direction":"out","frame":[69,1688207582586474,{}],"at":89}
+{"connection":1,"direction":"in","frame":[8,68,1688207582586474,{},"wamp.error.canceled"],"at":89}
+{"connection":1,"direction":"in","frame":[6,{},"wamp.close.close_realm"],"at":239}
+{"connection":1,"direction":"out","frame":[6,{},"wamp.error.goodbye_and_out"],"at":239}
+{"connection":2,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":2}
+{"connection":2,"direction":"out","frame":[2,5124821043169022,{"roles":{"broker":{"features":{"subscriber_blackwhite_listing":true,"publisher_exclusion":true,"subscriber_metaevents":true}},"dealer":{"features":{"caller_identification":true,"progressive_call_results":true}}}}],"at":2}
+{"connection":2,"direction":"in","frame":[64,3472893480437730,{},"com.thruwayjs.goodbye.tmvpxvztgbwmx2n"],"at":2}
+{"connection":2,"direction":"out","frame":[65,3472893480437730,5486428097596323],"at":2}
+{"connection":2,"direction":"in","frame":[32,608848478354611,{},"com.thruwayjs.goodbye.tmvpxvztg4d852z"],"at":21}
+{"connection":2,"direction":"out","frame":[33,608848478354611,1682904310194772],"at":22}
+{"connection":2,"direction":"in","frame":[48,7901872303700914,{},"com.thruwayjs.goodbye.tmvpxvztg4qiyke"],"at":43}
+{"connection":2,"direction":"out","frame":[6,{"message":"Expired token"},"com.example.session_ended"],"at":64}
+{"connection":2,"direction":"in","frame":[6,{},"wamp.close.goodbye_and_out"],"at":64}
+{"connection":3,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":169}
+{"connection":3,"direction":"out","frame":[2,6409337696492330,{"roles":{"broker":{"features":{"subscriber_blackwhite_listing":true,"publisher_exclusion":true,"subscriber_metaevents":true}},"dealer":{"features":{"caller_identification":true,"progressive_call_results":true}}}}],"at":169}
+{"connection":3,"direction":"in","frame":[64,3445141681428553,{},"com.thruwayjs.goodbye.tmvpxvztgbwmx2n"],"at":170}
+{"connection":3,"direction":"in","frame":[32,260356543028497,{},"com.thruwayjs.goodbye.tmvpxvztg4d852z"],"at":170}
+{"connection":3,"direction":"out","frame":[65,3445141681428553,4802886553507012],"at":170}
+{"connection":3,"direction":"out","frame":[33,260356543028497,2035878743824741],"at":170}
+{"connection":3,"direction":"out","frame":[68,1951429399732399,4802886553507012,{}],"at":191}
+{"connection":3,"direction":"in","frame":[70,1951429399732399,{},["still here"]],"at":192}
+{"connection":3,"direction":"out","frame":[36,2035878743824741,423490296252814,{},["after"]],"at":193}
+{"connection":3,"direction":"in","frame":[6,{},"wamp.close.close_realm"],"at":215}
+{"connection":3,"direction":"out","frame":[6,{},"wamp.error.goodbye_and_out"],"at":216}
+{"connection":4,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":2}
+{"connection":4,"direction":"out","frame":[2,4395250325039435,{"roles":{"broker":{"features":{"subscriber_blackwhite_listing":true,"publisher_exclusion":true,"subscriber_metaevents":true}},"dealer":{"features":{"caller_identification":true,"progressive_call_results":true}}}}],"at":2}
+{"connection":4,"direction":"in","frame":[48,6682289418436169,{},"com.thruwayjs.goodbye.tmvpxvztgbwmx2n"],"at":2}
+{"connection":4,"direction":"out","frame":[50,6682289418436169,{},["still here"]],"at":3}
+{"connection":4,"direction":"in","frame":[16,7615344264695140,{"acknowledge":true},"com.thruwayjs.goodbye.tmvpxvztg4d852z",["after"]],"at":3}
+{"connection":4,"direction":"out","frame":[17,7615344264695140,423490296252814],"at":4}
+{"connection":4,"direction":"in","frame":[6,{},"wamp.close.close_realm"],"at":26}
+{"connection":4,"direction":"out","frame":[6,{},"wamp.error.goodbye_and_out"],"at":27}
+{"connection":5,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":3}
+{"connection":5,"direction":"out","frame":[2,8165821966783823,{"roles":{"broker":{"features":{"subscriber_blackwhite_listing":true,"publisher_exclusion":true,"subscriber_metaevents":true}},"dealer":{"features":{"caller_identification":true,"progressive_call_results":true}}}}],"at":4}
+{"connection":5,"direction":"in","frame":[48,5709282098874530,{},"thruway_test.shutdown_session",[2255248223803144]],"at":24}
+{"connection":5,"direction":"out","frame":[50,5709282098874530,{},[true]],"at":24}
+{"connection":5,"direction":"in","frame":[6,{},"wamp.close.close_realm"],"at":129}
+{"connection":5,"direction":"out","frame":[6,{},"wamp.error.goodbye_and_out"],"at":130}
+{"connection":6,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":2}
+{"connection":6,"direction":"out","frame":[2,2255248223803144,{"roles":{"broker":{"features":{"subscriber_blackwhite_listing":true,"publisher_exclusion":true,"subscriber_metaevents":true}},"dealer":{"features":{"caller_identification":true,"progressive_call_results":true}}}}],"at":3}
+{"connection":6,"direction":"in","frame":[32,8483503737895495,{},"com.thruwayjs.inspect.tmvpxw00u11zs0b"],"at":3}
+{"connection":6,"direction":"out","frame":[33,8483503737895495,6821111670128420],"at":4}
+{"connection":7,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":125}
+{"connection":7,"direction":"out","frame":[2,797308325336251,{"roles":{"broker":{"features":{"subscriber_blackwhite_listing":true,"publisher_exclusion":true,"subscriber_metaevents":true}},"dealer":{"features":{"caller_identification":true,"progressive_call_results":true}}}}],"at":126}
+{"connection":7,"direction":"in","frame":[32,5103381610972086,{},"com.thruwayjs.inspect.tmvpxw00u11zs0b"],"at":126}
+{"connection":7,"direction":"out","frame":[33,5103381610972086,3152586706908946],"at":126}
+{"connection":7,"direction":"in","frame":[6,{},"wamp.close.close_realm"],"at":129}
+{"connection":7,"direction":"out","frame":[6,{},"wamp.error.goodbye_and_out"],"at":129}

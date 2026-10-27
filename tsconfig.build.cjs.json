@@ -1,0 +1,10 @@
+{
+  // CJS build: dist/cjs/**; scripts/build.mjs writes dist/cjs/package.json {"type":"commonjs"}.
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": false,
+    "outDir": "./dist/cjs"
+  }
+}

@@ -1,0 +1,15 @@
+# fox-wamp 0.7.28 (Node.js WAMP v2 router) for thruway.js integration tests.
+#   scripts/routers.mjs build fox-wamp   (NODE_IMAGE from ROUTER_NODE_IMAGE; FOX_WAMP_NODE_MODULES mounts a local
+#                                        node_modules at /deps/node_modules for an offline build, else npm ci)
+# --ignore-scripts: the sqlite3/esbuild native install steps are skipped; the in-memory engine needs neither.
+ARG NODE_IMAGE=docker.io/library/node:22-alpine
+FROM ${NODE_IMAGE}
+WORKDIR /app
+COPY package.json package-lock.json router.cjs config.json ./
+RUN if [ -d /deps/node_modules/fox-wamp ]; then cp -R /deps/node_modules ./node_modules; \
+    else npm ci --ignore-scripts --omit=dev --no-audit --no-fund; fi \
+ && node -e "console.log('fox-wamp', require('fox-wamp/package.json').version)"
+ENV FOX_WAMP_HOME=/app FOX_WAMP_HOST=0.0.0.0 FOX_WAMP_PORT=8080
+EXPOSE 8080
+STOPSIGNAL SIGTERM
+CMD ["node", "/app/router.cjs", "/app/config.json"]

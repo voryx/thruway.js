@@ -1,0 +1,21 @@
+{
+  // Lint-only project of rx5.mts: `rxjs` is the repo's RxJS 5.5.12 alias (rxjs5), resolved like apps that pin
+  // RxJS 5 do (bundler), as in the matrix's RxJS 5 cells.
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "types": [],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "paths": {
+      "thruway.js": ["../../../../src/index.ts"],
+      "thruway.js/rxjs": ["../../../../src/rxjs/index.ts"],
+      "rxjs": ["../../../../node_modules/rxjs5/Rx.d.ts"],
+      "rxjs/*": ["../../../../node_modules/rxjs5/*"]
+    }
+  },
+  "include": ["rx5.mts"]
+}

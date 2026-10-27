@@ -1,0 +1,21 @@
+{
+  // Lint-only project for the consumer-matrix sources (scripts/consumer-matrix.sh compiles them against the packed
+  // tarball). Here `thruway.js` resolves to src, so typescript-eslint can type them; they are never run.
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "types": [],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "skipLibCheck": true,
+    "paths": {
+      "thruway.js": ["../../../src/index.ts"],
+      "thruway.js/auth": ["../../../src/auth/index.ts"],
+      "thruway.js/testing": ["../../../src/testing/index.ts"],
+      "thruway.js/rxjs": ["../../../src/rxjs/index.ts"]
+    }
+  },
+  "include": ["api.mts", "dom.mts", "eopt.mts", "rx7.mts"]
+}

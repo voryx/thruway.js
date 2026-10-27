@@ -1,0 +1,17 @@
+{"connection":1,"direction":"in","frame":[1,"realm1",{"agent":"thruway.js/3.0.0","roles":{"caller":{"features":{"caller_identification":true,"progressive_call_results":true,"call_canceling":true}},"callee":{"features":{"caller_identification":true,"pattern_based_registration":true,"shared_registration":true,"progressive_call_results":true,"call_canceling":true,"registration_revocation":true}},"publisher":{"features":{"publisher_identification":true,"subscriber_blackwhite_listing":true,"publisher_exclusion":true}},"subscriber":{"features":{"publisher_identification":true,"pattern_based_subscription":true,"subscription_revocation":true}}}}],"at":2}
+{"connection":1,"direction":"out","frame":[2,2284191417583738,{"authid":"1254c1634a9d8f","authrole":"anonymous","authprovider":"static","authmethod":"anonymous","roles":{"broker":{"features":{"event_history":true,"pattern_based_subscription":true,"publisher_exclusion":true,"publisher_identification":true,"session_meta_api":true,"subscriber_blackwhite_listing":true,"subscription_meta_api":true,"payload_passthru_mode":true}},"dealer":{"features":{"call_canceling":true,"call_timeout":true,"caller_identification":true,"pattern_based_registration":true,"progressive_call_invocations":true,"shared_registration":true,"registration_meta_api":true,"testament_meta_api":true,"progressive_call_results":true,"session_meta_api":true,"payload_passthru_mode":true}}}}],"at":2}
+{"connection":1,"direction":"in","frame":[64,7305938474392902,{},"com.thruwayjs.smoke.tmvpnm9q5g4466f"],"at":2}
+{"connection":1,"direction":"out","frame":[65,7305938474392902,164],"at":3}
+{"connection":1,"direction":"in","frame":[48,1585711006663182,{},"com.thruwayjs.smoke.tmvpnm9q5g4466f",[2,3]],"at":24}
+{"connection":1,"direction":"out","frame":[68,1,164,{"progress":false,"procedure":"com.thruwayjs.smoke.tmvpnm9q5g4466f"},[2,3]],"at":25}
+{"connection":1,"direction":"in","frame":[70,1,{},[5]],"at":25}
+{"connection":1,"direction":"out","frame":[50,1585711006663182,{},[5]],"at":25}
+{"connection":1,"direction":"in","frame":[32,2696751968135985,{},"com.thruwayjs.smoke.tmvpnm9qr6dva6"],"at":25}
+{"connection":1,"direction":"in","frame":[16,8261553201616084,{"acknowledge":true,"exclude_me":false},"com.thruwayjs.smoke.tmvpnm9qr6dva6",["warmup"]],"at":25}
+{"connection":1,"direction":"out","frame":[33,2696751968135985,117],"at":26}
+{"connection":1,"direction":"out","frame":[17,8261553201616084,5007090533049762],"at":26}
+{"connection":1,"direction":"in","frame":[16,5677719316177306,{"acknowledge":true,"exclude_me":false},"com.thruwayjs.smoke.tmvpnm9qr6dva6",["hello"]],"at":26}
+{"connection":1,"direction":"out","frame":[36,117,5007090533049762,{},["warmup"]],"at":26}
+{"connection":1,"direction":"out","frame":[17,5677719316177306,7248981569057858],"at":26}
+{"connection":1,"direction":"out","frame":[36,117,7248981569057858,{},["hello"]],"at":26}
+{"connection":1,"direction":"in","frame":[6,{},"wamp.close.close_realm"],"at":78}

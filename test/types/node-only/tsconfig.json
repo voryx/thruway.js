@@ -1,0 +1,10 @@
+{
+  // Node-only type project: @types/node and no DOM, so `globalThis.WebSocket` is undici's.
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["es2023"],
+    "types": ["node"]
+  },
+  "include": ["./**/*.ts"],
+  "exclude": []
+}

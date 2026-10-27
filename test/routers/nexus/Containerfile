@@ -1,0 +1,27 @@
+# nexus-test router image (gammazero/nexus library + static-keystore authenticators).
+#   podman build -t localhost/thruway-nexus:v3.3.1 --build-arg NEXUS_VERSION=v3.3.1 .
+#   podman build -t localhost/thruway-nexus:master --build-arg NEXUS_VERSION=main .
+# NEXUS_VERSION is anything `go get github.com/gammazero/nexus/v3@<x>` accepts: a tag, a branch
+# (main) or a commit hash.
+ARG GO_IMAGE=docker.io/library/golang:1.27.3-alpine
+FROM ${GO_IMAGE} AS build
+ARG NEXUS_VERSION=v3.3.1
+WORKDIR /src
+COPY main.go ./
+RUN go mod init thruway.test/nexus-test \
+ && go get github.com/gammazero/nexus/v3@${NEXUS_VERSION} \
+ && go mod tidy \
+ && resolved="$(go list -m -f '{{.Version}}' github.com/gammazero/nexus/v3)" \
+ && echo "nexus resolved to ${resolved}" \
+ && CGO_ENABLED=0 go build -trimpath \
+      -ldflags "-s -w -X github.com/gammazero/nexus/v3/router.Version=${resolved}" \
+      -o /out/nexus-test . \
+ && echo "${resolved}" > /out/NEXUS_VERSION
+
+FROM docker.io/library/alpine:3.22
+COPY --from=build /out/nexus-test /usr/local/bin/nexus-test
+COPY --from=build /out/NEXUS_VERSION /NEXUS_VERSION
+COPY nexus-test.json /etc/nexus-test.json
+EXPOSE 8080 8081
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["/usr/local/bin/nexus-test", "-c", "/etc/nexus-test.json"]

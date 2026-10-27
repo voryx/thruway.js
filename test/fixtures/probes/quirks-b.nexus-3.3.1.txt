@@ -1,0 +1,32 @@
+no-such-realm                       62ms  closed(1006)
+hello-empty-details                 13ms  closed(1006)
+call-before-hello                   14ms  closed(1006)
+double-hello                        24ms  closed(1006)
+invalid-json                      1517ms  open
+unknown-message-type              1521ms  open
+binary-frame-on-json              1519ms  ERROR(CALL,wamp.error.no_such_procedure) open
+request-id-0                       834ms  ERROR(CALL,wamp.error.no_such_procedure) open
+request-id-2^53                    835ms  ERROR(CALL,wamp.error.no_such_procedure) open
+request-id-non-sequential          540ms  SUBSCRIBED SUBSCRIBED open
+request-id-reuse-inflight         1330ms  2 INVOCATION(s); then REGISTERED INVOCATION INVOCATION RESULT open
+invalid-uri                        556ms  ERROR(REGISTER,wamp.error.invalid_uri) ERROR(SUBSCRIBE,wamp.error.invalid_uri) ERROR(CALL,wamp.error.no_such_procedure) open
+subscribe-same-topic-twice         341ms  same subscription id; SUBSCRIBED SUBSCRIBED open
+unsubscribe-unknown                331ms  ERROR(UNSUBSCRIBE,wamp.error.no_such_subscription) open
+yield-unknown-invocation          1215ms  open
+call-timeout-option                835ms  ERROR(CALL,wamp.error.timeout) after 509ms; rest: REGISTERED INVOCATION INTERRUPT ERROR(CALL,wamp.error.timeout) open
+cancel-kill                        364ms  INTERRUPT:{"mode":"kill","reason":"wamp.error.canceled"} caller:ERROR(CALL,wamp.error.canceled); rest: REGISTERED INVOCATION INTERRUPT ERROR(CALL,wamp.error.canceled) open
+cancel-skip                        549ms  caller:ERROR(CALL,wamp.error.canceled); after late YIELD: REGISTERED INVOCATION ERROR(CALL,wamp.error.canceled) open
+callee-error-uri                   351ms  [8,48,2,{"x":1},"com.thruway.custom_error",["a"],{"k":"v"}]; REGISTERED INVOCATION ERROR(CALL,com.thruway.custom_error) open
+callee-leaves-mid-call             362ms  caller got ERROR(CALL,wamp.error.canceled); ERROR(CALL,wamp.error.canceled) open
+publish-no-subscribers-ack         331ms  PUBLISHED open
+publish-exclude-me-default         436ms  0 self EVENT(s) (spec: 0); SUBSCRIBED PUBLISHED open
+publish-eligible-exclude           473ms  B got ["eligible-b"] (expect ["eligible-b"]), D got ["exclude-b"] (expect ["exclude-b"])
+pattern-subscription               462ms  prefix:SUBSCRIBED wildcard:SUBSCRIBED events:["p:com.thruway.q.pfx.deep.er","w:com.thruway.x.wc"]
+shared-registration-roundrobin     102ms  register: REGISTERED,REGISTERED; invocations: c1,c2,c1,c2
+progressive-call-results           836ms  INVOCATION.receive_progress=true; RESULTs: p1(progress),p2(progress),done; REGISTERED INVOCATION RESULT RESULT RESULT open
+payload-1MiB                       381ms  RESULT len=1048576; REGISTERED INVOCATION RESULT open
+payload-20MiB                     1186ms  PUBLISHED open
+router-goodbye-via-kill             38ms  kill call: RESULT; victim got nothing; victim: closed(1006)
+goodbye-close-code                  23ms  closed(1006)
+message-after-goodbye               24ms  closed(1006)
+rejoin-after-goodbye-same-socket    24ms  router closed socket after GOODBYE (1006); cannot re-HELLO

@@ -1,69 +1,168 @@
 {
   "name": "thruway.js",
-  "version": "2.0.8",
-  "description": "WAMP RxJS Client",
-  "main": "index.js",
+  "version": "3.0.0",
+  "description": "WAMP v2 client: cold Observables, a deterministic reconnecting state machine, zero runtime dependencies",
+  "keywords": [
+    "wamp",
+    "websocket",
+    "observable",
+    "rxjs",
+    "rpc",
+    "pubsub",
+    "typescript",
+    "thruway"
+  ],
+  "homepage": "https://github.com/voryx/Thruway.js#readme",
+  "bugs": {
+    "url": "https://github.com/voryx/Thruway.js/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/voryx/Thruway.js.git"
   },
-  "keywords": [
-    "wamp",
-    "typescript",
-    "autobahn",
-    "javascript",
-    "rxjs",
-    "websocket",
-    "reactivex"
-  ],
-  "author": "David Dan <davidwdan@gmail.com> (http://voryx.net)",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/voryx/Thruway.js/issues"
+  "author": "David Dan <davidwdan@gmail.com> (http://voryx.net)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
   },
-  "homepage": "https://github.com/voryx/Thruway.js#readme",
-  "peerDependencies": {
-    "rxjs": "^5.5.12",
-    "ws": "^6.0.0"
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=22.13.0",
+      "onFail": "error"
+    }
   },
-  "browser": {
-    "ws": false
-  },
-  "typings": "./src/Client.ts",
   "scripts": {
-    "compile": "tsc",
-    "watch": "tsc --watch",
-    "webpack": "webpack --optimize-minimize",
-    "clean_spec": "shx rm -rf spec-js",
-    "build_spec": "tsc --project ./spec --pretty",
-    "test_mocha": "mocha spec-js/spec/*",
-    "test": "npm-run-all clean_spec build_spec test_mocha clean_spec"
+    "build": "node scripts/build.mjs",
+    "typecheck": "node scripts/typecheck.mjs",
+    "lint": "prettier --check . && eslint --max-warnings 0 .",
+    "test:unit": "vitest run --project unit",
+    "test:node": "vitest run --project node",
+    "test": "npm run typecheck && npm run lint && npm run test:unit && npm run test:node",
+    "test:interop": "vitest run --project interop",
+    "test:browser": "vitest run --project browser",
+    "test:integration": "node scripts/routers.mjs --require-env ROUTERS && vitest run --project integration",
+    "test:mutation": "stryker run",
+    "package:check": "node scripts/package-check.mjs",
+    "audit:gate": "node scripts/audit-gate.mjs",
+    "soak": "node scripts/soak.mjs",
+    "ci": "node scripts/ci.mjs",
+    "prepublishOnly": "node scripts/prepublish-guard.mjs"
+  },
+  "sideEffects": [
+    "./dist/esm/observable/symbol-observable.js",
+    "./dist/cjs/observable/symbol-observable.js"
+  ],
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "auth": [
+        "./dist/cjs/auth/index.d.ts"
+      ],
+      "rxjs": [
+        "./dist/cjs/rxjs/index.d.ts"
+      ],
+      "testing": [
+        "./dist/cjs/testing/index.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./auth": {
+      "import": {
+        "types": "./dist/esm/auth/index.d.ts",
+        "default": "./dist/esm/auth/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/auth/index.d.ts",
+        "default": "./dist/cjs/auth/index.js"
+      }
+    },
+    "./rxjs": {
+      "import": {
+        "types": "./dist/esm/rxjs/index.d.ts",
+        "default": "./dist/esm/rxjs/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/rxjs/index.d.ts",
+        "default": "./dist/cjs/rxjs/index.js"
+      }
+    },
+    "./testing": {
+      "import": {
+        "types": "./dist/esm/testing/index.d.ts",
+        "default": "./dist/esm/testing/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/testing/index.d.ts",
+        "default": "./dist/cjs/testing/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "unpkg": "./dist/browser/thruway.min.js",
+  "jsdelivr": "./dist/browser/thruway.min.js",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "MIGRATION.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "rxjs": ">=5.4.3 <10"
+  },
+  "peerDependenciesMeta": {
+    "rxjs": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@types/es6-shim": "^0.31.32",
-    "@types/escape-string-regexp": "^0.0.30",
-    "@types/lodash": "^4.14.62",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "6.0.38",
-    "@types/sinon": "^1.16.31",
-    "@types/ws": "6.0.1",
-    "browserfy": "^1.0.0",
-    "chai": "^3.5.0",
-    "es6-shim": "^0.35.1",
-    "escape-string-regexp": "^1.0.5",
-    "lodash": "^4.14.62",
-    "mocha": "^6.2.2",
-    "npm-run-all": "^3.1.0",
-    "promise": "^7.1.1",
-    "rxjs": "^5.6.0-forward-compat.5",
-    "shx": "^0.1.4",
-    "sinon": "^2.0.0-pre",
-    "ts-loader": "^6.2.1",
-    "ts-node": "^3.3.0",
-    "tslint": "^5.2.0",
-    "typescript": "^3.7.3",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10",
-    "ws": "^6.0.0"
+    "@arethetypeswrong/cli": "0.18.5",
+    "@eslint/js": "10.0.1",
+    "@fast-check/vitest": "0.5.0",
+    "@rspack/cli": "2.2.9",
+    "@rspack/core": "2.2.9",
+    "@stryker-mutator/core": "10.1.1",
+    "@stryker-mutator/vitest-runner": "10.1.1",
+    "@types/node": "22.20.5",
+    "@types/ws": "8.18.2",
+    "@vitest/browser-playwright": "5.0.5",
+    "@vitest/coverage-v8": "5.0.5",
+    "acorn": "8.19.0",
+    "eslint": "10.13.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-es-x": "9.7.0",
+    "fast-check": "4.10.2",
+    "globals": "17.13.0",
+    "jiti": "2.7.0",
+    "playwright": "1.64.1",
+    "prettier": "3.9.10",
+    "publint": "0.3.25",
+    "rxjs": "7.8.2",
+    "rxjs5": "npm:rxjs@5.5.12",
+    "rxjs543": "npm:rxjs@5.4.3",
+    "rxjs6": "npm:rxjs@6.6.7",
+    "rxjs9": "npm:rxjs@9.0.0-beta.1",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript-eslint": "8.72.0",
+    "typescript7": "npm:typescript@7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5",
+    "ws": "8.22.0"
   }
 }

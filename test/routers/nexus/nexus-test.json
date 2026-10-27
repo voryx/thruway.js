@@ -1,0 +1,45 @@
+{
+  "websocket_address": "0.0.0.0:8080",
+  "rawsocket_tcp_address": "0.0.0.0:8081",
+  "debug": false,
+  "auth_timeout_sec": 5,
+  "realms": [
+    {
+      "uri": "realm1",
+      "thruway_auth": true,
+      "anonymous_auth": true,
+      "allow_disclose": true,
+      "strict_uri": false,
+      "enable_meta_kill": true,
+      "enable_meta_modify": true,
+      "event_history": [{ "topic": "com.thruway.history.", "match": "prefix", "limit": 100 }]
+    },
+    {
+      "uri": "realm1.strict",
+      "thruway_auth": true,
+      "anonymous_auth": true,
+      "allow_disclose": true,
+      "strict_uri": true,
+      "strict_request_ids": true,
+      "enable_meta_kill": true
+    }
+  ],
+  "users": [
+    { "authid": "ticketuser", "role": "user", "ticket": "ticketsecret" },
+    { "authid": "crauser", "role": "user", "wampcra_secret": "crasecret" },
+    {
+      "authid": "crasalted",
+      "role": "user",
+      "wampcra_secret": "crasecret",
+      "salt": "thruwaysalt",
+      "iterations": 1000,
+      "keylen": 32
+    },
+    {
+      "authid": "csuser",
+      "role": "user",
+      "cryptosign_pubkey": "682a35e8c87f7004cbb10679617a29154f9906b7e29a64af3f6d3e8e10934701"
+    },
+    { "authid": "dual", "role": "user", "ticket": "dualticket", "wampcra_secret": "dualsecret" }
+  ]
+}

@@ -1,0 +1,34 @@
+# Job `lint`: Prettier, ESLint 10 + typescript-eslint strictTypeChecked (TS 6 API, projectService over the solution
+# tsconfig) + eslint-plugin-es-x, and the TS 7 + TS 6 typecheck of every project with the canary that must fail —
+# through the same npm scripts as `npm run ci`.
+name: lint
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Prettier + ESLint
+        run: npm run lint
+      - name: TypeScript 7 and 6 over every project; the canary must fail
+        run: npm run typecheck

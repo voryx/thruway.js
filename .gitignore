@@ -1,12 +1,8 @@
-dist/
 node_modules/
-typings/
-npm-debug.log
-.idea/
-
-# Ignored files
-*.js
-*.map
-*.d.ts
-spec-js
-!webpack.config.js
+dist/
+coverage/
+reports/
+.stryker-tmp/
+.vitest/
+*.tgz
+*.tsbuildinfo

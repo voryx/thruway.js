@@ -1,0 +1,26 @@
+{
+  "name": "thruway-jest29-consumer",
+  "private": true,
+  "description": "Jest 29 consumer of the packed thruway.js: installed and run by scripts/package-check.mjs; thruway.js is the packed tarball, rxjs is the repo's rxjs 5.5.12 alias",
+  "devDependencies": {
+    "jest": "29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testEnvironmentOptions": {
+      "customExportConditions": [
+        "require",
+        "react-native"
+      ]
+    },
+    "testMatch": [
+      "<rootDir>/*.test.cjs"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ],
+    "haste": {
+      "retainAllFiles": true
+    }
+  }
+}

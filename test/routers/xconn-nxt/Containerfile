@@ -1,0 +1,19 @@
+# nxt = the standalone router CLI of xconnio/xconn-go (built from source; the published
+# docker.io/xconnio/nxt:latest is a single-arch image with no tags/versions).
+#   podman build -t localhost/thruway-nxt:683389304fa4 --build-arg XCONN_REF=683389304fa4 .
+# XCONN_REF: anything `go install ...@<x>` accepts (commit hash, main, v0.1.0).
+ARG GO_IMAGE=docker.io/library/golang:1.27.3-alpine
+FROM ${GO_IMAGE} AS build
+ARG XCONN_REF=683389304fa4
+RUN CGO_ENABLED=0 GOBIN=/out go install -trimpath -ldflags "-s -w" github.com/xconnio/xconn-go/cmd/nxt@${XCONN_REF} \
+ && go version -m /out/nxt | awk '$1=="mod"{print $3}' > /out/XCONN_VERSION \
+ && cat /out/XCONN_VERSION
+
+FROM docker.io/library/alpine:3.22
+COPY --from=build /out/nxt /usr/local/bin/nxt
+COPY --from=build /out/XCONN_VERSION /XCONN_VERSION
+COPY config/.nxt/config.yaml /nxt/.nxt/config.yaml
+EXPOSE 8080 8081
+# nxt only handles SIGINT for a graceful stop
+STOPSIGNAL SIGINT
+ENTRYPOINT ["/usr/local/bin/nxt", "start", "-c", "/nxt"]

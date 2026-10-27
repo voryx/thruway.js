@@ -1,0 +1,83 @@
+# nxt (xconnio/xconn-go router) config for thruway.js v3 integration/fuzz tests.
+# nxt reads <config dir>/.nxt/config.yaml (start.sh mounts ./config at /nxt).
+version: '1'
+
+config:
+  loglevel: info
+  management: false
+
+realms:
+  - name: realm1
+    roles:
+      - name: anonymous
+        permissions:
+          - uri: ''
+            match: prefix
+            allow_call: true
+            allow_register: true
+            allow_publish: true
+            allow_subscribe: true
+      - name: user
+        permissions:
+          - uri: ''
+            match: prefix
+            allow_call: true
+            allow_register: true
+            allow_publish: true
+            allow_subscribe: true
+
+transports:
+  - type: websocket
+    listener: tcp
+    address: 0.0.0.0:8080
+    serializers: [json, cbor, msgpack]
+
+  - type: rawsocket
+    listener: tcp
+    address: 0.0.0.0:8081
+    serializers: [json, cbor, msgpack]
+
+authenticators:
+  anonymous:
+    - authid: anonymous
+      realm: realm1
+      role: anonymous
+
+  ticket:
+    - authid: ticketuser
+      realm: realm1
+      role: user
+      ticket: ticketsecret
+    - authid: dual
+      realm: realm1
+      role: user
+      ticket: dualticket
+
+  wampcra:
+    - authid: crauser
+      realm: realm1
+      role: user
+      secret: crasecret
+    - authid: dual
+      realm: realm1
+      role: user
+      secret: dualsecret
+    # Salted WAMP-CRA. nxt BUG (wampproto-go acceptor.go, 2026-06-23 ecb54c6): the CHALLENGE carries
+    # salt/iterations/keylen but the router verifies the HMAC with the raw `secret`, not with the
+    # PBKDF2-derived key. Workaround: store the derived key itself as `secret`.
+    # A1d06z...= is base64(PBKDF2-HMAC-SHA256("crasecret", "thruwaysalt", 1000, 32)); the client
+    # authenticates with the plain password "crasecret".
+    - authid: crasalted
+      realm: realm1
+      role: user
+      secret: A1d06zR4usFSO6LHumhf/Fu7sAKGboO3TX1R1H7vT10=
+      salt: thruwaysalt
+      iterations: 1000
+      keylen: 32
+
+  cryptosign:
+    - authid: csuser
+      realm: realm1
+      role: user
+      authorized_keys:
+        - 682a35e8c87f7004cbb10679617a29154f9906b7e29a64af3f6d3e8e10934701

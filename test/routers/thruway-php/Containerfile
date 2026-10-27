@@ -1,0 +1,19 @@
+# Thruway (voryx/thruway, PHP) WAMP v2 router for thruway.js integration/fuzz tests.
+# Build: ./start.sh builds it automatically (podman build -t localhost/thruwayjs-router-thruway-php:0.6.1 .)
+FROM docker.io/library/php:8.3-cli-bookworm
+
+COPY --from=docker.io/library/composer:2 /usr/bin/composer /usr/bin/composer
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git unzip ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
+WORKDIR /app
+# composer.lock pins the exact dependency set (regenerate: see README).
+COPY composer.json composer.lock /app/
+RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+COPY router.php config.json /app/
+EXPOSE 8080 8081
+CMD ["php", "/app/router.php"]

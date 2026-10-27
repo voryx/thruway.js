@@ -1,0 +1,42 @@
+# Crossbar.io router image for thruway.js v3 integration / fuzz testing.
+#
+# The official crossbario/crossbar images on Docker Hub are stale (newest
+# arm64 build is 22.7.1.dev1 from 2022, newest amd64 is 23.1.2 from 2023), so
+# we build our own from PyPI. Multi-arch: works on arm64 (podman machine on
+# Apple Silicon) and amd64 (CI).
+#
+#   podman build -t localhost/thruway-crossbar:26.10.1 \
+#       --build-arg CROSSBAR_VERSION=26.10.1 -f Containerfile .
+
+ARG PYTHON_VERSION=3.12
+
+FROM docker.io/library/python:${PYTHON_VERSION}-slim-bookworm AS build
+ARG CROSSBAR_VERSION=26.10.1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
+# numpy<2: the bjdata (UBJSON) wheel pulled in by autobahn is built against NumPy 1.x and prints an
+# ImportError traceback at every worker start under NumPy 2.x (non-fatal, but it pollutes logs we grep).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential libffi-dev libssl-dev pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+# constraints.txt = pip freeze of the verified image: a rebuild resolves exactly those versions
+COPY constraints.txt /tmp/constraints.txt
+RUN python -m venv /opt/crossbar \
+ && /opt/crossbar/bin/pip install --upgrade pip wheel setuptools \
+ && /opt/crossbar/bin/pip install -c /tmp/constraints.txt "crossbar==${CROSSBAR_VERSION}" "numpy<2" \
+ && /opt/crossbar/bin/crossbar version
+
+FROM docker.io/library/python:${PYTHON_VERSION}-slim-bookworm
+ARG CROSSBAR_VERSION=26.10.1
+LABEL org.opencontainers.image.title="thruway-crossbar" \
+      org.opencontainers.image.version="${CROSSBAR_VERSION}" \
+      org.opencontainers.image.description="Crossbar.io ${CROSSBAR_VERSION} built from PyPI for WAMP client testing"
+COPY --from=build /opt/crossbar /opt/crossbar
+ENV PATH=/opt/crossbar/bin:$PATH PYTHONUNBUFFERED=1
+RUN useradd --create-home --uid 1000 crossbar \
+ && mkdir -p /node/.crossbar \
+ && chown -R crossbar:crossbar /node
+USER crossbar
+WORKDIR /node
+EXPOSE 18080 18081
+ENTRYPOINT ["crossbar"]
+CMD ["start", "--cbdir", "/node/.crossbar", "--loglevel", "info"]
