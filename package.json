@@ -1,6 +1,6 @@
 {
   "name": "thruway.js",
-  "version": "3.0.0",
+  "version": "3.0.0-beta1",
   "description": "WAMP v2 client: cold Observables, a deterministic reconnecting state machine, zero runtime dependencies",
   "keywords": [
     "wamp",

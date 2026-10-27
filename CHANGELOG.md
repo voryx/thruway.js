@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.0 (unreleased; release candidates are published under the `next` dist-tag)
+## 3.0.0-beta1 (2026-10-27, under the `next` dist-tag)
 
 A rewrite. See [MIGRATION.md](MIGRATION.md) for what changes in your code, with before and after examples, and the
 [README](README.md) for the API.

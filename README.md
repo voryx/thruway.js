@@ -30,7 +30,7 @@ Version 3 is a rewrite. Coming from 2.x? Read [MIGRATION.md](MIGRATION.md).
 ## Install
 
 ```sh
-npm install thruway.js        # 3.0.0 release candidates: npm install thruway.js@next
+npm install thruway.js@next   # the 3.0 beta; plain `npm install thruway.js` still installs 2.x
 ```
 
 Requirements: Node.js ≥ 22 (it has a global `WebSocket`), any current browser, or React Native (Hermes). RxJS is an
