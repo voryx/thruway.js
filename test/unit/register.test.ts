@@ -1112,14 +1112,14 @@ describe('UNREGISTER', () => {
     expect(h.ctx.frames(MessageType.UNREGISTER)).toEqual([unregisterFrame(3, 7), unregisterFrame(5, 7)]);
   });
 
-  test('a REGISTERED with the id of an UNREGISTER in flight registers again once that is over, then announces', () => {
+  test('a REGISTERED with the id of an UNREGISTER written after its REGISTER, still in flight: registers again once that is over, then announces', () => {
     for (const how of ['unregistered', 'timeout'] as const) {
       const h = new Harness();
       const op = registration('com.p');
-      h.reg.inbound(inbound.registered(4242, 7), h.ctx); // a stray REGISTERED: UNREGISTER 1 for registration 7
-      expect(h.ctx.frames(MessageType.UNREGISTER)).toEqual([unregisterFrame(1, 7)]);
-      h.reg.start(op, h.ctx, h.ctx); // REGISTER 2, written after UNREGISTER 1: the router drops what it grants here
-      expect(h.reg.inbound(inbound.registered(2, 7), h.ctx)).toBe(true);
+      h.reg.start(op, h.ctx, h.ctx); // REGISTER 1
+      h.reg.inbound(inbound.registered(4242, 7), h.ctx); // a stray REGISTERED: UNREGISTER 2 for registration 7
+      expect(h.ctx.frames(MessageType.UNREGISTER)).toEqual([unregisterFrame(2, 7)]);
+      expect(h.reg.inbound(inbound.registered(1, 7), h.ctx)).toBe(true); // 7 for REGISTER 1: UNREGISTER 2 removes it
       h.ctx.runDeliveries();
       expect(op.subscriber.values).toEqual([]); // not announced: that registration is about to go
       expect(h.ctx.frames(MessageType.REGISTER)).toHaveLength(1);
@@ -1129,7 +1129,7 @@ describe('UNREGISTER', () => {
         h.ctx.advance(TIMEOUT);
         h.ctx.resolveVerdicts('alive');
       } else {
-        h.reg.inbound(inbound.unregistered(1), h.ctx);
+        h.reg.inbound(inbound.unregistered(2), h.ctx);
       }
       expect(h.ctx.frames(MessageType.REGISTER).at(-1)).toEqual(registerFrame(3, {}, 'com.p'));
       h.reg.inbound(inbound.registered(3, 8), h.ctx);
@@ -1143,12 +1143,12 @@ describe('UNREGISTER', () => {
   test('a REGISTERED whose raced UNREGISTER the router refuses keeps its id: announced, no second REGISTER', () => {
     const h = new Harness();
     const op = registration('com.p', () => 'served');
-    h.reg.inbound(inbound.registered(4242, 7), h.ctx);
     h.reg.start(op, h.ctx, h.ctx);
-    h.reg.inbound(inbound.registered(2, 7), h.ctx);
+    h.reg.inbound(inbound.registered(4242, 7), h.ctx);
+    h.reg.inbound(inbound.registered(1, 7), h.ctx);
     h.ctx.runDeliveries();
     expect(op.subscriber.values).toEqual([]);
-    h.reg.inbound(inbound.error(MessageType.UNREGISTER, 1, Uri.NO_SUCH_REGISTRATION), h.ctx);
+    h.reg.inbound(inbound.error(MessageType.UNREGISTER, 2, Uri.NO_SUCH_REGISTRATION), h.ctx);
     h.ctx.runDeliveries();
     expect(op.subscriber.values).toMatchObject([{ registrationId: 7, procedure: 'com.p' }]);
     expect(h.ctx.frames(MessageType.REGISTER)).toHaveLength(1);
@@ -1160,19 +1160,19 @@ describe('UNREGISTER', () => {
   test('waiting for the raced UNREGISTER: a stop forgets the record; a session end keeps it dormant, a possible ghost', () => {
     const stopped = new Harness();
     const a = registration('com.p');
-    stopped.reg.inbound(inbound.registered(4242, 7), stopped.ctx);
     stopped.reg.start(a, stopped.ctx, stopped.ctx);
-    stopped.reg.inbound(inbound.registered(2, 7), stopped.ctx);
+    stopped.reg.inbound(inbound.registered(4242, 7), stopped.ctx);
+    stopped.reg.inbound(inbound.registered(1, 7), stopped.ctx);
     stopped.reg.stop(a, stopped.ctx, stopped.ctx);
     expect(stopped.reg.sizes()).toMatchObject({ records: 0, ops: 0, requests: 1 });
-    stopped.reg.inbound(inbound.unregistered(1), stopped.ctx);
+    stopped.reg.inbound(inbound.unregistered(2), stopped.ctx);
     expect(stopped.ctx.frames(MessageType.REGISTER)).toHaveLength(1);
     expect(stopped.ctx.frames(MessageType.UNREGISTER)).toHaveLength(1);
     const ended = new Harness();
     const b = registration('com.p');
-    ended.reg.inbound(inbound.registered(4242, 7), ended.ctx);
     ended.reg.start(b, ended.ctx, ended.ctx);
-    ended.reg.inbound(inbound.registered(2, 7), ended.ctx);
+    ended.reg.inbound(inbound.registered(4242, 7), ended.ctx);
+    ended.reg.inbound(inbound.registered(1, 7), ended.ctx);
     ended.end();
     expect(ended.reg.sizes()).toMatchObject({ records: 1, ops: 1, requests: 0, ghostKeys: 1 });
     const next = ended.session(2);
@@ -1180,6 +1180,59 @@ describe('UNREGISTER', () => {
     ended.reg.inbound(inbound.error(MessageType.REGISTER, 1, Uri.PROCEDURE_ALREADY_EXISTS), next);
     expect(b.subscriber.errors).toEqual([]); // ridden out as a ghost of the old session
   });
+
+  test('an UNREGISTER written after the REGISTER and answered before its REGISTERED (Thruway PHP invokes a replacing registration first): REGISTER again', () => {
+    const h = new Harness();
+    const op = registration('com.p', () => 'served');
+    h.reg.start(op, h.ctx, h.ctx); // REGISTER 1
+    h.invoke(1, 7); // the router already invokes the registration it is granting REGISTER 1
+    expect(h.answers()).toEqual([invocationErrorFrame(1, {}, Uri.NO_SUCH_REGISTRATION)]);
+    expect(h.ctx.frames(MessageType.UNREGISTER)).toEqual([unregisterFrame(2, 7)]);
+    h.reg.inbound(inbound.unregistered(2), h.ctx); // the router removed 7
+    h.reg.inbound(inbound.registered(1, 7), h.ctx); // the REGISTERED it held back, for that removed registration
+    h.ctx.runDeliveries();
+    expect(op.subscriber.values).toEqual([]);
+    expect(h.ctx.frames(MessageType.REGISTER).at(-1)).toEqual(registerFrame(3, {}, 'com.p'));
+    h.reg.inbound(inbound.registered(3, 8), h.ctx);
+    h.ctx.runDeliveries();
+    expect(op.subscriber.values).toMatchObject([{ registrationId: 8, procedure: 'com.p' }]);
+    h.invoke(2, 8);
+    expect(h.answers().at(-1)).toEqual(yieldFrame(2, false, [['served']]));
+    expect(h.ctx.frames(MessageType.UNREGISTER)).toHaveLength(1);
+    expect(h.reg.sizes()).toMatchObject({ records: 1, ops: 1, requests: 0 });
+  });
+
+  test('the same race with a refused UNREGISTER keeps the id: announced, no second REGISTER', () => {
+    const h = new Harness();
+    const op = registration('com.p', () => 'served');
+    h.reg.start(op, h.ctx, h.ctx);
+    h.invoke(1, 7);
+    h.reg.inbound(inbound.error(MessageType.UNREGISTER, 2, Uri.NOT_AUTHORIZED), h.ctx); // the router kept 7
+    h.reg.inbound(inbound.registered(1, 7), h.ctx);
+    h.ctx.runDeliveries();
+    expect(op.subscriber.values).toMatchObject([{ registrationId: 7, procedure: 'com.p' }]);
+    expect(h.ctx.frames(MessageType.REGISTER)).toHaveLength(1);
+    h.invoke(2, 7);
+    expect(h.answers().at(-1)).toEqual(yieldFrame(2, false, [['served']]));
+  });
+
+  test.each(['before', 'after'] as const)(
+    'an UNREGISTER written before the REGISTER never removes what that REGISTER is granted (the router processes them in order), answered %s its REGISTERED',
+    (answered) => {
+      const h = new Harness();
+      const op = registration('com.p', () => 'served');
+      h.reg.inbound(inbound.registered(4242, 7), h.ctx); // a stray: UNREGISTER 1
+      h.reg.start(op, h.ctx, h.ctx); // REGISTER 2, written after UNREGISTER 1
+      if (answered === 'before') h.reg.inbound(inbound.unregistered(1), h.ctx);
+      h.reg.inbound(inbound.registered(2, 7), h.ctx); // a router that gives the id out again
+      if (answered === 'after') h.reg.inbound(inbound.unregistered(1), h.ctx);
+      h.ctx.runDeliveries();
+      expect(op.subscriber.values).toMatchObject([{ registrationId: 7, procedure: 'com.p' }]);
+      expect(h.ctx.frames(MessageType.REGISTER)).toHaveLength(1);
+      h.invoke(1, 7);
+      expect(h.answers()).toEqual([yieldFrame(1, false, [['served']])]);
+    },
+  );
 });
 
 describe('session end and close', () => {

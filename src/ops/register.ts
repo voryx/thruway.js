@@ -4,8 +4,8 @@
  *
  * A registration record is `dormant` (no session, or its REGISTER was not sent), `waiting` (its re-REGISTER met this
  * client's own ghost session; REGISTER again when the ghost timer fires), `registering` (REGISTER outstanding),
- * `reregister` (the router answered with an id whose UNREGISTER is in flight: REGISTER again once that is answered;
- * keep the id if the router refused it) or
+ * `reregister` (the router answered with an id that an UNREGISTER written after its REGISTER is removing: REGISTER
+ * again once that is answered; keep the id if the router refused it) or
  * `active`. A record whose subscriber is gone while its REGISTER is outstanding (the app unsubscribed: stopped; the
  * request timed out: late) is adopted by the next subscription of the same key, so a remount never registers twice
  * and never meets its own `procedure_already_exists`. Everything bound to one session (request ids, registration ids,
@@ -84,6 +84,8 @@ interface RegisterRequest {
   readonly id: number;
   readonly record: Registration;
   readonly writtenAt: number;
+  /** Write order in the session: the router processes REGISTERs and UNREGISTERs in this order. */
+  readonly order: number;
   timer: TimerHandle;
 }
 
@@ -93,6 +95,7 @@ interface UnregisterRequest {
   readonly registrationId: number;
   readonly key: string;
   readonly writtenAt: number;
+  readonly order: number;
   readonly timer: TimerHandle;
 }
 
@@ -150,6 +153,11 @@ class Session {
   /** Registration ids this session wrote an UNREGISTER for, oldest first, at most GHOST_MEMORY: a REGISTERED or an
    *  INVOCATION of one of them that no record maps is a frame racing that UNREGISTER, never a reason for another. */
   readonly retired = new Set<number>();
+  /** Registration ids the router removed for an UNREGISTER of this session (answered, or timed out), with that
+   *  UNREGISTER's write order; oldest first, at most GHOST_MEMORY. */
+  readonly removed = new Map<number, number>();
+  /** REGISTERs and UNREGISTERs written in this session (their `order`). */
+  writes = 0;
   nextGhostKey = -1;
   constructor(readonly connId: number) {}
 }
@@ -382,7 +390,7 @@ export class RegisterParticipant implements RegisterParticipantContract {
       return;
     }
     const timer = ctx.timer(this.requestTimeout, 'register', id, true);
-    const request: RegisterRequest = { kind: 'register', id, record, writtenAt: ctx.now, timer };
+    const request: RegisterRequest = { kind: 'register', id, record, writtenAt: ctx.now, order: ++s.writes, timer };
     s.requests.set(id, request);
     record.state = { kind: 'registering', request };
   }
@@ -407,7 +415,7 @@ export class RegisterParticipant implements RegisterParticipantContract {
     if (id === undefined) return; // the session is ending
     remember(s.retired, registrationId);
     const timer = ctx.timer(this.requestTimeout, 'register', id, true);
-    s.requests.set(id, { kind: 'unregister', id, registrationId, key, writtenAt: ctx.now, timer });
+    s.requests.set(id, { kind: 'unregister', id, registrationId, key, writtenAt: ctx.now, order: ++s.writes, timer });
   }
 
   /**
@@ -459,8 +467,18 @@ export class RegisterParticipant implements RegisterParticipantContract {
       if (!s.byRegistration.has(registrationId)) this.writeUnregister(registrationId, record.key, s, ctx);
       return true;
     }
-    if (unregistering(registrationId, s)) {
+    // An UNREGISTER of this id written after this REGISTER removes what the router granted here (one written before
+    // it acted first: the router processes them in order, whatever the order of its answers)
+    const unregister = unregisterOf(registrationId, s);
+    if (unregister !== undefined && unregister.order > request.order) {
       record.state = { kind: 'reregister', after: registrationId }; // the router is about to drop that registration
+      return true;
+    }
+    const removedBy = s.removed.get(registrationId);
+    if (removedBy !== undefined && removedBy > request.order) {
+      // that UNREGISTER was answered before this REGISTERED (Thruway PHP invokes a replacing registration before it
+      // confirms it): the router already dropped this registration
+      this.register(record, s, ctx);
       return true;
     }
     this.activate(record, op, registrationId, s, ctx);
@@ -471,6 +489,7 @@ export class RegisterParticipant implements RegisterParticipantContract {
   private activate(record: Registration, op: RegisterOp, registrationId: number, s: Session, ctx: SessionCtx): void {
     record.state = { kind: 'active', registrationId };
     s.retired.delete(registrationId);
+    s.removed.delete(registrationId);
     record.ghostSince = undefined;
     record.ghostAttempts = 0;
     this.ghostKeys.delete(record.key);
@@ -559,6 +578,7 @@ export class RegisterParticipant implements RegisterParticipantContract {
   private unregisterDone(request: UnregisterRequest, refused: boolean, s: Session, ctx: SessionCtx): void {
     s.requests.delete(request.id);
     request.timer.cancel();
+    if (!refused) rememberAt(s.removed, request.registrationId, request.order);
     for (const record of [...this.records]) {
       if (record.state.kind !== 'reregister' || record.state.after !== request.registrationId) continue;
       if (refused && record.op !== undefined) this.activate(record, record.op, request.registrationId, s, ctx);
@@ -831,6 +851,16 @@ export class RegisterParticipant implements RegisterParticipantContract {
 }
 
 /** Add `key` to `keys` as the most recent one, keeping at most GHOST_MEMORY (oldest first). */
+/** `remember` for a map: `key` (with `value`) becomes the newest entry. */
+function rememberAt<K, V>(entries: Map<K, V>, key: K, value: V): void {
+  entries.delete(key);
+  entries.set(key, value);
+  for (const oldest of entries.keys()) {
+    if (entries.size <= GHOST_MEMORY) break;
+    entries.delete(oldest);
+  }
+}
+
 function remember<K>(keys: Set<K>, key: K): void {
   keys.delete(key);
   keys.add(key);
@@ -848,12 +878,17 @@ function adoptable(key: string, s: Session): RegisterRequest | undefined {
   return undefined;
 }
 
+/** The UNREGISTER of `registrationId` in flight, if any. */
+function unregisterOf(registrationId: number, s: Session): UnregisterRequest | undefined {
+  for (const request of s.requests.values()) {
+    if (request.kind === 'unregister' && request.registrationId === registrationId) return request;
+  }
+  return undefined;
+}
+
 /** Is an UNREGISTER of `registrationId` in flight? */
 function unregistering(registrationId: number, s: Session): boolean {
-  for (const request of s.requests.values()) {
-    if (request.kind === 'unregister' && request.registrationId === registrationId) return true;
-  }
-  return false;
+  return unregisterOf(registrationId, s) !== undefined;
 }
 
 /** Read through a call: app code (the handler, the result's subscribe) may have finished it meanwhile. */
