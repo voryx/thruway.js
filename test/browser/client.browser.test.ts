@@ -179,13 +179,14 @@ describe.each(targets)('$name', ({ name, realm }) => {
     const { client, opens, closes } = watch(url, realm, { WebSocket: Recorded });
     await until(() => opens.length === 1, 'the session');
     expect(await commands.fault(id, 'closingWindow', 1500)).toBe(1);
-    await until(() => sockets[0]?.readyState !== WebSocket.OPEN, 'the router close frame', 1000);
     // Measured: Chromium answers the close frame and stays CLOSING until the TCP connection ends — the window, in
-    // which the client has noticed nothing yet; WebKit fires close (1000) at once, so it has no window and the calls
+    // which the client has noticed nothing yet. WebKit has no window: on macOS it fires close (1000) at once; on Linux
+    // it keeps the socket OPEN, hiding the close frame, until the connection is reset (1.5 s here). Either way its calls
     // simply wait for the next session. A browser that changes either way fails here (firefox: either).
-    const state = sockets[0]?.readyState;
     const chromium = navigator.userAgent.includes('Chrome/');
     const webkit = !chromium && navigator.userAgent.includes('AppleWebKit/');
+    await until(() => sockets[0]?.readyState !== WebSocket.OPEN, 'the router close frame', chromium ? 1000 : 5000);
+    const state = sockets[0]?.readyState;
     if (chromium) expect([state, closes.length]).toEqual([WebSocket.CLOSING, 0]);
     if (webkit) expect(state).toBe(WebSocket.CLOSED);
     const results = await Promise.all([1, 2, 3].map((n) => first(client.call(`${ns}.double`, [n]))));

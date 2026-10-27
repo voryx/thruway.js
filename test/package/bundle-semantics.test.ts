@@ -13,6 +13,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { stripVTControlCharacters } from 'node:util';
 import vm from 'node:vm';
 import { rspack, type RspackOptions, type Stats } from '@rspack/core';
 import { beforeAll, describe, expect, test } from 'vitest';
@@ -51,11 +52,14 @@ async function semanticsBundle(minify: boolean): Promise<string> {
 }
 
 async function nestedUnitRun(dir: string) {
+  // Without colour: vitest colours its summary on CI runners, and the codes would break the match on it below.
+  const env: NodeJS.ProcessEnv = { ...process.env, NO_COLOR: '1', THRUWAY_SEMANTICS_DIR: dir, FC_NUM_RUNS: '50' };
+  delete env['FORCE_COLOR'];
   const r = await runNode(
     ['node_modules/vitest/vitest.mjs', 'run', '--config', 'test/package/bundle-semantics.vitest.config.ts'],
-    { env: { ...process.env, THRUWAY_SEMANTICS_DIR: dir, FC_NUM_RUNS: '50' }, timeout: 120_000 },
+    { env, timeout: 120_000 },
   );
-  return { ...r, output: r.stdout + r.stderr };
+  return { ...r, output: stripVTControlCharacters(r.stdout + r.stderr) };
 }
 
 describe('the unit tests of errors, Observable and Yield against rspack builds of those modules', () => {

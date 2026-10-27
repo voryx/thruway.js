@@ -8,6 +8,7 @@
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { stripVTControlCharacters } from 'node:util';
 
 process.chdir(fileURLToPath(new URL('..', import.meta.url)));
 
@@ -39,14 +40,19 @@ for (const arg of args) {
  */
 function run(command, env = {}) {
   const started = performance.now();
+  // Without colour: vitest colours its output on CI runners, and the codes would hide the canary's result from the
+  // match below.
+  /** @type {NodeJS.ProcessEnv} */
+  const childEnv = { ...process.env, NO_COLOR: '1', ...env };
+  delete childEnv['FORCE_COLOR'];
   const result = spawnSync(process.execPath, command, {
     encoding: 'utf8',
-    env: { ...process.env, ...env },
+    env: childEnv,
     maxBuffer: 64 * 1024 * 1024,
   });
   return {
     status: result.status,
-    output: `${result.stdout}${result.stderr}${result.error ? String(result.error) : ''}`,
+    output: stripVTControlCharacters(`${result.stdout}${result.stderr}${result.error ? String(result.error) : ''}`),
     ms: Math.round(performance.now() - started),
   };
 }
